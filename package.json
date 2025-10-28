@@ -1,0 +1,32 @@
+
+{
+  "name": "intelli-read",
+  "version": "1.0.0",
+  "description": "Intelli-Read - Smart Reading Platform",
+  "main": "Server.js",
+  "scripts": {
+    "start": "node Server.js",
+    "dev": "node Server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "reading",
+    "books",
+    "education",
+    "platform"
+  ],
+  "author": "Team Rv",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "express-session": "^1.18.2",
+    "mongoose": "^8.19.2",
+    "nodemailer": "^7.0.10"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

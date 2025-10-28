@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up | Intelli-Read</title>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="SignUp.css">
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header>
+    <a href="/Home.html"><img src="/images/logo.png" alt="IntelliRead Logo" style="height:80px; width:auto;"></a>
+    <div class="nav-buttons">
+      <button class="btn btn-loginoutline" title="Login & Signup" onclick="window.location.href='/login'">
+        <img src="/images/login.png" alt="login-icon" style="height: 50px; width: auto;">
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== SIGNUP FORM ===== -->
+  <div class="signup-container">
+    <div class="signup-card">
+      <h2>Create Account</h2>
+      <p class="subtitle">Join us today</p>
+
+      <form class="signup-form" id="signupForm">
+        <!-- Role Selection -->
+        <div class="role-selection">
+          <label>Select Role</label>
+          <div class="role-options">
+            <div class="role-option" data-role="user">
+              <input type="radio" id="role-user" name="role" value="user" required>
+              <i class='bx bx-user-circle role-icon'></i>
+              <span>USER</span>
+            </div>
+            <div class="role-option" data-role="publisher">
+              <input type="radio" id="role-publisher" name="role" value="publisher" required>
+              <i class='bx bx-book-alt role-icon'></i>
+              <span>PUBLISHER</span>
+            </div>
+          </div>
+        </div>
+        <!-- Full Name -->
+        <div class="input-group">
+          <i class='bx bx-user'></i>
+          <input type="text" id="fullName" name="fullName" placeholder="Full Name" required>
+        </div>
+
+        <!-- Email Address -->
+        <div class="input-group">
+          <i class='bx bx-envelope'></i>
+          <input type="email" id="email" name="email" placeholder="Email Address" required>
+        </div>
+
+
+<!-- Password -->
+        <div class="input-group">
+          <i class='bx bx-lock-alt'></i>
+          <input type="password" id="password" name="password" placeholder="Password" required minlength="8">
+          <i class='bx bx-hide toggle-eye' id="togglePassword"></i>
+        </div>
+
+        <div class="input-group">
+          <i class='bx bx-lock'></i>
+          <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required>
+          <i class='bx bx-hide toggle-eye' id="toggleConfirmPassword"></i>
+        </div>
+
+        <div class="form-options">
+          <label class="checkbox-label">
+            <input type="checkbox" name="terms" id="terms" required>
+            I agree to the <a href="#" class="terms-link"> Terms & Conditions</a>
+          </label>
+        </div>
+
+        <button type="submit" class="signup-btn">Sign Up</button>
+        <p class="login-link">Already have an account? <a href="/login">Sign in here</a></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="main-footer" style="font-family: chakra petch;">
+    <div class="footer-section">
+      <h4>About</h4>
+      <p>Designed and Developed by Team <b style="color: rgb(206, 232, 10); font-size: large;">Rv</b></p>
+    </div>
+    <div class="footer-section">
+      <p>&copy; <span>2025</span> Intelli-Read. All Rights Reserved.</p>
+      <p><a href="#">Terms of Service</a> | <a href="#">Privacy Policy</a></p>
+    </div>
+    <div class="footer-section">
+      <h4>License</h4>
+      <p>Standard License</p>
+    </div>
+  </footer>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script>
+    // DOM Elements
+    const form = document.getElementById('signupForm');
+    const fullName = document.getElementById('fullName');
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const terms = document.getElementById('terms');
+    const togglePassword = document.getElementById('togglePassword');
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    const roleOptions = document.querySelectorAll('.role-option');
+    const roleInputs = document.querySelectorAll('input[name="role"]');
+
+    // ===== ROLE SELECTION =====
+    roleOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        // Remove selected class from all options
+        roleOptions.forEach(opt => opt.classList.remove('selected'));
+        // Add selected class to clicked option
+        option.classList.add('selected');
+        // Check the radio input
+        const radioInput = option.querySelector('input[type="radio"]');
+        radioInput.checked = true;
+      });
+    });
+
+    // ===== PASSWORD VISIBILITY TOGGLE =====
+    togglePassword.addEventListener('click', () => {
+      const type = password.type === 'password' ? 'text' : 'password';
+      password.type = type;
+      togglePassword.classList.toggle('bx-hide');
+      togglePassword.classList.toggle('bx-show');
+    });
+
+    toggleConfirmPassword.addEventListener('click', () => {
+      const type = confirmPassword.type === 'password' ? 'text' : 'password';
+      confirmPassword.type = type;
+      toggleConfirmPassword.classList.toggle('bx-hide');
+      toggleConfirmPassword.classList.toggle('bx-show');
+    });
+
+    // ===== PASSWORD STRENGTH CHECK =====
+    function isStrongPassword(pwd) {
+      const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+      return strongRegex.test(pwd);
+    }
+
+    // ===== FORM VALIDATION =====
+    function validateForm() {
+      let valid = true;
+      let errorMessage = '';
+
+      if (!fullName.value.trim()) {
+        errorMessage = 'Full name is required.';
+        valid = false;
+      } else if (!email.value.trim()) {
+        errorMessage = 'Email is required.';
+        valid = false;
+      } else if (!document.querySelector('input[name="role"]:checked')) {
+        errorMessage = 'Please select a role (User or Publisher).';
+        valid = false;
+      } else if (!password.value.trim()) {
+        errorMessage = 'Password is required.';
+        valid = false;
+      } else if (!isStrongPassword(password.value)) {
+        errorMessage = 'Password must contain:\n• At least 8 characters\n• One uppercase letter (A-Z)\n• One lowercase letter (a-z)\n• One number (0-9)\n• One special symbol (!@#$%^&*)';
+        valid = false;
+      } else if (password.value !== confirmPassword.value) {
+        errorMessage = 'Passwords do not match. Please make sure both passwords are the same.';
+        valid = false;
+      } else if (!terms.checked) {
+        errorMessage = 'You must agree to the Terms & Conditions.';
+        valid = false;
+      }
+
+      if (!valid) {
+        alert(errorMessage);
+        return false;
+      }
+      return true;
+    }
+
+    // ===== LOADING STATE =====
+    function setLoadingState(loading) {
+      const submitBtn = form.querySelector('.signup-btn');
+      if (loading) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating Account...';
+        submitBtn.style.opacity = '0.7';
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign Up';
+        submitBtn.style.opacity = '1';
+      }
+    }
+
+    // ===== FORM SUBMISSION =====
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Validate form
+      if (!validateForm()) return;
+
+      // Set loading state
+      setLoadingState(true);
+
+      try {
+        const selectedRole = document.querySelector('input[name="role"]:checked').value;
+        
+        const userData = {
+          fullName: fullName.value.trim(),
+          email: email.value.trim(),
+          role: selectedRole,
+          password: password.value
+        };
+
+        console.log('🔄 Sending signup request...', userData);
+
+        // Send request to server
+        const response = await fetch('http://localhost:3000/api/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(userData)
+        });
+
+        console.log('📨 Response status:', response.status);
+
+        // Parse response
+        const result = await response.json();
+        console.log('📨 Server response:', result);
+
+        if (response.ok && result.success) {
+          alert('✅ SignUp successful! Redirecting to login...');
+          // Clear form
+          form.reset();
+          // Reset role selection
+          roleOptions.forEach(opt => opt.classList.remove('selected'));
+          // Redirect to login
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 1000);
+        } else {
+          alert(`❌ ${result.message || 'Signup failed. Please try again.'}`);
+        }
+
+      } catch (error) {
+        console.error('💥 Signup error:', error);
+        alert('❌ Network error. Please check if server is running and try again.');
+      } finally {
+        // Reset loading state
+        setLoadingState(false);
+      }
+    });
+
+    // ===== REAL-TIME VALIDATION =====
+    password.addEventListener('input', function() {
+      if (this.value.length > 0 && !isStrongPassword(this.value)) {
+        this.style.borderColor = 'orange';
+      } else {
+        this.style.borderColor = '';
+      }
+    });
+
+    confirmPassword.addEventListener('input', function() {
+      if (this.value.length > 0) {
+        if (password.value === this.value) {
+          this.style.borderColor = 'green';
+        } else {
+          this.style.borderColor = 'red';
+        }
+      } else {
+        this.style.borderColor = '';
+      }
+    });
+
+    // ===== ENTER KEY SUPPORT =====
+    form.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        this.dispatchEvent(new Event('submit'));
+      }
+    });
+
+    // ===== PAGE LOAD =====
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('✅ SignUp page loaded successfully');
+      
+      // Test server connection
+      fetch('/api/health')
+        .then(response => response.json())
+        .then(data => console.log('✅ Server health:', data))
+        .catch(error => console.error('❌ Server health check failed:', error));
+    });
+  </script>
+
+</body>
+</html>
