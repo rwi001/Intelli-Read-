@@ -21,7 +21,7 @@
         <img src="images/login.png" alt="login-icon" style="height: 50px; width: auto;">
       </button>
     </div>
-    
+    </nav>
   </header>
   
 <!-- container -->
@@ -83,8 +83,13 @@
       </div>
   </footer>
 
- <script>
-</script>
+  <script>
+    // Simple guaranteed fix
+    document.getElementById('loginButton').addEventListener('click', function() {
+      console.log('Login button clicked - going to /login');
+      window.location.href = '/login';
+    });
+  </script>
 
 </body>
 </html>

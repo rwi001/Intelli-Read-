@@ -88,7 +88,7 @@ function showBooks(books) {
     const bookEl = document.createElement('div');
     bookEl.classList.add('book');
 
-    // Main book content
+    // Main book content - ONLY TITLE VISIBLE BY DEFAULT
     bookEl.innerHTML = `
       <img src="${cover_i ? IMG_URL + cover_i + '-L.jpg' : 'http://via.placeholder.com/250x350'}" alt="${title}">
       <div class="book-info">
@@ -96,18 +96,16 @@ function showBooks(books) {
         <p>${author_name ? author_name.join(', ') : 'Unknown Author'}</p>
         <span>${first_publish_year || ''}</span>
       </div>
+      
+      <!-- Hover Tooltip - Shows all details -->
+      <div class="book-tooltip">
+        <h4>${title}</h4>
+        <p><strong>Author:</strong> ${author_name ? author_name.join(', ') : 'Unknown'}</p>
+        <p><strong>Published:</strong> ${first_publish_year || 'N/A'}</p>
+        <p><strong>Subjects:</strong> ${subject ? subject.slice(0, 3).join(', ') : 'No subjects available'}</p>
+        <p><strong>Description:</strong> ${getBookDescription(book)}</p>
+      </div>
     `;
-
-    // Add tooltip div for hover overview
-    const tooltip = document.createElement('div');
-    tooltip.classList.add('book-tooltip');
-    tooltip.innerHTML = `
-      <h4>${title}</h4>
-      <p><strong>Author:</strong> ${author_name ? author_name.join(', ') : 'Unknown'}</p>
-      <p><strong>Published:</strong> ${first_publish_year || 'N/A'}</p>
-      <p><strong>Subjects:</strong> ${subject ? subject.slice(0, 4).join(', ') : 'No subjects available'}</p>
-    `;
-    bookEl.appendChild(tooltip);
 
     // Click opens modal
     bookEl.addEventListener('click', () => showBookDetails(book));
@@ -116,6 +114,29 @@ function showBooks(books) {
   });
 }
 
+// ===== GET BOOK DESCRIPTION =====
+function getBookDescription(book) {
+  // Try to get description from different possible fields
+  if (book.description) {
+    if (typeof book.description === 'string') {
+      return book.description.length > 120 
+        ? book.description.substring(0, 120) + '...' 
+        : book.description;
+    } else if (book.description.value) {
+      return book.description.value.length > 120 
+        ? book.description.value.substring(0, 120) + '...' 
+        : book.description.value;
+    }
+  }
+  
+  // Fallback descriptions based on subjects
+  if (book.subject && book.subject.length > 0) {
+    const mainSubjects = book.subject.slice(0, 2).join(' and ');
+    return `A ${book.subject[0]?.toLowerCase() || 'fiction'} book${mainSubjects ? ' about ' + mainSubjects : ''}.`;
+  }
+  
+  return 'Description not available. Click for more details.';
+}
 
 // ===== PAGINATION =====
 function updatePagination() {
@@ -180,6 +201,7 @@ function showBookDetails(book) {
       <h4>by ${author_name ? author_name.join(', ') : 'Unknown Author'}</h4>
       <p><strong>First Published:</strong> ${first_publish_year || 'N/A'}</p>
       <p><strong>Subjects:</strong> ${subject ? subject.slice(0, 10).join(', ') : 'No subjects available'}</p>
+      <p><strong>Description:</strong> ${getBookDescription(book)}</p>
       <a href="https://openlibrary.org${key}" target="_blank" class="read-more">📖 Read More on Open Library</a>
     </div>
   `;

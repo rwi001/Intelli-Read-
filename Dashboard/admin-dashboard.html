@@ -8,6 +8,35 @@
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/Dashboard/dashboard.css">
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+  <style>
+    /* Logout message styles */
+    #logoutMessageContainer {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: bold;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        max-width: 300px;
+        text-align: center;
+        display: none;
+        animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+  </style>
 </head>
 <body>
   <!-- Header -->
@@ -105,6 +134,29 @@
             <div class="stat-info">
               <h3 id="activeUsers">0</h3>
               <p>Active Today</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Stats for Publishers -->
+        <div class="stats-grid" style="margin-top: 20px;">
+          <div class="stat-card secondary">
+            <div class="stat-icon">
+              <i class='bx bx-user-check'></i>
+            </div>
+            <div class="stat-info">
+              <h3 id="totalPublishers">0</h3>
+              <p>Approved Publishers</p>
+            </div>
+          </div>
+          
+          <div class="stat-card danger">
+            <div class="stat-icon">
+              <i class='bx bx-user-x'></i>
+            </div>
+            <div class="stat-info">
+              <h3 id="pendingPublishers">0</h3>
+              <p>Pending Publishers</p>
             </div>
           </div>
         </div>
@@ -271,6 +323,17 @@
       <h2>User Details</h2>
       <div id="userDetails">
         <!-- User details will be loaded here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for book details -->
+  <div id="bookModal" class="modal">
+    <div class="modal-content large">
+      <span class="close">&times;</span>
+      <h2>Book Details</h2>
+      <div id="bookDetails">
+        <!-- Book details will be loaded here -->
       </div>
     </div>
   </div>

@@ -235,15 +235,23 @@
         console.log('📨 Server response:', result);
 
         if (response.ok && result.success) {
-          alert('✅ SignUp successful! Redirecting to login...');
+          if (selectedRole === 'publisher') {
+            alert('✅ Publisher account created successfully! Please wait for admin approval. You will receive an email once your account is approved.');
+          } else {
+            alert('✅ User account created successfully! Redirecting to login...');
+          }
+          
           // Clear form
           form.reset();
           // Reset role selection
           roleOptions.forEach(opt => opt.classList.remove('selected'));
-          // Redirect to login
-          setTimeout(() => {
-            window.location.href = '/login';
-          }, 1000);
+          
+          // Redirect to login only for users, publishers stay on page
+          if (selectedRole === 'user') {
+            setTimeout(() => {
+              window.location.href = '/login';
+            }, 2000);
+          }
         } else {
           alert(`❌ ${result.message || 'Signup failed. Please try again.'}`);
         }
