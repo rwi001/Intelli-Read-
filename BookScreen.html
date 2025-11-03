@@ -13,7 +13,7 @@
     /* ===== FULL WIDTH RECOMMENDATION SECTION ===== */
     .recommended-section {
       width: 100%;
-      padding: 10px 5%;
+      padding: 5px 5% 15px 5%;
       background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
       color: #fff;
       position: relative;
@@ -53,29 +53,27 @@
       50% { transform: translateY(30px); }
     }
 
-    .recommended-section h2 {
-      font-family: 'Chakra Petch', sans-serif;
-      font-size: 2rem;
-      color: #fff;
-      text-align: center;
-      margin-bottom: 35px;
-      position: relative;
-      z-index: 1;
-      letter-spacing: 1px;
-      /* Removed top: -50px to fix positioning */
-    }
+   .recommended-section h2 {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 2rem;
+  color: #fff;
+  text-align: center;
+  margin-bottom: 20px; /* ← Reduced margin */
+  position: relative;
+  z-index: 1;
+  letter-spacing: 1px;
+}
 
     /* Slider container */
     .book-slider {
       display: flex;
       overflow-x: auto;
       scroll-behavior: smooth;
-      gap: 25px;
-      padding-top: 0px;
+      gap: 35px;
+      padding-top: -50px;
       position: relative;
       z-index: 1;
       scroll-snap-type: x mandatory;
-      /* Removed top: -70px to fix positioning */
     }
 
     .book-slider::-webkit-scrollbar {
@@ -117,19 +115,18 @@
     }
 
    .book-card h3 {
-  margin-top: 10px;
-  font-size: 0.95rem;
-  color: #fff;
-  line-height: 1.2;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  line-clamp: 2;
-  -webkit-line-clamp: 2; /* Show max 2 lines */
-  -webkit-box-orient: vertical;
-  white-space: normal;
-}
-
+      margin-top: 10px;
+      font-size: 0.95rem;
+      color: #fff;
+      line-height: 1.2;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      line-clamp: 2;
+      -webkit-line-clamp: 2; /* Show max 2 lines */
+      -webkit-box-orient: vertical;
+      white-space: normal;
+    }
 
     .book-card p.author {
       color: #d1d1d1;
@@ -158,98 +155,6 @@
 
     .book-card:hover .book-description {
       transform: translateY(0);
-    }
-
-    /* Arrows - Made Responsive */
-    .slider-btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background-color: rgba(255, 255, 255, 0.15);
-      border: none;
-      border-radius: 50%;
-      width: 45px;
-      height: 45px;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s;
-      z-index: 5;
-    }
-
-    .slider-btn i {
-      color: white;
-      font-size: 1.8rem;
-    }
-
-    .slider-btn:hover {
-      background-color: rgba(255, 255, 255, 0.3);
-      transform: translateY(-50%) scale(1.1);
-    }
-
-    .slider-btn.left { left: 20px; }
-    .slider-btn.right { right: 20px; }
-
-    /* Dot Indicators */
-    .dots-container {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 20px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background-color: rgba(255, 255, 255, 0.3);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .dot.active {
-      background-color: #00c6ff;
-      transform: scale(1.2);
-    }
-
-    .dot:hover {
-      background-color: rgba(255, 255, 255, 0.6);
-    }
-
-    @media (max-width: 768px) {
-      .slider-btn { 
-        display: flex; /* Show arrows on mobile */
-        width: 35px;
-        height: 35px;
-      }
-      .slider-btn i {
-        font-size: 1.4rem;
-      }
-      .book-card { width: 140px; }
-      .book-card img { height: 160px; }
-    }
-
-    @media (max-width: 480px) {
-      .slider-btn {
-        width: 30px;
-        height: 30px;
-      }
-      .slider-btn i {
-        font-size: 1.2rem;
-      }
-      .slider-btn.left { left: 10px; }
-      .slider-btn.right { right: 10px; }
-      .book-card { width: 130px; }
-      .book-card img { height: 150px; }
-      .book-card h3 { font-size: 0.85rem; }
-      .dot {
-        width: 10px;
-        height: 10px;
-      }
     }
 
     /* === USER MENU (UPDATED - GLASSMORPHIC STYLE) === */
@@ -355,8 +260,46 @@
       to {opacity: 1; transform: translateY(0);}
     }
 
-    /* Responsive user menu */
+    /* Responsive adjustments for book cards */
+    @media (max-width: 1200px) {
+      .book-card {
+        width: 150px;
+      }
+      .book-card img {
+        height: 170px;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .book-card {
+        width: 140px;
+      }
+      .book-card img {
+        height: 160px;
+      }
+      .book-card h3 {
+        font-size: 0.9rem;
+      }
+    }
+
     @media (max-width: 768px) {
+      .recommended-section h2 {
+        font-size: 1.7rem;
+      }
+      
+      .book-card {
+        width: 130px;
+      }
+      .book-card img {
+        height: 150px;
+      }
+      .book-card h3 {
+        font-size: 0.85rem;
+      }
+      .book-card p.author {
+        font-size: 0.75rem;
+      }
+      
       .user-avatar { 
         width: 50px; 
         height: 50px; 
@@ -373,7 +316,48 @@
       }
     }
 
+    @media (max-width: 576px) {
+      .recommended-section h2 {
+        font-size: 1.5rem;
+        margin-bottom: 25px;
+      }
+      
+      .book-slider {
+        gap: 15px;
+      }
+      
+      .book-card {
+        width: 120px;
+        padding: 10px;
+      }
+      .book-card img {
+        height: 140px;
+      }
+      .book-card h3 {
+        font-size: 0.8rem;
+        margin-top: 8px;
+      }
+      .book-card p.author {
+        font-size: 0.7rem;
+      }
+      .book-description {
+        font-size: 0.7rem;
+        padding: 10px;
+      }
+    }
+
     @media (max-width: 480px) {
+      .recommended-section {
+        padding: 10px 3%;
+      }
+      
+      .book-card {
+        width: 110px;
+      }
+      .book-card img {
+        height: 130px;
+      }
+      
       .user-avatar { 
         width: 45px; 
         height: 45px; 
@@ -388,6 +372,18 @@
         top: 65px; 
         right: -20px; 
         min-width: 170px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .book-card {
+        width: 100px;
+      }
+      .book-card img {
+        height: 120px;
+      }
+      .book-card h3 {
+        font-size: 0.75rem;
       }
     }
   </style>
@@ -411,8 +407,8 @@
         </div>
         <div class="welcome-text">Welcome, <span id="username">Ravi</span></div>
         <div class="dropdown" id="dropdownMenu">
-          <a href="/user-dashboard"><i class='bx bx-grid-alt'></i> Dashboard</a>
-          <a href="downloads.html"><i class='bx bx-download'></i> Downloads</a>
+          <!-- <a href="/user-dashboard"><i class='bx bx-grid-alt'></i> Dashboard</a> -->
+          <!-- <a href="downloads.html"><i class='bx bx-download'></i> Downloads</a> -->
           <a href="#" id="logoutBtn"><i class='bx bx-log-out'></i> Logout</a>
         </div>
       </div>
@@ -422,14 +418,11 @@
   <!-- ===== RECOMMENDED BOOKS SECTION ===== -->
   <section id="recommended" class="recommended-section">
     <h2>⭐ Recommended For You ⭐</h2>
-    <button class="slider-btn left" id="slideLeft"><i class='bx bx-chevron-left'></i></button>
-    <button class="slider-btn right" id="slideRight"><i class='bx bx-chevron-right'></i></button>
+    <!-- Removed arrow buttons -->
     <div id="recommended-container" class="book-slider">
       <!-- Book cards will be dynamically added here -->
     </div>
-    <div class="dots-container" id="dots-container">
-      <!-- Dot indicators will be dynamically added here -->
-    </div>
+    <!-- Removed dots container -->
   </section>
 
   <div id="tags" class="tags"></div>
@@ -507,9 +500,8 @@
     }
   }
 
-  // Fallback default recommendations
+  // Fallback default recommendations - exactly 8 books
   function getDefaultRecommendations() {
-    // Sample book data - in production, this would come from your database
     return [
       {
         id: 1,
@@ -532,42 +524,41 @@
         image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
         description: "Rules for focused success in a distracted world. Master the ability to concentrate without distraction."
       },
-        {
+      {
         id: 4,
-        title: "The Alchemist",
-        author: "Paulo Coelho",
-        image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-        description: "A magical story about following your dreams and listening to your heart."
+        title: "Thinking, Fast and Slow",
+        author: "Daniel Kahneman",
+        image: "https://images.unsplash.com/photo-1589998059171-988d887df646?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+        description: "Explores the two systems that drive the way we think—System 1 and System 2."
       },
       {
         id: 5,
-        title: "Atomic Habits",
-        author: "James Clear",
-        image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-        description: "Tiny changes, remarkable results. An easy way to build good habits and break bad ones."
+        title: "Sapiens",
+        author: "Yuval Noah Harari",
+        image: "https://images.unsplash.com/photo-1553729459-efe14ef6055d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+        description: "A brief history of humankind, exploring how biology and history have defined us."
       },
       {
         id: 6,
-        title: "Deep Work",
-        author: "Cal Newport",
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-        description: "Rules for focused success in a distracted world. Master the ability to concentrate without distraction."
+        title: "The Power of Now",
+        author: "Eckhart Tolle",
+        image: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+        description: "A guide to spiritual enlightenment that emphasizes living in the present moment."
       },
-        {
+      {
         id: 7,
-        title: "The Alchemist",
-        author: "Paulo Coelho",
-        image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-        description: "A magical story about following your dreams and listening to your heart."
+        title: "Educated",
+        author: "Tara Westover",
+        image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+        description: "A memoir about a young woman who grows up in a survivalist family and eventually earns a PhD."
       },
       {
         id: 8,
-        title: "Atomic Habits",
-        author: "James Clear",
-        image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-        description: "Tiny changes, remarkable results. An easy way to build good habits and break bad ones."
+        title: "The Midnight Library",
+        author: "Matt Haig",
+        image: "https://images.unsplash.com/photo-1514907283155-ea5f4094c70c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+        description: "A novel about a library that contains books that let you experience the lives you could have lived."
       }
-      // Add more default books as needed
     ];
   }
 
@@ -591,90 +582,6 @@
     });
   }
 
-  // Function to create dot indicators
-  function createDotIndicators() {
-    const dotsContainer = document.getElementById('dots-container');
-    const bookCards = document.querySelectorAll('.book-card');
-    const cardsPerView = Math.floor(window.innerWidth / 200);
-    const totalDots = Math.ceil(bookCards.length / cardsPerView);
-    
-    dotsContainer.innerHTML = '';
-    
-    for (let i = 0; i < totalDots; i++) {
-      const dot = document.createElement('div');
-      dot.className = 'dot';
-      if (i === 0) dot.classList.add('active');
-      dot.addEventListener('click', () => {
-        scrollToSlide(i, cardsPerView);
-      });
-      dotsContainer.appendChild(dot);
-    }
-  }
-
-  // Function to scroll to specific slide
-  function scrollToSlide(slideIndex, cardsPerView) {
-    const slider = document.getElementById('recommended-container');
-    const cardWidth = 160 + 25;
-    const scrollPosition = slideIndex * cardWidth * cardsPerView;
-    
-    slider.scrollTo({
-      left: scrollPosition,
-      behavior: 'smooth'
-    });
-    
-    document.querySelectorAll('.dot').forEach((dot, index) => {
-      if (index === slideIndex) {
-        dot.classList.add('active');
-      } else {
-        dot.classList.remove('active');
-      }
-    });
-  }
-
-  // Function to update active dot based on scroll position
-  function updateActiveDot() {
-    const slider = document.getElementById('recommended-container');
-    const dots = document.querySelectorAll('.dot');
-    const cardWidth = 160 + 25;
-    const cardsPerView = Math.floor(window.innerWidth / 200);
-    
-    const scrollPosition = slider.scrollLeft;
-    const activeDotIndex = Math.round(scrollPosition / (cardWidth * cardsPerView));
-    
-    dots.forEach((dot, index) => {
-      if (index === activeDotIndex) {
-        dot.classList.add('active');
-      } else {
-        dot.classList.remove('active');
-      }
-    });
-  }
-
-  // Function to handle slider navigation
-  function setupSliderNavigation() {
-    const slider = document.getElementById('recommended-container');
-    const slideLeft = document.getElementById('slideLeft');
-    const slideRight = document.getElementById('slideRight');
-    const cardWidth = 160 + 25;
-    const cardsPerView = Math.floor(window.innerWidth / 200);
-    
-    slideLeft.addEventListener('click', () => {
-      slider.scrollBy({
-        left: -cardWidth * cardsPerView,
-        behavior: 'smooth'
-      });
-    });
-    
-    slideRight.addEventListener('click', () => {
-      slider.scrollBy({
-        left: cardWidth * cardsPerView,
-        behavior: 'smooth'
-      });
-    });
-
-    slider.addEventListener('scroll', updateActiveDot);
-  }
-
   // Initialize the page
   async function initializePage() {
     try {
@@ -686,11 +593,6 @@
       
       // Create UI elements
       createBookCards();
-      createDotIndicators();
-      setupSliderNavigation();
-      
-      // Recreate dots on window resize
-      window.addEventListener('resize', createDotIndicators);
       
     } catch (error) {
       console.error('Error initializing page:', error);

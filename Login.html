@@ -173,13 +173,13 @@
             
             // Show success message with role information
             const roleMessage = data.user.role === 'publisher' ? 
-              'Publisher login successful! Redirecting to publisher dashboard...' : 
-              'Login successful! Redirecting to books...';
+              'Publisher login successful! Redirecting to Publisher Dashboard...' : 
+              'Login successful! Redirecting to BookScreen...';
             
             alert(roleMessage);
             
             // Redirect based on role
-            if (data.user.role === 'publisher') {
+            if (data.user.role === 'publisher') {  
               window.location.href = '/publisher-dashboard';
             } else {
               window.location.href = '/bookscreen';

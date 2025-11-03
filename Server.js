@@ -2434,12 +2434,12 @@ app.get("/forgotpassword", (req, res) => {
 
 // Publisher Dashboard
 app.get("/publisher-dashboard", requirePublisherAuth, (req, res) => {
-  res.sendFile(path.join(__dirname, "dashboard", "publisher-dashboard.html"));
+  res.sendFile(path.join(__dirname, "dashboard", "Publisher.html"));
 });
 
 // User Dashboard
 app.get("/user-dashboard", requireUserAuth, (req, res) => {
-  res.sendFile(path.join(__dirname, "dashboard", "user.html"));
+  res.sendFile(path.join(__dirname, "dashboard", "User.html"));
 });
 
 // Admin Routes - Protected
