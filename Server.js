@@ -214,7 +214,7 @@ function generateWelcomeEmailHTML(userName, role) {
     <!-- Header -->
     <div class="header">
       <div class="logo">
-        <img src="../images/logo.png" alt="IntelliRead Logo">
+        <img src="https://i.postimg.cc/cHPNJ0qr/logo.png" alt="IntelliRead Logo">
       </div>
     </div>
 
@@ -378,7 +378,7 @@ function generatePublisherApprovalEmailHTML(userName) {
   <div class="email-container">
     <div class="header">
       <div class="logo">
-        <img src="../images/logo.png" alt="IntelliRead Logo">
+        <img src="https://i.postimg.cc/cHPNJ0qr/logo.png" alt="IntelliRead Logo">
       </div>
     </div>
     <div class="content">
@@ -467,7 +467,7 @@ function generatePublisherApprovalResultEmailHTML(userName, approved) {
       <div class="email-container">
         <div class="header">
           <div class="logo">
-            <img src="../images/logo.png" alt="IntelliRead Logo">
+            <img src="https://i.postimg.cc/cHPNJ0qr/logo.png" alt="IntelliRead Logo">
           </div>
         </div>
         <div class="content">
@@ -525,7 +525,7 @@ function generatePublisherApprovalResultEmailHTML(userName, approved) {
       <div class="email-container">
         <div class="header">
           <div class="logo">
-            <img src="../images/logo.png" alt="IntelliRead Logo">
+            <img src="https://i.postimg.cc/cHPNJ0qr/logo.png" alt="IntelliRead Logo">
           </div>
         </div>
         <div class="content">
@@ -1825,17 +1825,21 @@ app.get("/api/publisher/books", requirePublisherAuth, async (req, res) => {
   }
 });
 
-// Add New Book (Publisher only)
+// Add New Book (Publisher) - With file upload
 app.post("/api/publisher/books", requirePublisherAuth, async (req, res) => {
   try {
-    const { title, author, description, category, coverImage, bookFile } = req.body;
-
+    const { title, author, description, category } = req.body;
+    
     if (!title || !author) {
       return res.status(400).json({
         success: false,
         message: 'Title and author are required'
       });
     }
+
+    // File upload handling (simplified - actual me multer use karo)
+    const coverImage = req.files?.coverImage ? `/uploads/covers/${req.files.coverImage.name}` : null;
+    const bookFile = req.files?.bookFile ? `/uploads/books/${req.files.bookFile.name}` : null;
 
     const newBook = new Book({
       title,
@@ -1845,12 +1849,13 @@ app.post("/api/publisher/books", requirePublisherAuth, async (req, res) => {
       coverImage,
       bookFile,
       uploadedBy: req.session.user.id,
-      status: 'pending' // Books need admin approval
+      status: 'pending'
     });
 
     await newBook.save();
 
-    console.log('✅ New book added by publisher:', req.session.user.email);
+    // Send notification email to admin (optional)
+    console.log(`📚 New book submitted for approval: "${title}" by ${req.session.user.email}`);
 
     res.status(201).json({
       success: true,
@@ -1863,6 +1868,26 @@ app.post("/api/publisher/books", requirePublisherAuth, async (req, res) => {
     res.status(500).json({ 
       success: false,
       message: 'Error adding book' 
+    });
+  }
+});
+
+// Get books for approval (Admin)
+app.get("/api/admin/books/pending", requireAdminAuth, async (req, res) => {
+  try {
+    const pendingBooks = await Book.find({ status: 'pending' })
+      .populate('uploadedBy', 'fullName email')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      books: pendingBooks
+    });
+  } catch (error) {
+    console.error('❌ Get pending books error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error fetching pending books' 
     });
   }
 });
@@ -2049,7 +2074,7 @@ function generateOTPEmailHTML(userName, otp) {
     <div class="email-container">
       <div class="header">
         <div class="logo">
-          <img src="../images/logo.png" alt="IntelliRead Logo">
+          <img src="https://i.postimg.cc/cHPNJ0qr/logo.png" alt="IntelliRead Logo">
         </div>
       </div>
       <div class="content">

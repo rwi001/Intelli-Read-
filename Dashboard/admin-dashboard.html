@@ -2012,7 +2012,10 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ status: 'approved' })
+                    body: JSON.stringify({ 
+                        status: 'approved',
+                        adminNotes: 'Book approved by admin'
+                    })
                 });
 
                 const data = await response.json();
@@ -2021,6 +2024,9 @@
                     showNotification('Book approved successfully!', 'success');
                     loadBooks(currentBookPage);
                     loadDashboardSummary();
+                    
+                    // Close modal if open
+                    document.getElementById('bookModal').style.display = 'none';
                 } else {
                     showNotification('Error: ' + data.message, 'error');
                 }
@@ -2074,7 +2080,7 @@
                 },
                 body: JSON.stringify({ 
                     status: 'rejected',
-                    rejectionReason: reason 
+                    adminNotes: reason 
                 })
             });
 
@@ -2176,10 +2182,10 @@
                                 <span>${formatDateTime(book.reviewedAt)}</span>
                             </div>
                             ` : ''}
-                            ${book.rejectionReason ? `
+                            ${book.adminNotes ? `
                             <div class="stat">
-                                <label>Rejection Reason:</label>
-                                <span style="color: var(--warning);">${book.rejectionReason}</span>
+                                <label>Admin Notes:</label>
+                                <span style="color: var(--warning);">${book.adminNotes}</span>
                             </div>
                             ` : ''}
                         </div>

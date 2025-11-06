@@ -209,8 +209,6 @@
     .stat-card.success { border-left: 4px solid var(--success); }
     .stat-card.warning { border-left: 4px solid var(--warning); }
     .stat-card.info { border-left: 4px solid var(--info); }
-    .stat-card.secondary { border-left: 4px solid #6c757d; }
-    .stat-card.danger { border-left: 4px solid #dc3545; }
 
     .stat-icon {
       width: 60px;
@@ -227,8 +225,6 @@
     .stat-card.success .stat-icon { background: var(--success); }
     .stat-card.warning .stat-icon { background: var(--warning); }
     .stat-card.info .stat-icon { background: var(--info); }
-    .stat-card.secondary .stat-icon { background: #6c757d; }
-    .stat-card.danger .stat-icon { background: #dc3545; }
 
     .stat-info h3 {
       font-size: 2rem;
@@ -439,8 +435,6 @@
     .status-pending { background: #fff3cd; color: #856404; }
     .status-approved { background: #d1edff; color: #004085; }
     .status-rejected { background: #f8d7da; color: #721c24; }
-    .status-active { background: #d4edda; color: #155724; }
-    .status-inactive { background: #e2e3e5; color: #383d41; }
 
     /* Pagination */
     .pagination {
@@ -549,9 +543,7 @@
       color: white;
     }
 
-    .activity-icon.user { background: var(--primary); }
     .activity-icon.book { background: var(--success); }
-    .activity-icon.system { background: var(--warning); }
 
     /* Analytics Grid */
     .analytics-grid {
@@ -615,52 +607,6 @@
       width: 200px;
     }
 
-    /* Switch */
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 50px;
-      height: 24px;
-    }
-
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: #ccc;
-      transition: .4s;
-      border-radius: 24px;
-    }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 16px;
-      width: 16px;
-      left: 4px;
-      bottom: 4px;
-      background: white;
-      transition: .4s;
-      border-radius: 50%;
-    }
-
-    input:checked + .slider {
-      background: var(--primary);
-    }
-
-    input:checked + .slider:before {
-      transform: translateX(26px);
-    }
-
     /* Book cover styles */
     .book-cover {
       width: 40px;
@@ -681,27 +627,6 @@
     }
 
     /* Loading states */
-    .loading-cell {
-      text-align: center;
-      padding: 2rem;
-      color: var(--gray);
-    }
-
-    .loading-spinner {
-      width: 30px;
-      height: 30px;
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid var(--primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 1rem;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
     .no-data {
       text-align: center;
       padding: 3rem;
@@ -714,24 +639,6 @@
       display: block;
     }
 
-    /* User avatar */
-    .user-avatar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .user-avatar i {
-      width: 32px;
-      height: 32px;
-      background: var(--primary);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-    }
-
     /* Category tags */
     .category-tag {
       background: #e9ecef;
@@ -742,17 +649,6 @@
       font-weight: 500;
     }
 
-    /* Featured badge */
-    .featured-badge {
-      background: linear-gradient(135deg, #ffd700, #ffed4e);
-      color: #856404;
-      padding: 2px 6px;
-      border-radius: 8px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      margin-left: 8px;
-    }
-
     /* Book title styling */
     .book-title {
       display: flex;
@@ -761,43 +657,6 @@
     }
 
     /* Modal improvements */
-    .user-detail-grid {
-      display: grid;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .user-detail {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .user-detail:last-child {
-      border-bottom: none;
-    }
-
-    .user-detail label {
-      font-weight: 600;
-      color: var(--dark);
-    }
-
-    .role-badge {
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 0.8rem;
-      font-weight: 500;
-      background: #e9ecef;
-      color: #495057;
-    }
-
-    .role-badge.publisher {
-      background: #d1edff;
-      color: #004085;
-    }
-
     .modal-actions {
       display: flex;
       gap: 1rem;
@@ -1085,7 +944,7 @@
       </div>
       <div class="header-right">
         <div class="admin-info">
-          <span id="publisherName">Welcome, Demo Publisher</span>
+          <span id="publisherName">Welcome, Publisher</span>
           <button class="logout-btn" onclick="logout()">
             <i class='bx bx-log-out'></i> Logout
           </button>
@@ -1278,12 +1137,12 @@
               <select id="bookLanguage" required>
                 <option value="">Select Language</option>
                 <option value="English">English</option>
+                <option value="Hindi">Hindi</option>
                 <option value="Spanish">Spanish</option>
                 <option value="French">French</option>
                 <option value="German">German</option>
                 <option value="Chinese">Chinese</option>
                 <option value="Japanese">Japanese</option>
-                <option value="Hindi">Hindi</option>
               </select>
             </div>
           </div>
@@ -1299,8 +1158,8 @@
           </div>
           
           <div class="modal-actions">
-            <button type="button" class="btn-secondary" onclick="clearForm()">Clear Form</button>
-            <button type="submit" class="btn-primary">Add Book</button>
+            <button type="button" class="btn-secondary" onclick="resetBookForm()">Reset</button>
+            <button type="submit" class="btn-primary">Submit Book</button>
           </div>
         </form>
       </section>
@@ -1309,39 +1168,28 @@
       <section id="analytics" class="section">
         <div class="section-header">
           <h1>Book Analytics</h1>
-          <p>Track performance and engagement of your books</p>
+          <p>Track your book performance and reader engagement</p>
         </div>
         
         <div class="analytics-grid">
           <div class="chart-card">
             <h3>Downloads by Book</h3>
-            <div class="chart-placeholder" id="downloadsChart">
+            <div class="chart-placeholder">
               <p>Downloads chart will appear here</p>
             </div>
           </div>
           
           <div class="chart-card">
             <h3>Reader Engagement</h3>
-            <div class="chart-placeholder" id="engagementChart">
+            <div class="chart-placeholder">
               <p>Engagement chart will appear here</p>
             </div>
           </div>
           
           <div class="chart-card">
             <h3>Top Performing Books</h3>
-            <div class="table-container">
-              <table id="topBooksTable">
-                <thead>
-                  <tr>
-                    <th>Book Title</th>
-                    <th>Downloads</th>
-                    <th>Rating</th>
-                  </tr>
-                </thead>
-                <tbody id="topBooksBody">
-                  <!-- Top books will be loaded here -->
-                </tbody>
-              </table>
+            <div class="chart-placeholder">
+              <p>Top books chart will appear here</p>
             </div>
           </div>
         </div>
@@ -1351,78 +1199,51 @@
       <section id="profile" class="section">
         <div class="section-header">
           <h1>Publisher Profile</h1>
-          <p>Manage your account settings and preferences</p>
+          <p>Manage your account information and settings</p>
         </div>
         
         <div class="settings-grid">
           <div class="setting-card">
             <h3>Account Information</h3>
             <div class="setting-item">
-              <label for="profileName">Full Name</label>
-              <input type="text" id="profileName" value="Demo Publisher">
+              <label>Publisher Name</label>
+              <span id="profileName">Loading...</span>
             </div>
             <div class="setting-item">
-              <label for="profileEmail">Email</label>
-              <input type="email" id="profileEmail" value="demo.publisher@example.com">
+              <label>Email Address</label>
+              <span id="profileEmail">Loading...</span>
             </div>
             <div class="setting-item">
-              <label for="profilePhone">Phone</label>
-              <input type="tel" id="profilePhone" value="+1 (555) 123-4567">
+              <label>Phone Number</label>
+              <span id="profilePhone">Loading...</span>
             </div>
             <div class="setting-item">
-              <label for="profileCompany">Company</label>
-              <input type="text" id="profileCompany" value="Intelli-Read Publishing">
-            </div>
-          </div>
-          
-          <div class="setting-card">
-            <h3>Security Settings</h3>
-            <div class="setting-item">
-              <label for="currentPassword">Current Password</label>
-              <input type="password" id="currentPassword">
+              <label>Company/Organization</label>
+              <span id="profileCompany">Loading...</span>
             </div>
             <div class="setting-item">
-              <label for="newPassword">New Password</label>
-              <input type="password" id="newPassword">
-            </div>
-            <div class="setting-item">
-              <label for="confirmPassword">Confirm Password</label>
-              <input type="password" id="confirmPassword">
-            </div>
-            <div class="setting-item">
-              <button class="btn-primary" onclick="updatePassword()">Update Password</button>
+              <label>Member Since</label>
+              <span id="profileMemberSince">Loading...</span>
             </div>
           </div>
           
           <div class="setting-card">
-            <h3>Notification Preferences</h3>
+            <h3>Account Statistics</h3>
             <div class="setting-item">
-              <label>Email Notifications</label>
-              <label class="switch">
-                <input type="checkbox" checked>
-                <span class="slider"></span>
-              </label>
+              <label>Total Books Published</label>
+              <span id="profileTotalBooks">0</span>
             </div>
             <div class="setting-item">
-              <label>Book Approval Alerts</label>
-              <label class="switch">
-                <input type="checkbox" checked>
-                <span class="slider"></span>
-              </label>
+              <label>Books Pending Approval</label>
+              <span id="profilePendingBooks">0</span>
             </div>
             <div class="setting-item">
-              <label>Download Reports</label>
-              <label class="switch">
-                <input type="checkbox">
-                <span class="slider"></span>
-              </label>
+              <label>Total Downloads</label>
+              <span id="profileTotalDownloads">0</span>
             </div>
             <div class="setting-item">
-              <label>Marketing Updates</label>
-              <label class="switch">
-                <input type="checkbox">
-                <span class="slider"></span>
-              </label>
+              <label>Approval Rate</label>
+              <span id="profileApprovalRate">0%</span>
             </div>
           </div>
         </div>
@@ -1430,105 +1251,243 @@
     </main>
   </div>
 
-  <!-- Book Detail Modal -->
-  <div id="bookDetailModal" class="modal">
+  <!-- Book Details Modal -->
+  <div id="bookModal" class="modal">
     <div class="modal-content large">
-      <span class="close" onclick="closeModal('bookDetailModal')">&times;</span>
-      <div id="bookDetailContent">
+      <span class="close" onclick="closeModal('bookModal')">&times;</span>
+      <h2>Book Details</h2>
+      <div id="bookModalContent">
         <!-- Book details will be loaded here -->
       </div>
     </div>
   </div>
 
   <!-- Logout Message Container -->
-  <div id="logoutMessageContainer"></div>
+  <div id="logoutMessageContainer" style="display: none;"></div>
 
   <script>
-    // Initialize the application
+    // Current logged-in publisher data
+    let currentPublisher = null;
+    let publisherBooks = [];
+
+    // Initialize the dashboard
     document.addEventListener('DOMContentLoaded', function() {
-      // Load user's books
-      loadUserBooks();
+      // Get publisher data from localStorage or session
+      loadPublisherData();
       
-      // Set up event listeners
-      setupEventListeners();
+      // Load publisher's books
+      loadPublisherBooks();
+      
+      // Set up upload area
+      setupUploadArea();
+      
+      // Set up form submission
+      document.getElementById('addBookForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        addNewBook();
+      });
     });
 
-    // User's books data
-    let userBooks = [];
+    // Load publisher data
+function loadPublisherData() {
+  // Session se publisher data get karo
+  const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user'));
+  
+  if (currentUser && currentUser.role === 'publisher' && currentUser.isApproved) {
+    currentPublisher = {
+      id: currentUser.id,
+      name: currentUser.fullName,
+      email: currentUser.email,
+      phone: currentUser.phone || 'Not provided',
+      company: currentUser.company || 'Not provided',
+      memberSince: currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleDateString() : new Date().toLocaleDateString()
+    };
+    
+    localStorage.setItem('currentPublisher', JSON.stringify(currentPublisher));
+    updatePublisherUI();
+  } else {
+    // Agar publisher approved nahi hai to login page redirect karo
+    alert('Publisher account not approved or not logged in. Redirecting to login...');
+    window.location.href = 'login.html';
+  }
+}
 
-    // Function to load user's books
-    function loadUserBooks() {
-      // In a real application, this would fetch data from a server
-      // For now, we'll check if there are any books in localStorage
-      const savedBooks = localStorage.getItem('userBooks');
-      if (savedBooks) {
-        userBooks = JSON.parse(savedBooks);
+
+    // Update UI with publisher data
+    function updatePublisherUI() {
+      if (!currentPublisher) return;
+      
+      // Update header
+      document.getElementById('publisherName').textContent = `Welcome, ${currentPublisher.name}`;
+      
+      // Update profile section
+      document.getElementById('profileName').textContent = currentPublisher.name;
+      document.getElementById('profileEmail').textContent = currentPublisher.email;
+      document.getElementById('profilePhone').textContent = currentPublisher.phone;
+      document.getElementById('profileCompany').textContent = currentPublisher.company;
+      document.getElementById('profileMemberSince').textContent = currentPublisher.joinDate;
+    }
+
+   // Load publisher's books from server
+async function loadPublisherBooks() {
+  try {
+    const response = await fetch('/api/publisher/books');
+    const data = await response.json();
+    
+    if (data.success) {
+      publisherBooks = data.books;
+      updateBooksUI();
+    } else {
+      console.error('Error loading books:', data.message);
+      publisherBooks = [];
+      updateBooksUI();
+    }
+  } catch (error) {
+    console.error('Error loading books:', error);
+    publisherBooks = [];
+    updateBooksUI();
+  }
+}
+
+    // Update UI with books data
+    function updateBooksUI() {
+      // Update dashboard stats
+      updateDashboardStats();
+      
+      // Load books table
+      loadBooksTable();
+      
+      // Load recent books
+      loadRecentBooks();
+    }
+
+    // Update dashboard statistics - Real data from server
+async function updateDashboardStats() {
+  try {
+    const response = await fetch('/api/publisher/stats');
+    const data = await response.json();
+    
+    if (data.success) {
+      // Update dashboard stats cards
+      document.getElementById('totalBooks').textContent = data.stats.totalBooks;
+      document.getElementById('approvedBooks').textContent = data.stats.approvedBooks;
+      document.getElementById('pendingBooks').textContent = data.stats.pendingBooks;
+      document.getElementById('totalDownloads').textContent = data.stats.totalDownloads.toLocaleString();
+      
+      // Update profile section stats
+      document.getElementById('profileTotalBooks').textContent = data.stats.totalBooks;
+      document.getElementById('profilePendingBooks').textContent = data.stats.pendingBooks;
+      document.getElementById('profileTotalDownloads').textContent = data.stats.totalDownloads.toLocaleString();
+      
+      // Calculate approval rate
+      const approvalRate = data.stats.totalBooks > 0 ? 
+        Math.round((data.stats.approvedBooks / data.stats.totalBooks) * 100) : 0;
+      document.getElementById('profileApprovalRate').textContent = `${approvalRate}%`;
+    } else {
+      console.error('Error fetching stats:', data.message);
+      // Fallback to local data if API fails
+      updateStatsFromLocalData();
+    }
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    // Fallback to local data if network error
+    updateStatsFromLocalData();
+  }
+}
+
+// Fallback function agar API fail ho
+function updateStatsFromLocalData() {
+  const totalBooks = publisherBooks.length;
+  const approvedBooks = publisherBooks.filter(book => book.status === 'approved').length;
+  const pendingBooks = publisherBooks.filter(book => book.status === 'pending').length;
+  const totalDownloads = publisherBooks.reduce((sum, book) => sum + (book.downloads || 0), 0);
+  
+  document.getElementById('totalBooks').textContent = totalBooks;
+  document.getElementById('approvedBooks').textContent = approvedBooks;
+  document.getElementById('pendingBooks').textContent = pendingBooks;
+  document.getElementById('totalDownloads').textContent = totalDownloads.toLocaleString();
+  
+  // Update profile section stats
+  document.getElementById('profileTotalBooks').textContent = totalBooks;
+  document.getElementById('profilePendingBooks').textContent = pendingBooks;
+  document.getElementById('profileTotalDownloads').textContent = totalDownloads.toLocaleString();
+  
+  // Calculate approval rate
+  const approvalRate = totalBooks > 0 ? Math.round((approvedBooks / totalBooks) * 100) : 0;
+  document.getElementById('profileApprovalRate').textContent = `${approvalRate}%`;
+}
+
+    // Load recent books
+    function loadRecentBooks() {
+      const recentBooksContainer = document.getElementById('recentBooks');
+      recentBooksContainer.innerHTML = '';
+      
+      // Sort books by date added (newest first) and take the first 5
+      const recentBooks = [...publisherBooks]
+        .sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded))
+        .slice(0, 5);
+      
+      if (recentBooks.length === 0) {
+        recentBooksContainer.innerHTML = '<div class="no-data"><i class="bx bx-book"></i><p>No books added yet</p></div>';
+        return;
       }
       
-      updateDashboardStats();
-      displayBooks();
-      displayRecentBooks();
-      displayTopBooks();
+      recentBooks.forEach(book => {
+        const activityItem = document.createElement('div');
+        activityItem.className = 'activity-item';
+        
+        activityItem.innerHTML = `
+          <div class="activity-icon book">
+            <i class='bx bx-book'></i>
+          </div>
+          <div class="activity-details">
+            <h4>${book.title}</h4>
+            <p>Added on ${formatDate(book.dateAdded)}</p>
+          </div>
+          <span class="status-badge status-${book.status}">${book.status.charAt(0).toUpperCase() + book.status.slice(1)}</span>
+        `;
+        
+        recentBooksContainer.appendChild(activityItem);
+      });
     }
 
-    // Function to update dashboard statistics
-    function updateDashboardStats() {
-      document.getElementById('totalBooks').textContent = userBooks.length;
+    // Load books table
+    function loadBooksTable() {
+      const bookTableBody = document.getElementById('bookTableBody');
+      bookTableBody.innerHTML = '';
       
-      const approvedBooks = userBooks.filter(book => book.status === 'approved').length;
-      document.getElementById('approvedBooks').textContent = approvedBooks;
-      
-      const pendingBooks = userBooks.filter(book => book.status === 'pending').length;
-      document.getElementById('pendingBooks').textContent = pendingBooks;
-      
-      const totalDownloads = userBooks.reduce((total, book) => total + (book.downloads || 0), 0);
-      document.getElementById('totalDownloads').textContent = totalDownloads;
-    }
-
-    // Function to display books in the table
-    function displayBooks(filteredBooks = null) {
-      const booksToDisplay = filteredBooks || userBooks;
-      const tableBody = document.getElementById('bookTableBody');
-      
-      if (booksToDisplay.length === 0) {
-        tableBody.innerHTML = `
+      if (publisherBooks.length === 0) {
+        bookTableBody.innerHTML = `
           <tr>
             <td colspan="7" class="no-data">
-              <i class='bx bx-book-open'></i>
-              <h3>No Books Found</h3>
-              <p>You haven't added any books yet. Start by adding your first book!</p>
+              <i class='bx bx-book'></i>
+              <p>No books added yet</p>
+              <p><small>Start by adding your first book!</small></p>
             </td>
           </tr>
         `;
         return;
       }
       
-      tableBody.innerHTML = '';
-      
-      booksToDisplay.forEach(book => {
+      publisherBooks.forEach(book => {
         const row = document.createElement('tr');
-        
-        // Format date
-        const date = new Date(book.dateAdded);
-        const formattedDate = date.toLocaleDateString();
         
         row.innerHTML = `
           <td class="book-cover-cell">
-            ${book.coverUrl ? 
-              `<img src="${book.coverUrl}" alt="${book.title}">` : 
+            ${book.cover ? 
+              `<img src="${book.cover}" alt="${book.title}" class="book-cover">` : 
               `<div class="book-cover-placeholder"><i class='bx bx-book'></i></div>`
             }
           </td>
           <td>
             <div class="book-title">
               <span>${book.title}</span>
-              ${book.featured ? '<span class="featured-badge">FEATURED</span>' : ''}
             </div>
           </td>
           <td>${book.author}</td>
           <td><span class="category-tag">${book.category}</span></td>
           <td><span class="status-badge status-${book.status}">${book.status.charAt(0).toUpperCase() + book.status.slice(1)}</span></td>
-          <td>${formattedDate}</td>
+          <td>${formatDate(book.dateAdded)}</td>
           <td>
             <div class="action-buttons">
               <button class="btn-info btn-sm" onclick="viewBookDetails('${book.id}')">
@@ -1544,140 +1503,101 @@
           </td>
         `;
         
-        tableBody.appendChild(row);
+        bookTableBody.appendChild(row);
       });
     }
 
-    // Function to display recent books on dashboard
-    function displayRecentBooks() {
-      const recentBooksContainer = document.getElementById('recentBooks');
+    // Search books
+    function searchBooks() {
+      const searchTerm = document.getElementById('bookSearch').value.toLowerCase();
+      const filteredBooks = publisherBooks.filter(book => 
+        book.title.toLowerCase().includes(searchTerm) || 
+        book.author.toLowerCase().includes(searchTerm) ||
+        book.category.toLowerCase().includes(searchTerm)
+      );
       
-      if (userBooks.length === 0) {
-        recentBooksContainer.innerHTML = `
-          <div class="no-data">
-            <i class='bx bx-book-open'></i>
-            <h3>No Books Added</h3>
-            <p>You haven't added any books yet.</p>
-          </div>
-        `;
+      renderFilteredBooks(filteredBooks);
+    }
+
+    // Filter books by status
+    function filterBooks() {
+      const status = document.getElementById('statusFilter').value;
+      
+      if (!status) {
+        loadBooksTable();
         return;
       }
       
-      // Sort books by date (newest first) and take the first 5
-      const recentBooks = [...userBooks]
-        .sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded))
-        .slice(0, 5);
-      
-      recentBooksContainer.innerHTML = '';
-      
-      recentBooks.forEach(book => {
-        const activityItem = document.createElement('div');
-        activityItem.className = 'activity-item';
-        
-        const date = new Date(book.dateAdded);
-        const formattedDate = date.toLocaleDateString();
-        
-        activityItem.innerHTML = `
-          <div class="activity-icon book">
-            <i class='bx bx-book'></i>
-          </div>
-          <div class="activity-details">
-            <h4>${book.title}</h4>
-            <p>Added on ${formattedDate} - <span class="status-${book.status}">${book.status.charAt(0).toUpperCase() + book.status.slice(1)}</span></p>
-          </div>
-        `;
-        
-        recentBooksContainer.appendChild(activityItem);
-      });
+      const filteredBooks = publisherBooks.filter(book => book.status === status);
+      renderFilteredBooks(filteredBooks);
     }
 
-    // Function to display top books in analytics
-    function displayTopBooks() {
-      const topBooksBody = document.getElementById('topBooksBody');
+    // Render filtered books
+    function renderFilteredBooks(books) {
+      const bookTableBody = document.getElementById('bookTableBody');
+      bookTableBody.innerHTML = '';
       
-      if (userBooks.length === 0) {
-        topBooksBody.innerHTML = `
+      if (books.length === 0) {
+        bookTableBody.innerHTML = `
           <tr>
-            <td colspan="3" class="no-data">
-              <i class='bx bx-bar-chart'></i>
-              <h3>No Analytics Data</h3>
-              <p>Add books to see performance analytics</p>
+            <td colspan="7" class="no-data">
+              <i class='bx bx-search'></i>
+              <p>No books found</p>
             </td>
           </tr>
         `;
         return;
       }
       
-      // Sort books by downloads (highest first) and take the first 5
-      const topBooks = [...userBooks]
-        .sort((a, b) => (b.downloads || 0) - (a.downloads || 0))
-        .slice(0, 5);
-      
-      topBooksBody.innerHTML = '';
-      
-      topBooks.forEach(book => {
+      books.forEach(book => {
         const row = document.createElement('tr');
         
         row.innerHTML = `
-          <td>${book.title}</td>
-          <td>${book.downloads || 0}</td>
-          <td>${book.rating ? book.rating.toFixed(1) + ' ★' : 'N/A'}</td>
+          <td class="book-cover-cell">
+            ${book.cover ? 
+              `<img src="${book.cover}" alt="${book.title}" class="book-cover">` : 
+              `<div class="book-cover-placeholder"><i class='bx bx-book'></i></div>`
+            }
+          </td>
+          <td>
+            <div class="book-title">
+              <span>${book.title}</span>
+            </div>
+          </td>
+          <td>${book.author}</td>
+          <td><span class="category-tag">${book.category}</span></td>
+          <td><span class="status-badge status-${book.status}">${book.status.charAt(0).toUpperCase() + book.status.slice(1)}</span></td>
+          <td>${formatDate(book.dateAdded)}</td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-info btn-sm" onclick="viewBookDetails('${book.id}')">
+                <i class='bx bx-show'></i> View
+              </button>
+              <button class="btn-warning btn-sm" onclick="editBook('${book.id}')">
+                <i class='bx bx-edit'></i> Edit
+              </button>
+              <button class="btn-danger btn-sm" onclick="deleteBook('${book.id}')">
+                <i class='bx bx-trash'></i> Delete
+              </button>
+            </div>
+          </td>
         `;
         
-        topBooksBody.appendChild(row);
+        bookTableBody.appendChild(row);
       });
     }
 
-    // Function to search books
-    function searchBooks() {
-      const searchTerm = document.getElementById('bookSearch').value.toLowerCase();
-      
-      if (searchTerm === '') {
-        displayBooks();
-        return;
-      }
-      
-      const filteredBooks = userBooks.filter(book => 
-        book.title.toLowerCase().includes(searchTerm) || 
-        book.author.toLowerCase().includes(searchTerm) ||
-        book.category.toLowerCase().includes(searchTerm)
-      );
-      
-      displayBooks(filteredBooks);
-    }
-
-    // Function to filter books by status
-    function filterBooks() {
-      const statusFilter = document.getElementById('statusFilter').value;
-      
-      if (statusFilter === '') {
-        displayBooks();
-        return;
-      }
-      
-      const filteredBooks = userBooks.filter(book => book.status === statusFilter);
-      displayBooks(filteredBooks);
-    }
-
-    // Function to view book details
+    // View book details
     function viewBookDetails(bookId) {
-      const book = userBooks.find(b => b.id === bookId);
+      const book = publisherBooks.find(b => b.id === bookId);
+      if (!book) return;
       
-      if (!book) {
-        showNotification('Book not found', 'error');
-        return;
-      }
-      
-      const modalContent = document.getElementById('bookDetailContent');
-      const date = new Date(book.dateAdded);
-      const formattedDate = date.toLocaleDateString();
-      
+      const modalContent = document.getElementById('bookModalContent');
       modalContent.innerHTML = `
-        <h2>Book Details</h2>
         <div class="book-detail-grid">
           <div class="book-cover-large">
-            ${book.coverUrl ? 
-              `<img src="${book.coverUrl}" alt="${book.title}">` : 
+            ${book.cover ? 
+              `<img src="${book.cover}" alt="${book.title}">` : 
               `<div style="width: 200px; height: 300px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
                 <i class='bx bx-book' style="font-size: 3rem; color: #6c757d;"></i>
               </div>`
@@ -1689,205 +1609,171 @@
             <div class="book-meta">
               <span class="category-tag">${book.category}</span>
               <span class="status-badge status-${book.status}">${book.status.charAt(0).toUpperCase() + book.status.slice(1)}</span>
-              ${book.featured ? '<span class="featured-badge">FEATURED</span>' : ''}
             </div>
             <div class="book-description">
               <h4>Description</h4>
-              <p>${book.description || 'No description provided.'}</p>
+              <p>${book.description}</p>
             </div>
             <div class="book-stats">
               <div class="stat">
                 <span>Language:</span>
-                <span>${book.language || 'N/A'}</span>
+                <span>${book.language}</span>
               </div>
               <div class="stat">
                 <span>Downloads:</span>
-                <span>${book.downloads || 0}</span>
+                <span>${(book.downloads || 0).toLocaleString()}</span>
               </div>
               <div class="stat">
                 <span>Date Added:</span>
-                <span>${formattedDate}</span>
+                <span>${formatDate(book.dateAdded)}</span>
               </div>
             </div>
           </div>
         </div>
         <div class="modal-actions">
-          <button class="btn-secondary" onclick="closeModal('bookDetailModal')">Close</button>
+          <button class="btn-secondary" onclick="closeModal('bookModal')">Close</button>
           <button class="btn-warning" onclick="editBook('${book.id}')">Edit Book</button>
         </div>
       `;
       
-      openModal('bookDetailModal');
+      openModal('bookModal');
     }
 
-    // Function to add a new book
-function addBook(event) {
-  event.preventDefault();
-  
-  const title = document.getElementById('bookTitle').value;
-  const author = document.getElementById('bookAuthor').value;
-  const category = document.getElementById('bookCategory').value;
-  const language = document.getElementById('bookLanguage').value;
-  const description = document.getElementById('bookDescription').value;
-  const coverFile = document.getElementById('coverUpload').files[0];
-  
-  // Generate a unique ID for the book
-  const bookId = 'book_' + Date.now();
-  
-  // Get publisher info (in real app, this would come from authentication)
-  const publisherName = document.getElementById('publisherName').textContent.replace('Welcome, ', '');
-  
-  // Create book object
-  const newBook = {
-    id: bookId,
-    title,
-    author,
-    category,
-    language,
-    description,
-    status: 'pending',
-    dateAdded: new Date().toISOString(),
-    downloads: 0,
-    rating: null,
-    publisherName: publisherName,
-    publisherId: 'demo_publisher_id' // In real app, this would be actual publisher ID
-  };
-  
-  // Handle cover image if uploaded
-  if (coverFile) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      newBook.coverUrl = e.target.result;
-      newBook.coverImage = e.target.result; // For admin panel compatibility
-      saveBookToAdmin(newBook);
-      saveBookToLocal(newBook);
-    };
-    reader.readAsDataURL(coverFile);
-  } else {
-    saveBookToAdmin(newBook);
-    saveBookToLocal(newBook);
-  }
-}
-
-// Function to save book to admin panel (simulated)
-function saveBookToAdmin(book) {
-  // In a real application, this would send an API request to the server
-  // For demo purposes, we'll save to localStorage that admin panel can access
-  
-  // Get existing books from admin storage or initialize empty array
-  const adminBooks = JSON.parse(localStorage.getItem('adminBooks') || '[]');
-  
-  // Add the new book with additional admin-specific fields
-  const adminBook = {
-    _id: book.id,
-    title: book.title,
-    author: book.author,
-    category: book.category,
-    language: book.language,
-    description: book.description,
-    status: 'pending',
-    coverImage: book.coverImage,
-    publisherName: book.publisherName,
-    publisherId: book.publisherId,
-    createdAt: new Date().toISOString(),
-    isFeatured: false,
-    rejectionReason: null
-  };
-  
-  adminBooks.push(adminBook);
-  localStorage.setItem('adminBooks', JSON.stringify(adminBooks));
-  
-  console.log('Book submitted for admin approval:', adminBook);
-}
-
-// Function to save book to user's local collection
-function saveBookToLocal(book) {
-  userBooks.push(book);
-  localStorage.setItem('userBooks', JSON.stringify(userBooks));
-  
-  // Update UI
-  updateDashboardStats();
-  displayBooks();
-  displayRecentBooks();
-  displayTopBooks();
-  
-  // Show success message
-  showNotification('Book added successfully! It is now pending admin approval.', 'success');
-  
-  // Clear form
-  clearForm();
-  
-  // Switch to My Books section
-  showSection('myBooks');
-}
-
-    // Function to edit a book
+    // Edit book
     function editBook(bookId) {
-      // In a real application, this would open an edit form
-      // For now, we'll just show a notification
-      showNotification('Edit feature will be implemented in the full version', 'info');
+      // In a real app, this would open an edit form
+      showNotification('Edit book functionality would open here', 'info');
     }
 
-    // Function to delete a book
+    // Delete book
     function deleteBook(bookId) {
       if (confirm('Are you sure you want to delete this book? This action cannot be undone.')) {
-        userBooks = userBooks.filter(book => book.id !== bookId);
-        localStorage.setItem('userBooks', JSON.stringify(userBooks));
-        
-        // Update UI
+        publisherBooks = publisherBooks.filter(book => book.id !== bookId);
+        savePublisherBooks();
+        loadBooksTable();
         updateDashboardStats();
-        displayBooks();
-        displayRecentBooks();
-        displayTopBooks();
-        
+        loadRecentBooks();
         showNotification('Book deleted successfully', 'success');
       }
     }
 
-    // Function to clear the add book form
-    function clearForm() {
-      document.getElementById('addBookForm').reset();
-      document.getElementById('coverPreview').style.display = 'none';
-      document.getElementById('coverUpload').value = '';
+    // Setup upload area
+    function setupUploadArea() {
+      const uploadArea = document.getElementById('uploadArea');
+      const coverUpload = document.getElementById('coverUpload');
+      const coverPreview = document.getElementById('coverPreview');
+      
+      uploadArea.addEventListener('click', () => {
+        coverUpload.click();
+      });
+      
+      coverUpload.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+          const reader = new FileReader();
+          
+          reader.onload = function(e) {
+            coverPreview.src = e.target.result;
+            coverPreview.style.display = 'block';
+            uploadArea.querySelector('h3').textContent = 'Cover Image Uploaded';
+            uploadArea.querySelector('p').textContent = 'Click to change image';
+          }
+          
+          reader.readAsDataURL(this.files[0]);
+        }
+      });
     }
 
-    // Function to show a section and hide others
+    // Add new book
+    function addNewBook() {
+      const title = document.getElementById('bookTitle').value;
+      const author = document.getElementById('bookAuthor').value;
+      const category = document.getElementById('bookCategory').value;
+      const language = document.getElementById('bookLanguage').value;
+      const description = document.getElementById('bookDescription').value;
+      
+      // Generate a new book ID
+      const newId = 'book_' + Date.now();
+      
+      // Create new book object
+      const newBook = {
+        id: newId,
+        title,
+        author,
+        category,
+        language,
+        description,
+        status: 'pending',
+        dateAdded: new Date().toISOString(),
+        downloads: 0,
+        cover: document.getElementById('coverPreview').src || null,
+        publisherId: currentPublisher.id,
+        publisherName: currentPublisher.name
+      };
+      
+      // Add to publisher's books
+      publisherBooks.push(newBook);
+      savePublisherBooks();
+      
+      // Update UI
+      loadBooksTable();
+      updateDashboardStats();
+      loadRecentBooks();
+      
+      // Reset form
+      resetBookForm();
+      
+      // Show success message
+      showNotification('Book submitted successfully! It will be reviewed by our team.', 'success');
+      
+      // Switch to My Books section
+      showSection('myBooks');
+    }
+
+    // Save publisher's books to localStorage
+    function savePublisherBooks() {
+      localStorage.setItem(`publisherBooks_${currentPublisher.id}`, JSON.stringify(publisherBooks));
+    }
+
+    // Reset book form
+    function resetBookForm() {
+      document.getElementById('addBookForm').reset();
+      document.getElementById('coverPreview').style.display = 'none';
+      document.getElementById('coverPreview').src = '';
+      document.getElementById('uploadArea').querySelector('h3').textContent = 'Upload Book Cover';
+      document.getElementById('uploadArea').querySelector('p').textContent = 'Drag & drop or click to upload book cover image';
+    }
+
+    // Show section
     function showSection(sectionId) {
       // Hide all sections
       document.querySelectorAll('.section').forEach(section => {
         section.classList.remove('active');
       });
       
-      // Show the selected section
-      document.getElementById(sectionId).classList.add('active');
-      
-      // Update active menu item
+      // Remove active class from all menu items
       document.querySelectorAll('.menu-item').forEach(item => {
         item.classList.remove('active');
       });
       
-      // Find and activate the corresponding menu item
-      const menuItems = document.querySelectorAll('.menu-item');
-      for (let i = 0; i < menuItems.length; i++) {
-        if (menuItems[i].getAttribute('onclick').includes(sectionId)) {
-          menuItems[i].classList.add('active');
-          break;
-        }
-      }
+      // Show selected section
+      document.getElementById(sectionId).classList.add('active');
+      
+      // Add active class to clicked menu item
+      event.currentTarget.classList.add('active');
     }
 
-    // Function to open a modal
+    // Open modal
     function openModal(modalId) {
       document.getElementById(modalId).style.display = 'block';
     }
 
-    // Function to close a modal
+    // Close modal
     function closeModal(modalId) {
       document.getElementById(modalId).style.display = 'none';
     }
 
-    // Function to show notification
-    function showNotification(message, type = 'info') {
+    // Show notification
+    function showNotification(message, type) {
       // Create notification element
       const notification = document.createElement('div');
       notification.className = `notification ${type}`;
@@ -1910,107 +1796,39 @@ function saveBookToLocal(book) {
       setTimeout(() => {
         notification.classList.remove('show');
         setTimeout(() => {
-          document.body.removeChild(notification);
+          if (document.body.contains(notification)) {
+            document.body.removeChild(notification);
+          }
         }, 300);
       }, 5000);
     }
 
-    // Function to set up event listeners
-    function setupEventListeners() {
-      // Add book form submission
-      document.getElementById('addBookForm').addEventListener('submit', addBook);
-      
-      // Cover upload functionality
-      const uploadArea = document.getElementById('uploadArea');
-      const coverUpload = document.getElementById('coverUpload');
-      const coverPreview = document.getElementById('coverPreview');
-      
-      uploadArea.addEventListener('click', () => {
-        coverUpload.click();
-      });
-      
-      uploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadArea.style.borderColor = '#4361ee';
-        uploadArea.style.backgroundColor = '#f8f9fa';
-      });
-      
-      uploadArea.addEventListener('dragleave', () => {
-        uploadArea.style.borderColor = '#e9ecef';
-        uploadArea.style.backgroundColor = 'white';
-      });
-      
-      uploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadArea.style.borderColor = '#e9ecef';
-        uploadArea.style.backgroundColor = 'white';
-        
-        if (e.dataTransfer.files.length) {
-          coverUpload.files = e.dataTransfer.files;
-          handleCoverUpload();
-        }
-      });
-      
-      coverUpload.addEventListener('change', handleCoverUpload);
-      
-      function handleCoverUpload() {
-        if (coverUpload.files && coverUpload.files[0]) {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            coverPreview.src = e.target.result;
-            coverPreview.style.display = 'block';
-          };
-          reader.readAsDataURL(coverUpload.files[0]);
-        }
-      }
+    // Format date
+    function formatDate(dateString) {
+      const options = { year: 'numeric', month: 'short', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString(undefined, options);
     }
 
-    // Function to update password
-    function updatePassword() {
-      const currentPassword = document.getElementById('currentPassword').value;
-      const newPassword = document.getElementById('newPassword').value;
-      const confirmPassword = document.getElementById('confirmPassword').value;
-      
-      if (!currentPassword || !newPassword || !confirmPassword) {
-        showNotification('Please fill in all password fields', 'error');
-        return;
-      }
-      
-      if (newPassword !== confirmPassword) {
-        showNotification('New passwords do not match', 'error');
-        return;
-      }
-      
-      // In a real application, this would send a request to the server
-      // For now, we'll just show a success message
-      showNotification('Password updated successfully', 'success');
-      
-      // Clear password fields
-      document.getElementById('currentPassword').value = '';
-      document.getElementById('newPassword').value = '';
-      document.getElementById('confirmPassword').value = '';
-    }
-
-    // Function to handle logout
+    // Logout function
     function logout() {
-      // Create logout message
-      const logoutMessage = document.createElement('div');
-      logoutMessage.id = 'logoutMessageContainer';
-      logoutMessage.style.display = 'block';
-      logoutMessage.style.background = 'linear-gradient(135deg, #4361ee, #3a0ca3)';
-      logoutMessage.innerHTML = `
-        <p>You have been logged out successfully.</p>
-      `;
+      // Display logout message
+      const logoutMessageContainer = document.getElementById('logoutMessageContainer');
+      logoutMessageContainer.textContent = "Logging out...";
+      logoutMessageContainer.style.display = 'block';
+      logoutMessageContainer.style.backgroundColor = '#4361ee';
       
-      // Add to body
-      document.body.appendChild(logoutMessage);
-      
-      // Redirect after 2 seconds
+      // Simulate logout process
       setTimeout(() => {
-        // In a real application, this would redirect to the login page
-        // For now, we'll just reload the page to simulate logout
-        window.location.reload();
-      }, 2000);
+        logoutMessageContainer.textContent = "Successfully logged out!";
+        logoutMessageContainer.style.backgroundColor = '#28a745';
+        
+        // Redirect to login page after a delay
+        setTimeout(() => {
+          // In a real app, this would redirect to the login page
+          // alert('Redirecting to login page...');
+          window.location.href = 'login.html';
+        }, 1000);
+      }, 1500);
     }
 
     // Close modals when clicking outside
