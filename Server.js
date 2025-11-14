@@ -1149,11 +1149,11 @@ app.get("/api/admin/books", requireAdminAuth, async (req, res) => {
   }
 });
 
-// Update Book Status
+// Update Book Status (Enhanced with admin notes)
 app.put("/api/admin/books/:id", requireAdminAuth, async (req, res) => {
   try {
     const bookId = req.params.id;
-    const { status } = req.body;
+    const { status, adminNotes } = req.body;
 
     if (!['pending', 'approved', 'rejected'].includes(status)) {
       return res.status(400).json({
@@ -1162,9 +1162,17 @@ app.put("/api/admin/books/:id", requireAdminAuth, async (req, res) => {
       });
     }
 
+    const updateData = { status };
+    if (adminNotes) {
+      updateData.adminNotes = adminNotes;
+    }
+    if (status !== 'pending') {
+      updateData.reviewedAt = new Date();
+    }
+
     const book = await Book.findByIdAndUpdate(
       bookId,
-      { status },
+      updateData,
       { new: true }
     ).populate('uploadedBy', 'fullName email role isApproved');
 
@@ -1821,6 +1829,115 @@ app.get("/api/publisher/books", requirePublisherAuth, async (req, res) => {
     res.status(500).json({ 
       success: false,
       message: 'Error fetching your books' 
+    });
+  }
+});
+
+// ===== BOOK APPROVAL ROUTES =====
+
+// Get books for approval (Admin)
+app.get("/api/admin/books/pending", requireAdminAuth, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const pendingBooks = await Book.find({ status: 'pending' })
+      .populate('uploadedBy', 'fullName email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const totalPending = await Book.countDocuments({ status: 'pending' });
+
+    res.json({
+      success: true,
+      books: pendingBooks,
+      totalPages: Math.ceil(totalPending / limit),
+      currentPage: page,
+      totalPending
+    });
+  } catch (error) {
+    console.error('❌ Get pending books error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error fetching pending books' 
+    });
+  }
+});
+
+// Approve/Reject Book (Admin)
+app.put("/api/admin/books/:id/status", requireAdminAuth, async (req, res) => {
+  try {
+    const bookId = req.params.id;
+    const { status, adminNotes } = req.body;
+
+    if (!['approved', 'rejected'].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid status. Must be "approved" or "rejected"'
+      });
+    }
+
+    const book = await Book.findByIdAndUpdate(
+      bookId,
+      { 
+        status,
+        adminNotes: adminNotes || '',
+        reviewedAt: new Date()
+      },
+      { new: true }
+    ).populate('uploadedBy', 'fullName email');
+
+    if (!book) {
+      return res.status(404).json({
+        success: false,
+        message: 'Book not found'
+      });
+    }
+
+    console.log(`✅ Book ${status}: ${book.title} by ${book.uploadedBy.email}`);
+
+    res.json({
+      success: true,
+      message: `Book ${status} successfully`,
+      book
+    });
+
+  } catch (error) {
+    console.error('❌ Update book status error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error updating book status' 
+    });
+  }
+});
+
+// Get book details for admin
+app.get("/api/admin/books/:id", requireAdminAuth, async (req, res) => {
+  try {
+    const bookId = req.params.id;
+
+    const book = await Book.findById(bookId)
+      .populate('uploadedBy', 'fullName email role isApproved');
+
+    if (!book) {
+      return res.status(404).json({
+        success: false,
+        message: 'Book not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      book
+    });
+
+  } catch (error) {
+    console.error('❌ Get book details error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error fetching book details' 
     });
   }
 });

@@ -1328,7 +1328,7 @@ function loadPublisherData() {
       document.getElementById('profileMemberSince').textContent = currentPublisher.joinDate;
     }
 
-   // Load publisher's books from server
+ // Load publisher's books from server
 async function loadPublisherBooks() {
   try {
     const response = await fetch('/api/publisher/books');
@@ -1683,51 +1683,62 @@ function updateStatsFromLocalData() {
       });
     }
 
-    // Add new book
-    function addNewBook() {
-      const title = document.getElementById('bookTitle').value;
-      const author = document.getElementById('bookAuthor').value;
-      const category = document.getElementById('bookCategory').value;
-      const language = document.getElementById('bookLanguage').value;
-      const description = document.getElementById('bookDescription').value;
-      
-      // Generate a new book ID
-      const newId = 'book_' + Date.now();
-      
-      // Create new book object
-      const newBook = {
-        id: newId,
-        title,
-        author,
-        category,
-        language,
-        description,
-        status: 'pending',
-        dateAdded: new Date().toISOString(),
-        downloads: 0,
-        cover: document.getElementById('coverPreview').src || null,
-        publisherId: currentPublisher.id,
-        publisherName: currentPublisher.name
-      };
-      
-      // Add to publisher's books
-      publisherBooks.push(newBook);
-      savePublisherBooks();
-      
-      // Update UI
-      loadBooksTable();
-      updateDashboardStats();
-      loadRecentBooks();
+   // Add new book - REAL implementation
+async function addNewBook() {
+  try {
+    const title = document.getElementById('bookTitle').value;
+    const author = document.getElementById('bookAuthor').value;
+    const category = document.getElementById('bookCategory').value;
+    const language = document.getElementById('bookLanguage').value;
+    const description = document.getElementById('bookDescription').value;
+    
+    // Basic validation
+    if (!title || !author || !category || !language || !description) {
+      showNotification('Please fill in all required fields', 'error');
+      return;
+    }
+
+    showNotification('Submitting book for approval...', 'info');
+
+    // Create book data
+    const bookData = {
+      title,
+      author,
+      category,
+      language,
+      description
+    };
+
+    const response = await fetch('/api/publisher/books', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(bookData)
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      showNotification('Book submitted successfully! Waiting for admin approval.', 'success');
       
       // Reset form
       resetBookForm();
       
-      // Show success message
-      showNotification('Book submitted successfully! It will be reviewed by our team.', 'success');
+      // Reload books list
+      loadPublisherBooks();
       
       // Switch to My Books section
       showSection('myBooks');
+    } else {
+      showNotification('Error: ' + data.message, 'error');
     }
+
+  } catch (error) {
+    console.error('Error adding book:', error);
+    showNotification('Error submitting book. Please try again.', 'error');
+  }
+}
 
     // Save publisher's books to localStorage
     function savePublisherBooks() {

@@ -1162,47 +1162,69 @@
       </section>
 
       <!-- Manage Books Section -->
-      <section id="books" class="section">
-        <div class="section-header">
-          <h1>Manage Books</h1>
-          <p>Review and manage books submitted by publishers</p>
-          <div class="header-actions">
-            <div class="search-box">
-              <i class='bx bx-search'></i>
-              <input type="text" id="bookSearch" placeholder="Search books..." onkeyup="searchBooks()">
-            </div>
-            <select id="statusFilter" onchange="filterBooks()">
-              <option value="">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="table-container">
-          <table id="bookTable">
-            <thead>
-              <tr>
-                <th>Cover</th>
-                <th>Title & Author</th>
-                <th>Category</th>
-                <th>Publisher</th>
-                <th>Status</th>
-                <th>Submitted</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="bookTableBody">
-              <!-- Books will be loaded here -->
-            </tbody>
-          </table>
-        </div>
-        
-        <div class="pagination" id="bookPagination">
-          <!-- Pagination will be loaded here -->
-        </div>
-      </section>
+<section id="books" class="section">
+  <div class="section-header">
+    <h1>Manage Books</h1>
+    <p>Review and manage books submitted by publishers</p>
+    <div class="header-actions">
+      <div class="search-box">
+        <i class='bx bx-search'></i>
+        <input type="text" id="bookSearch" placeholder="Search books..." onkeyup="searchBooks()">
+      </div>
+      <select id="statusFilter" onchange="filterBooks()">
+        <option value="">All Status</option>
+        <option value="pending">Pending</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+      </select>
+      <button class="btn-primary" onclick="loadPendingBooks()">
+        <i class='bx bx-time'></i> Pending Books
+        <span id="pendingBadge" class="status-badge status-pending" style="margin-left: 8px; display: none;">0</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Rejection Reason Modal -->
+<div id="rejectionModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeRejectionModal()">&times;</span>
+    <h2>Reject Book</h2>
+    <form id="rejectionForm">
+      <div class="form-group">
+        <label for="rejectionReason">Reason for Rejection *</label>
+        <textarea id="rejectionReason" required placeholder="Please provide a reason for rejecting this book..." style="width: 100%; height: 120px; padding: 10px; border: 1px solid var(--border); border-radius: 5px;"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="closeRejectionModal()">Cancel</button>
+        <button type="submit" class="btn-danger">Reject Book</button>
+      </div>
+    </form>
+  </div>
+</div>
+  
+  <div class="table-container">
+    <table id="bookTable">
+      <thead>
+        <tr>
+          <th>Cover</th>
+          <th>Title & Author</th>
+          <th>Category</th>
+          <th>Publisher</th>
+          <th>Status</th>
+          <th>Submitted</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="bookTableBody">
+        <!-- Books will be loaded here -->
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="pagination" id="bookPagination">
+    <!-- Pagination will be loaded here -->
+  </div>
+</section>
 
       <!-- Analytics Section -->
       <section id="analytics" class="section">
@@ -1853,128 +1875,68 @@
     }
 
     // ===== BOOK MANAGEMENT =====
-    async function loadBooks(page = 1) {
-        try {
-            currentBookPage = page;
-            
-            // Show loading state
-            const bookTableBody = document.getElementById('bookTableBody');
-            bookTableBody.innerHTML = `
-                <tr>
-                    <td colspan="7" class="loading-cell">
-                        <div class="loading-spinner"></div>
-                        Loading books...
-                    </td>
-                </tr>
-            `;
-            
-            const response = await fetch(`/api/admin/books?page=${page}&limit=${booksPerPage}&status=all`);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const data = await response.json();
-
-            if (data.success) {
-                allBooks = data.books;
-                bookTableBody.innerHTML = '';
-
-                if (data.books.length === 0) {
-                    bookTableBody.innerHTML = `
-                        <tr>
-                            <td colspan="7" class="no-data">
-                                <i class='bx bx-book-open'></i>
-                                <p>No books found</p>
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-
-                data.books.forEach(book => {
-                    const row = document.createElement('tr');
-                    
-                    // Determine status badge class
-                    let statusClass = '';
-                    let statusText = book.status ? book.status.charAt(0).toUpperCase() + book.status.slice(1) : 'Unknown';
-                    switch(book.status) {
-                        case 'approved':
-                            statusClass = 'status-approved';
-                            break;
-                        case 'pending':
-                            statusClass = 'status-pending';
-                            break;
-                        case 'rejected':
-                            statusClass = 'status-rejected';
-                            break;
-                        default:
-                            statusClass = 'status-pending';
-                    }
-                    
-                    row.innerHTML = `
-                        <td>
-                            ${book.coverImage ? 
-                                `<img src="${book.coverImage}" alt="${book.title}" class="book-cover">` : 
-                                '<div class="book-cover-placeholder"><i class="bx bx-book"></i></div>'
-                            }
-                        </td>
-                        <td>
-                            <div class="book-title">
-                                <strong>${book.title || 'Untitled'}</strong>
-                                <div style="font-size: 0.8rem; color: var(--gray); margin-top: 4px;">
-                                    by ${book.author || 'Unknown Author'}
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="category-tag">${book.category || 'Uncategorized'}</span>
-                        </td>
-                        <td>
-                            <div style="font-size: 0.9rem;">
-                                ${book.publisherName || 'Unknown Publisher'}
-                            </div>
-                        </td>
-                        <td>
-                            <span class="status-badge ${statusClass}">${statusText}</span>
-                        </td>
-                        <td>${book.createdAt ? formatDate(book.createdAt) : 'Unknown'}</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn-info" onclick="viewBook('${book._id}')" title="View Details">
-                                    <i class='bx bx-show'></i> View
-                                </button>
-                                ${book.status === 'pending' ? 
-                                    `<button class="btn-success" onclick="approveBook('${book._id}')" title="Approve Book">
-                                        <i class='bx bx-check'></i> Approve
-                                    </button>
-                                     <button class="btn-danger" onclick="showRejectionModal('${book._id}')" title="Reject Book">
-                                        <i class='bx bx-x'></i> Reject
-                                     </button>` :
-                                    `<button class="btn-warning" onclick="editBook('${book._id}')" title="Edit Book">
-                                        <i class='bx bx-edit'></i> Edit
-                                    </button>`
-                                }
-                                <button class="btn-danger" onclick="deleteBook('${book._id}')" title="Delete Book">
-                                    <i class='bx bx-trash'></i> Delete
-                                </button>
-                            </div>
-                        </td>
-                    `;
-                    bookTableBody.appendChild(row);
-                });
-
-                // Update pagination
-                updateBookPagination(data.totalPages, page);
-            } else {
-                console.error('Error loading books:', data.message);
-                showNotification('Error loading books: ' + data.message, 'error');
-            }
-        } catch (error) {
-            console.error('Error loading books:', error);
-            showNotification('Network error loading books: ' + error.message, 'error');
-        }
+async function loadBooks(page = 1, status = '') {
+  try {
+    currentBookPage = page;
+    
+    // Show loading state
+    const bookTableBody = document.getElementById('bookTableBody');
+    bookTableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="loading-cell">
+          <div class="loading-spinner"></div>
+          Loading books...
+        </td>
+      </tr>
+    `;
+    
+    let url = `/api/admin/books?page=${page}&limit=${booksPerPage}`;
+    if (status) {
+      url += `&status=${status}`;
     }
+    
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+
+    if (data.success) {
+      allBooks = data.books;
+      renderBooksTable(data.books);
+      updateBookPagination(data.totalPages, page);
+      
+      // Update pending badge
+      updatePendingBadge();
+    } else {
+      console.error('Error loading books:', data.message);
+      showNotification('Error loading books: ' + data.message, 'error');
+    }
+  } catch (error) {
+    console.error('Error loading books:', error);
+    showNotification('Network error loading books: ' + error.message, 'error');
+  }
+}
+
+async function loadPendingBooks() {
+  await loadBooks(1, 'pending');
+  document.getElementById('statusFilter').value = 'pending';
+}
+
+function updatePendingBadge() {
+  const pendingCount = allBooks.filter(book => book.status === 'pending').length;
+  const pendingBadge = document.getElementById('pendingBadge');
+  if (pendingBadge) {
+    if (pendingCount > 0) {
+      pendingBadge.textContent = pendingCount;
+      pendingBadge.style.display = 'inline-block';
+    } else {
+      pendingBadge.style.display = 'none';
+    }
+  }
+}
 
     function updateBookPagination(totalPages, currentPage) {
         const pagination = document.getElementById('bookPagination');
@@ -2000,6 +1962,103 @@
         
         pagination.innerHTML = paginationHTML;
     }
+
+    //Render books
+    function renderBooksTable(books) {
+  const bookTableBody = document.getElementById('bookTableBody');
+  bookTableBody.innerHTML = '';
+
+  if (books.length === 0) {
+    bookTableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="no-data">
+          <i class='bx bx-book-open'></i>
+          <p>No books found</p>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  books.forEach(book => {
+    const row = document.createElement('tr');
+    
+    // Determine status badge class
+    let statusClass = '';
+    let statusText = book.status ? book.status.charAt(0).toUpperCase() + book.status.slice(1) : 'Unknown';
+    switch(book.status) {
+      case 'approved':
+        statusClass = 'status-approved';
+        break;
+      case 'pending':
+        statusClass = 'status-pending';
+        break;
+      case 'rejected':
+        statusClass = 'status-rejected';
+        break;
+      default:
+        statusClass = 'status-pending';
+    }
+    
+    // Get publisher info
+    const publisherName = book.uploadedBy ? 
+      (book.uploadedBy.fullName || book.uploadedBy.email) : 
+      'Unknown Publisher';
+    
+    row.innerHTML = `
+      <td>
+        ${book.coverImage ? 
+          `<img src="${book.coverImage}" alt="${book.title}" class="book-cover" style="width: 40px; height: 60px; object-fit: cover; border-radius: 4px;">` : 
+          '<div class="book-cover-placeholder"><i class="bx bx-book"></i></div>'
+        }
+      </td>
+      <td>
+        <div class="book-title">
+          <strong>${book.title || 'Untitled'}</strong>
+          <div style="font-size: 0.8rem; color: var(--gray); margin-top: 4px;">
+            by ${book.author || 'Unknown Author'}
+          </div>
+        </div>
+      </td>
+      <td>
+        <span class="category-tag">${book.category || 'Uncategorized'}</span>
+      </td>
+      <td>
+        <div style="font-size: 0.9rem;">
+          ${publisherName}
+          ${book.uploadedBy && book.uploadedBy.role === 'publisher' && !book.uploadedBy.isApproved ? 
+            '<br><small class="status-badge status-pending" style="font-size: 0.7rem;">Unapproved Publisher</small>' : ''}
+        </div>
+      </td>
+      <td>
+        <span class="status-badge ${statusClass}">${statusText}</span>
+      </td>
+      <td>${book.createdAt ? formatDate(book.createdAt) : 'Unknown'}</td>
+      <td>
+        <div class="action-buttons">
+          <button class="btn-info" onclick="viewBook('${book._id}')" title="View Details">
+            <i class='bx bx-show'></i> View
+          </button>
+          ${book.status === 'pending' ? 
+            `<button class="btn-success" onclick="approveBook('${book._id}')" title="Approve Book">
+              <i class='bx bx-check'></i> Approve
+            </button>
+             <button class="btn-danger" onclick="showRejectionModal('${book._id}')" title="Reject Book">
+              <i class='bx bx-x'></i> Reject
+             </button>` :
+            `<button class="btn-warning" onclick="editBook('${book._id}')" title="Edit Book">
+              <i class='bx bx-edit'></i> Edit
+            </button>`
+          }
+          <button class="btn-danger" onclick="deleteBook('${book._id}')" title="Delete Book">
+            <i class='bx bx-trash'></i> Delete
+          </button>
+        </div>
+      </td>
+    `;
+    bookTableBody.appendChild(row);
+  });
+}
 
     // ===== BOOK ACTIONS =====
     async function approveBook(bookId) {
