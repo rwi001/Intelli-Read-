@@ -8,6 +8,132 @@
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/Login.css">
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+  <style>
+    /* Notification System Styles */
+    .notification-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      max-width: 350px;
+    }
+    
+    .notification {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      animation: slideIn 0.3s ease-out;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .notification::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+    }
+    
+    .notification.success {
+      border-left: 4px solid #4CAF50;
+    }
+    
+    .notification.success::before {
+      background-color: #4CAF50;
+    }
+    
+    .notification.error {
+      border-left: 4px solid #f44336;
+    }
+    
+    .notification.error::before {
+      background-color: #f44336;
+    }
+    
+    .notification.warning {
+      border-left: 4px solid #FF9800;
+    }
+    
+    .notification.warning::before {
+      background-color: #FF9800;
+    }
+    
+    .notification-icon {
+      margin-right: 0.75rem;
+      font-size: 1.5rem;
+    }
+    
+    .notification.success .notification-icon {
+      color: #4CAF50;
+    }
+    
+    .notification.error .notification-icon {
+      color: #f44336;
+    }
+    
+    .notification.warning .notification-icon {
+      color: #FF9800;
+    }
+    
+    .notification-content {
+      flex: 1;
+    }
+    
+    .notification-title {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    
+    .notification-message {
+      color: #555;
+      font-size: 0.9rem;
+    }
+    
+    .notification-close {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #999;
+      margin-left: 0.5rem;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .notification-container {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -20,6 +146,9 @@
       </button>
     </div>
   </header>
+
+  <!-- Notification Container -->
+  <div class="notification-container" id="notificationContainer"></div>
 
   <!-- main -->
   <div class="login-container">
@@ -101,6 +230,66 @@
 
   <!-- ===== JS ===== -->
   <script>
+    // Notification System
+    function showNotification(type, title, message, duration = 5000) {
+      const container = document.getElementById('notificationContainer');
+      
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      
+      let iconClass;
+      switch(type) {
+        case 'success':
+          iconClass = 'bx bx-check-circle';
+          break;
+        case 'error':
+          iconClass = 'bx bx-error-circle';
+          break;
+        case 'warning':
+          iconClass = 'bx bx-error';
+          break;
+        default:
+          iconClass = 'bx bx-info-circle';
+      }
+      
+      notification.innerHTML = `
+        <i class="${iconClass} notification-icon"></i>
+        <div class="notification-content">
+          <div class="notification-title">${title}</div>
+          <div class="notification-message">${message}</div>
+        </div>
+        <button class="notification-close">
+          <i class='bx bx-x'></i>
+        </button>
+      `;
+      
+      container.appendChild(notification);
+      
+      // Auto remove after duration
+      const timeout = setTimeout(() => {
+        if (notification.parentNode) {
+          notification.style.animation = 'slideOut 0.3s ease-out';
+          setTimeout(() => {
+            if (notification.parentNode) {
+              container.removeChild(notification);
+            }
+          }, 300);
+        }
+      }, duration);
+      
+      // Close button functionality
+      const closeBtn = notification.querySelector('.notification-close');
+      closeBtn.addEventListener('click', () => {
+        clearTimeout(timeout);
+        notification.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => {
+          if (notification.parentNode) {
+            container.removeChild(notification);
+          }
+        }, 300);
+      });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       // ===== Role Selection =====
       const roleOptions = document.querySelectorAll('.role-option');
@@ -138,7 +327,7 @@
         const selectedRole = document.querySelector('input[name="role"]:checked').value;
         
         if (!email || !password) {
-          alert('Please fill in all fields');
+          showNotification('warning', 'Missing Information', 'Please fill in all fields');
           return;
         }
 
@@ -161,7 +350,7 @@
           if (data.success) {
             // Verify that the logged-in user's role matches the selected role
             if (data.user.role !== selectedRole) {
-              alert(`❌ Please login as ${selectedRole.toUpperCase()} using the correct credentials.`);
+              showNotification('error', 'Role Mismatch', `Please login as ${selectedRole.toUpperCase()} using the correct credentials.`);
               loginBtn.textContent = originalText;
               loginBtn.disabled = false;
               return;
@@ -176,27 +365,27 @@
               'Publisher login successful! Redirecting to Publisher Dashboard...' : 
               'Login successful! Redirecting to BookScreen...';
             
-            alert(roleMessage);
+            showNotification('success', 'Login Successful', roleMessage);
             
-            // Redirect based on role
-            if (data.user.role === 'publisher') {  
-              window.location.href = '/publisher-dashboard';
-            } else {
-              window.location.href = '/bookscreen';
-            }
+            // Redirect based on role after a short delay
+            setTimeout(() => {
+              if (data.user.role === 'publisher') {  
+                window.location.href = '/publisher-dashboard';
+              } else {
+                window.location.href = '/bookscreen';
+              }
+            }, 1500);
           } else {
-            alert(data.message || 'Login failed. Please try again.');
+            showNotification('error', 'Login Failed', data.message || 'Login failed. Please try again.');
           }
         } catch (error) {
           console.error('Login error:', error);
-          alert('Network error. Please try again.');
+          showNotification('error', 'Network Error', 'Network error. Please try again.');
         } finally {
           loginBtn.textContent = originalText;
           loginBtn.disabled = false;
         }
       });
-
-      
 
       // Check if user is already logged in
       const isLoggedIn = localStorage.getItem('isLoggedIn');

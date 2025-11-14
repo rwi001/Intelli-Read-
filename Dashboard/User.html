@@ -94,8 +94,8 @@
       color: rgba(255, 255, 255, 0.8);
     }
 
-    /* Logout Dropdown */
-    .logout-dropdown {
+    /* Books Dropdown */
+    .books-dropdown {
       position: absolute;
       top: 100%;
       right: 0;
@@ -109,11 +109,11 @@
       animation: fadeIn 0.2s ease;
     }
 
-    .logout-dropdown.active {
+    .books-dropdown.active {
       display: block;
     }
 
-    .logout-dropdown::before {
+    .books-dropdown::before {
       content: '';
       position: absolute;
       top: -8px;
@@ -125,7 +125,7 @@
       border-bottom: 8px solid white;
     }
 
-    .logout-item {
+    .books-item {
       display: flex;
       align-items: center;
       padding: 10px 20px;
@@ -133,109 +133,20 @@
       transition: background 0.2s;
     }
 
-    .logout-item:hover {
+    .books-item:hover {
       background: var(--light);
     }
 
-    .logout-item i {
+    .books-item i {
       margin-right: 10px;
-      color: var(--warning);
+      color: var(--primary);
       width: 20px;
       text-align: center;
     }
 
-    .logout-item span {
+    .books-item span {
       color: var(--dark);
       font-weight: 500;
-    }
-
-    /* Logout Modal */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s;
-    }
-
-    .modal-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .modal {
-      background: white;
-      border-radius: 10px;
-      padding: 30px;
-      max-width: 400px;
-      width: 90%;
-      text-align: center;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-      transform: translateY(-20px);
-      transition: transform 0.3s;
-    }
-
-    .modal-overlay.active .modal {
-      transform: translateY(0);
-    }
-
-    .modal-icon {
-      font-size: 48px;
-      color: var(--warning);
-      margin-bottom: 15px;
-    }
-
-    .modal h3 {
-      font-size: 22px;
-      margin-bottom: 10px;
-      color: var(--dark);
-    }
-
-    .modal p {
-      color: var(--gray);
-      margin-bottom: 25px;
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 15px;
-      justify-content: center;
-    }
-
-    .btn {
-      padding: 8px 15px;
-      border-radius: 5px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      border: none;
-      transition: all 0.3s;
-    }
-
-    .btn-danger {
-      background-color: #e71212;
-      color: white;
-    }
-
-    .btn-danger:hover {
-      background-color: #e74d4d;
-    }
-
-    .btn-secondary {
-      background-color: var(--gray);
-      color: white;
-    }
-
-    .btn-secondary:hover {
-      background-color: #5a6268;
     }
 
     /* Main Container */
@@ -638,11 +549,11 @@
             <h4 id="userName">Loading...</h4>
             <p id="userRole">User</p>
           </div>
-          <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User Profile" id="userProfileImg">
-          <div class="logout-dropdown" id="logoutDropdown">
-            <div class="logout-item" id="logoutOption">
-              <i class='bx bx-log-out'></i>
-              <span>Logout</span>
+          <img src="/images/avatar.jpg" alt="User Profile" id="userProfileImg">
+          <div class="books-dropdown" id="booksDropdown">
+            <div class="books-item" id="booksOption">
+              <i class='bx bx-book'></i>
+              <span>Back to Books</span>
             </div>
           </div>
         </div>
@@ -696,7 +607,7 @@
         <!-- Profile Section -->
         <div class="profile-section">
           <div class="profile-header">
-            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Profile" class="profile-avatar">
+            <img src="/images/avatar.jpg" alt="Profile" class="profile-avatar">
             <div class="profile-details">
               <h3 id="profileName">Loading...</h3>
               <p id="profileEmail">Loading...</p>
@@ -927,7 +838,7 @@
         
         <div class="profile-section">
           <div class="profile-header">
-            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Profile" class="profile-avatar">
+            <img src="/images/avatar.jpg" alt="Profile" class="profile-avatar">
             <div class="profile-details">
               <h3 id="profileName2">Loading...</h3>
               <p id="profileEmail2">Loading...</p>
@@ -966,21 +877,6 @@
     </main>
   </div>
 
-  <!-- Logout Confirmation Modal -->
-  <div class="modal-overlay" id="logoutModal">
-    <div class="modal">
-      <div class="modal-icon">
-        <i class='bx bx-log-out'></i>
-      </div>
-      <h3>Confirm Logout</h3>
-      <p>Are you sure you want to logout from Intelli-Read?</p>
-      <div class="modal-actions">
-        <button class="btn btn-danger" id="confirmLogout">Yes, Logout</button>
-        <button class="btn btn-secondary" id="cancelLogout">Cancel</button>
-      </div>
-    </div>
-  </div>
-
   <script>
     // Global variable to store user data
     let currentUser = null;
@@ -990,6 +886,39 @@
       checkAuthAndLoadUser();
       setupEventListeners();
     });
+
+    // Set up event listeners
+    function setupEventListeners() {
+      // Toggle books dropdown when clicking on profile image
+      document.getElementById('userProfileImg').addEventListener('click', function() {
+        const dropdown = document.getElementById('booksDropdown');
+        dropdown.classList.toggle('active');
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('booksDropdown');
+        const profileImg = document.getElementById('userProfileImg');
+        
+        if (!profileImg.contains(event.target) && !dropdown.contains(event.target)) {
+          dropdown.classList.remove('active');
+        }
+      });
+
+      // Handle "Back to Books" option
+      document.getElementById('booksOption').addEventListener('click', function() {
+        goToBooksScreen();
+      });
+    }
+
+    // Navigate to books screen
+    function goToBooksScreen() {
+      // Close dropdown
+      document.getElementById('booksDropdown').classList.remove('active');
+      
+      // Redirect to books screen
+      window.location.href = '/bookscreen';
+    }
 
     // Check authentication and load user data
     async function checkAuthAndLoadUser() {
@@ -1100,80 +1029,6 @@
       });
     }
 
-    // Setup event listeners
-    function setupEventListeners() {
-      // Profile image click to show logout dropdown
-      const profileImg = document.getElementById('userProfileImg');
-      const logoutDropdown = document.getElementById('logoutDropdown');
-
-      profileImg.addEventListener('click', function(e) {
-        e.stopPropagation();
-        logoutDropdown.classList.toggle('active');
-      });
-
-      // Prevent dropdown from closing when clicking inside it
-      logoutDropdown.addEventListener('click', function(e) {
-        e.stopPropagation();
-      });
-
-      // Close dropdown when clicking elsewhere
-      document.addEventListener('click', function() {
-        logoutDropdown.classList.remove('active');
-      });
-
-      // Logout option click
-      const logoutOption = document.getElementById('logoutOption');
-      const logoutModal = document.getElementById('logoutModal');
-      const confirmLogout = document.getElementById('confirmLogout');
-      const cancelLogout = document.getElementById('cancelLogout');
-
-      logoutOption.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        logoutDropdown.classList.remove('active');
-        logoutModal.classList.add('active');
-      });
-
-      // Confirm logout
-      confirmLogout.addEventListener('click', async function() {
-        try {
-          const response = await fetch('/api/logout', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          });
-
-          const data = await response.json();
-
-          if (data.success) {
-            logoutModal.classList.remove('active');
-            showSuccess('Logging out...');
-            setTimeout(() => {
-              window.location.href = '/login';
-            }, 1000);
-          } else {
-            throw new Error(data.message);
-          }
-        } catch (error) {
-          console.error('Logout error:', error);
-          showError('Logout failed. Please try again.');
-        }
-      });
-
-      // Cancel logout
-      cancelLogout.addEventListener('click', function() {
-        logoutModal.classList.remove('active');
-      });
-
-      // Close modal when clicking outside
-      logoutModal.addEventListener('click', function(e) {
-        if (e.target === logoutModal) {
-          logoutModal.classList.remove('active');
-        }
-      });
-    }
-
     // Show section
     function showSection(sectionId) {
       // Hide all sections
@@ -1197,13 +1052,11 @@
     function showSuccess(message) {
       // You can implement a toast notification system here
       console.log('✅ ' + message);
-      alert('✅ ' + message);
     }
 
     function showError(message) {
       // You can implement a toast notification system here
       console.error('❌ ' + message);
-      alert('❌ ' + message);
     }
 
     // Format date for display
