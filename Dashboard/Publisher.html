@@ -1289,29 +1289,28 @@
     });
 
     // Load publisher data
-function loadPublisherData() {
-  // Session se publisher data get karo
-  const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user'));
-  
-  if (currentUser && currentUser.role === 'publisher' && currentUser.isApproved) {
-    currentPublisher = {
-      id: currentUser.id,
-      name: currentUser.fullName,
-      email: currentUser.email,
-      phone: currentUser.phone || 'Not provided',
-      company: currentUser.company || 'Not provided',
-      memberSince: currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleDateString() : new Date().toLocaleDateString()
-    };
-    
-    localStorage.setItem('currentPublisher', JSON.stringify(currentPublisher));
-    updatePublisherUI();
-  } else {
-    // Agar publisher approved nahi hai to login page redirect karo
-    alert('Publisher account not approved or not logged in. Redirecting to login...');
-    window.location.href = 'login.html';
-  }
-}
-
+    function loadPublisherData() {
+      // Try to get publisher data from localStorage first
+      const storedPublisher = localStorage.getItem('currentPublisher');
+      
+      if (storedPublisher) {
+        currentPublisher = JSON.parse(storedPublisher);
+        updatePublisherUI();
+      } else {
+        // If no publisher data in localStorage, create a default publisher
+        currentPublisher = {
+          id: 'publisher_' + Date.now(),
+          name: 'Demo Publisher',
+          email: 'publisher@example.com',
+          phone: '+1 234 567 8900',
+          company: 'Intelli-Read Publishing',
+          joinDate: new Date().toLocaleDateString()
+        };
+        
+        localStorage.setItem('currentPublisher', JSON.stringify(currentPublisher));
+        updatePublisherUI();
+      }
+    }
 
     // Update UI with publisher data
     function updatePublisherUI() {
@@ -1328,26 +1327,53 @@ function loadPublisherData() {
       document.getElementById('profileMemberSince').textContent = currentPublisher.joinDate;
     }
 
-   // Load publisher's books from server
-async function loadPublisherBooks() {
-  try {
-    const response = await fetch('/api/publisher/books');
-    const data = await response.json();
-    
-    if (data.success) {
-      publisherBooks = data.books;
-      updateBooksUI();
-    } else {
-      console.error('Error loading books:', data.message);
-      publisherBooks = [];
+    // Load publisher's books from localStorage
+    function loadPublisherBooks() {
+      // Get books from localStorage
+      const storedBooks = localStorage.getItem(`publisherBooks_${currentPublisher.id}`);
+      
+      if (storedBooks) {
+        publisherBooks = JSON.parse(storedBooks);
+      } else {
+        // If no books in localStorage, initialize with some sample data
+        publisherBooks = [
+          {
+            id: 'book_1',
+            title: 'The Art of Programming',
+            author: 'John Developer',
+            category: 'Technology',
+            language: 'English',
+            description: 'A comprehensive guide to programming concepts and best practices.',
+            status: 'approved',
+            dateAdded: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+            downloads: 245,
+            cover: null,
+            publisherId: currentPublisher.id,
+            publisherName: currentPublisher.name
+          },
+          {
+            id: 'book_2',
+            title: 'Business Strategies for Success',
+            author: 'Sarah Entrepreneur',
+            category: 'Business',
+            language: 'English',
+            description: 'Learn effective business strategies to grow your company.',
+            status: 'pending',
+            dateAdded: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+            downloads: 0,
+            cover: null,
+            publisherId: currentPublisher.id,
+            publisherName: currentPublisher.name
+          }
+        ];
+        
+        // Save the initial books to localStorage
+        savePublisherBooks();
+      }
+      
+      // Update UI with books data
       updateBooksUI();
     }
-  } catch (error) {
-    console.error('Error loading books:', error);
-    publisherBooks = [];
-    updateBooksUI();
-  }
-}
 
     // Update UI with books data
     function updateBooksUI() {
@@ -1361,61 +1387,27 @@ async function loadPublisherBooks() {
       loadRecentBooks();
     }
 
-    // Update dashboard statistics - Real data from server
-async function updateDashboardStats() {
-  try {
-    const response = await fetch('/api/publisher/stats');
-    const data = await response.json();
-    
-    if (data.success) {
-      // Update dashboard stats cards
-      document.getElementById('totalBooks').textContent = data.stats.totalBooks;
-      document.getElementById('approvedBooks').textContent = data.stats.approvedBooks;
-      document.getElementById('pendingBooks').textContent = data.stats.pendingBooks;
-      document.getElementById('totalDownloads').textContent = data.stats.totalDownloads.toLocaleString();
+    // Update dashboard statistics
+    function updateDashboardStats() {
+      const totalBooks = publisherBooks.length;
+      const approvedBooks = publisherBooks.filter(book => book.status === 'approved').length;
+      const pendingBooks = publisherBooks.filter(book => book.status === 'pending').length;
+      const totalDownloads = publisherBooks.reduce((sum, book) => sum + (book.downloads || 0), 0);
+      
+      document.getElementById('totalBooks').textContent = totalBooks;
+      document.getElementById('approvedBooks').textContent = approvedBooks;
+      document.getElementById('pendingBooks').textContent = pendingBooks;
+      document.getElementById('totalDownloads').textContent = totalDownloads.toLocaleString();
       
       // Update profile section stats
-      document.getElementById('profileTotalBooks').textContent = data.stats.totalBooks;
-      document.getElementById('profilePendingBooks').textContent = data.stats.pendingBooks;
-      document.getElementById('profileTotalDownloads').textContent = data.stats.totalDownloads.toLocaleString();
+      document.getElementById('profileTotalBooks').textContent = totalBooks;
+      document.getElementById('profilePendingBooks').textContent = pendingBooks;
+      document.getElementById('profileTotalDownloads').textContent = totalDownloads.toLocaleString();
       
       // Calculate approval rate
-      const approvalRate = data.stats.totalBooks > 0 ? 
-        Math.round((data.stats.approvedBooks / data.stats.totalBooks) * 100) : 0;
+      const approvalRate = totalBooks > 0 ? Math.round((approvedBooks / totalBooks) * 100) : 0;
       document.getElementById('profileApprovalRate').textContent = `${approvalRate}%`;
-    } else {
-      console.error('Error fetching stats:', data.message);
-      // Fallback to local data if API fails
-      updateStatsFromLocalData();
     }
-  } catch (error) {
-    console.error('Error fetching stats:', error);
-    // Fallback to local data if network error
-    updateStatsFromLocalData();
-  }
-}
-
-// Fallback function agar API fail ho
-function updateStatsFromLocalData() {
-  const totalBooks = publisherBooks.length;
-  const approvedBooks = publisherBooks.filter(book => book.status === 'approved').length;
-  const pendingBooks = publisherBooks.filter(book => book.status === 'pending').length;
-  const totalDownloads = publisherBooks.reduce((sum, book) => sum + (book.downloads || 0), 0);
-  
-  document.getElementById('totalBooks').textContent = totalBooks;
-  document.getElementById('approvedBooks').textContent = approvedBooks;
-  document.getElementById('pendingBooks').textContent = pendingBooks;
-  document.getElementById('totalDownloads').textContent = totalDownloads.toLocaleString();
-  
-  // Update profile section stats
-  document.getElementById('profileTotalBooks').textContent = totalBooks;
-  document.getElementById('profilePendingBooks').textContent = pendingBooks;
-  document.getElementById('profileTotalDownloads').textContent = totalDownloads.toLocaleString();
-  
-  // Calculate approval rate
-  const approvalRate = totalBooks > 0 ? Math.round((approvedBooks / totalBooks) * 100) : 0;
-  document.getElementById('profileApprovalRate').textContent = `${approvalRate}%`;
-}
 
     // Load recent books
     function loadRecentBooks() {
