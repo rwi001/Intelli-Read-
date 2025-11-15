@@ -933,21 +933,6 @@
         }
     }
 
-    /* Loading spinner */
-    .loading-spinner {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid #ffffff;
-      border-radius: 50%;
-      border-top-color: transparent;
-      animation: spin 1s ease-in-out infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
     /* Responsive */
     @media (max-width: 768px) {
       .sidebar {
@@ -1226,9 +1211,7 @@
           
           <div class="modal-actions">
             <button type="button" class="btn-secondary" onclick="resetBookForm()">Reset</button>
-            <button type="submit" class="btn-primary" id="submitBookBtn">
-              Submit Book
-            </button>
+            <button type="submit" class="btn-primary">Submit Book</button>
           </div>
         </form>
       </section>
@@ -1339,11 +1322,6 @@
     let currentPublisher = null;
     let publisherBooks = [];
 
-    // Generate unique book ID
-    function generateBookId() {
-      return 'book_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    }
-
     // Initialize the dashboard
     document.addEventListener('DOMContentLoaded', function() {
       // Get publisher data from localStorage or session
@@ -1362,44 +1340,30 @@
       });
     });
 
-    // Load publisher data with proper authentication
-    function loadPublisherData() {
-      try {
-        // For demo purposes, create a mock publisher if none exists
-        let currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user'));
-        
-        if (!currentUser) {
-          // Create a mock publisher for demo
-          currentUser = {
-            id: 'pub_' + Date.now(),
-            fullName: 'Demo Publisher',
-            email: 'publisher@example.com',
-            role: 'publisher',
-            isApproved: true,
-            phone: '+1234567890',
-            company: 'Demo Publishing House',
-            createdAt: new Date().toISOString()
-          };
-          localStorage.setItem('user', JSON.stringify(currentUser));
-        }
+    // Load publisher data
+function loadPublisherData() {
+  // Session se publisher data get karo
+  const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user'));
+  
+  if (currentUser && currentUser.role === 'publisher' && currentUser.isApproved) {
+    currentPublisher = {
+      id: currentUser.id,
+      name: currentUser.fullName,
+      email: currentUser.email,
+      phone: currentUser.phone || 'Not provided',
+      company: currentUser.company || 'Not provided',
+      memberSince: currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleDateString() : new Date().toLocaleDateString()
+    };
+    
+    localStorage.setItem('currentPublisher', JSON.stringify(currentPublisher));
+    updatePublisherUI();
+  } else {
+    // Agar publisher approved nahi hai to login page redirect karo
+    alert('Publisher account not approved or not logged in. Redirecting to login...');
+    window.location.href = 'login.html';
+  }
+}
 
-        currentPublisher = {
-          id: currentUser.id,
-          name: currentUser.fullName || currentUser.name || 'Publisher',
-          email: currentUser.email || 'Not provided',
-          phone: currentUser.phone || 'Not provided',
-          company: currentUser.company || 'Not provided',
-          memberSince: currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleDateString() : new Date().toLocaleDateString()
-        };
-        
-        localStorage.setItem('currentPublisher', JSON.stringify(currentPublisher));
-        updatePublisherUI();
-        
-      } catch (error) {
-        console.error('Error loading publisher data:', error);
-        showNotification('Error loading publisher data', 'error');
-      }
-    }
 
     // Update UI with publisher data
     function updatePublisherUI() {
@@ -1413,56 +1377,29 @@
       document.getElementById('profileEmail').textContent = currentPublisher.email;
       document.getElementById('profilePhone').textContent = currentPublisher.phone;
       document.getElementById('profileCompany').textContent = currentPublisher.company;
-      document.getElementById('profileMemberSince').textContent = currentPublisher.memberSince;
+      document.getElementById('profileMemberSince').textContent = currentPublisher.joinDate;
     }
 
-    // Load publisher's books
-    function loadPublisherBooks() {
-      try {
-        const localBooks = localStorage.getItem(`publisherBooks_${currentPublisher.id}`);
-        if (localBooks) {
-          publisherBooks = JSON.parse(localBooks);
-        } else {
-          // Create some sample books for demo
-          publisherBooks = [
-            {
-              id: generateBookId(),
-              title: "Sample Book One",
-              author: "John Author",
-              category: "Fiction",
-              language: "English",
-              description: "This is a sample book description for demonstration purposes.",
-              cover: "",
-              status: "approved",
-              dateAdded: new Date().toISOString(),
-              downloads: 150,
-              publisherId: currentPublisher.id,
-              publisherName: currentPublisher.name
-            },
-            {
-              id: generateBookId(),
-              title: "Sample Book Two",
-              author: "Jane Writer",
-              category: "Non-Fiction",
-              language: "English",
-              description: "Another sample book for testing the publisher dashboard.",
-              cover: "",
-              status: "pending",
-              dateAdded: new Date(Date.now() - 86400000).toISOString(),
-              downloads: 0,
-              publisherId: currentPublisher.id,
-              publisherName: currentPublisher.name
-            }
-          ];
-          savePublisherBooks();
-        }
-        updateBooksUI();
-      } catch (error) {
-        console.error('Error loading books:', error);
-        publisherBooks = [];
-        updateBooksUI();
-      }
+ // Load publisher's books from server
+async function loadPublisherBooks() {
+  try {
+    const response = await fetch('/api/publisher/books');
+    const data = await response.json();
+    
+    if (data.success) {
+      publisherBooks = data.books;
+      updateBooksUI();
+    } else {
+      console.error('Error loading books:', data.message);
+      publisherBooks = [];
+      updateBooksUI();
     }
+  } catch (error) {
+    console.error('Error loading books:', error);
+    publisherBooks = [];
+    updateBooksUI();
+  }
+}
 
     // Update UI with books data
     function updateBooksUI() {
@@ -1476,43 +1413,76 @@
       loadRecentBooks();
     }
 
-    // Update dashboard statistics
-    function updateDashboardStats() {
-      const totalBooks = publisherBooks.length;
-      const approvedBooks = publisherBooks.filter(book => book.status === 'approved').length;
-      const pendingBooks = publisherBooks.filter(book => book.status === 'pending').length;
-      const totalDownloads = publisherBooks.reduce((sum, book) => sum + (book.downloads || 0), 0);
-      
-      document.getElementById('totalBooks').textContent = totalBooks;
-      document.getElementById('approvedBooks').textContent = approvedBooks;
-      document.getElementById('pendingBooks').textContent = pendingBooks;
-      document.getElementById('totalDownloads').textContent = totalDownloads.toLocaleString();
+    // Update dashboard statistics - Real data from server
+async function updateDashboardStats() {
+  try {
+    const response = await fetch('/api/publisher/stats');
+    const data = await response.json();
+    
+    if (data.success) {
+      // Update dashboard stats cards
+      document.getElementById('totalBooks').textContent = data.stats.totalBooks;
+      document.getElementById('approvedBooks').textContent = data.stats.approvedBooks;
+      document.getElementById('pendingBooks').textContent = data.stats.pendingBooks;
+      document.getElementById('totalDownloads').textContent = data.stats.totalDownloads.toLocaleString();
       
       // Update profile section stats
-      document.getElementById('profileTotalBooks').textContent = totalBooks;
-      document.getElementById('profilePendingBooks').textContent = pendingBooks;
-      document.getElementById('profileTotalDownloads').textContent = totalDownloads.toLocaleString();
+      document.getElementById('profileTotalBooks').textContent = data.stats.totalBooks;
+      document.getElementById('profilePendingBooks').textContent = data.stats.pendingBooks;
+      document.getElementById('profileTotalDownloads').textContent = data.stats.totalDownloads.toLocaleString();
       
       // Calculate approval rate
-      const approvalRate = totalBooks > 0 ? 
-        Math.round((approvedBooks / totalBooks) * 100) : 0;
+      const approvalRate = data.stats.totalBooks > 0 ? 
+        Math.round((data.stats.approvedBooks / data.stats.totalBooks) * 100) : 0;
       document.getElementById('profileApprovalRate').textContent = `${approvalRate}%`;
+    } else {
+      console.error('Error fetching stats:', data.message);
+      // Fallback to local data if API fails
+      updateStatsFromLocalData();
     }
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    // Fallback to local data if network error
+    updateStatsFromLocalData();
+  }
+}
+
+// Fallback function agar API fail ho
+function updateStatsFromLocalData() {
+  const totalBooks = publisherBooks.length;
+  const approvedBooks = publisherBooks.filter(book => book.status === 'approved').length;
+  const pendingBooks = publisherBooks.filter(book => book.status === 'pending').length;
+  const totalDownloads = publisherBooks.reduce((sum, book) => sum + (book.downloads || 0), 0);
+  
+  document.getElementById('totalBooks').textContent = totalBooks;
+  document.getElementById('approvedBooks').textContent = approvedBooks;
+  document.getElementById('pendingBooks').textContent = pendingBooks;
+  document.getElementById('totalDownloads').textContent = totalDownloads.toLocaleString();
+  
+  // Update profile section stats
+  document.getElementById('profileTotalBooks').textContent = totalBooks;
+  document.getElementById('profilePendingBooks').textContent = pendingBooks;
+  document.getElementById('profileTotalDownloads').textContent = totalDownloads.toLocaleString();
+  
+  // Calculate approval rate
+  const approvalRate = totalBooks > 0 ? Math.round((approvedBooks / totalBooks) * 100) : 0;
+  document.getElementById('profileApprovalRate').textContent = `${approvalRate}%`;
+}
 
     // Load recent books
     function loadRecentBooks() {
       const recentBooksContainer = document.getElementById('recentBooks');
       recentBooksContainer.innerHTML = '';
       
-      if (publisherBooks.length === 0) {
-        recentBooksContainer.innerHTML = '<div class="no-data"><i class="bx bx-book"></i><p>No books added yet</p></div>';
-        return;
-      }
-      
       // Sort books by date added (newest first) and take the first 5
       const recentBooks = [...publisherBooks]
         .sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded))
         .slice(0, 5);
+      
+      if (recentBooks.length === 0) {
+        recentBooksContainer.innerHTML = '<div class="no-data"><i class="bx bx-book"></i><p>No books added yet</p></div>';
+        return;
+      }
       
       recentBooks.forEach(book => {
         const activityItem = document.createElement('div');
@@ -1672,10 +1642,7 @@
     // View book details
     function viewBookDetails(bookId) {
       const book = publisherBooks.find(b => b.id === bookId);
-      if (!book) {
-        showNotification('Book not found', 'error');
-        return;
-      }
+      if (!book) return;
       
       const modalContent = document.getElementById('bookModalContent');
       modalContent.innerHTML = `
@@ -1712,10 +1679,6 @@
                 <span>Date Added:</span>
                 <span>${formatDate(book.dateAdded)}</span>
               </div>
-              <div class="stat">
-                <span>Book ID:</span>
-                <span>${book.id}</span>
-              </div>
             </div>
           </div>
         </div>
@@ -1730,47 +1693,23 @@
 
     // Edit book
     function editBook(bookId) {
-      const book = publisherBooks.find(b => b.id === bookId);
-      if (!book) {
-        showNotification('Book not found', 'error');
-        return;
-      }
-      
-      showNotification(`Edit functionality for "${book.title}" would open here`, 'info');
+      // In a real app, this would open an edit form
+      showNotification('Edit book functionality would open here', 'info');
     }
 
-    // Delete book - FIXED VERSION
+    // Delete book
     function deleteBook(bookId) {
-      const book = publisherBooks.find(b => b.id === bookId);
-      if (!book) {
-        showNotification('Book not found', 'error');
-        return;
-      }
-      
-      if (!confirm(`Are you sure you want to delete "${book.title}"? This action cannot be undone.`)) {
-        return;
-      }
-
-      try {
-        // Remove from local array
+      if (confirm('Are you sure you want to delete this book? This action cannot be undone.')) {
         publisherBooks = publisherBooks.filter(book => book.id !== bookId);
-        
-        // Update local storage
         savePublisherBooks();
-        
-        // Refresh UI
         loadBooksTable();
         updateDashboardStats();
         loadRecentBooks();
-        
         showNotification('Book deleted successfully', 'success');
-      } catch (error) {
-        console.error('Error deleting book:', error);
-        showNotification('Error deleting book. Please try again.', 'error');
       }
     }
 
-    // Setup upload area - FIXED VERSION
+    // Setup upload area
     function setupUploadArea() {
       const uploadArea = document.getElementById('uploadArea');
       const coverUpload = document.getElementById('coverUpload');
@@ -1796,114 +1735,66 @@
       });
     }
 
-    // Add new book - FIXED VERSION
-    async function addNewBook() {
-      const submitBtn = document.getElementById('submitBookBtn');
-      const originalText = submitBtn.innerHTML;
+   // Add new book - REAL implementation
+async function addNewBook() {
+  try {
+    const title = document.getElementById('bookTitle').value;
+    const author = document.getElementById('bookAuthor').value;
+    const category = document.getElementById('bookCategory').value;
+    const language = document.getElementById('bookLanguage').value;
+    const description = document.getElementById('bookDescription').value;
+    
+    // Basic validation
+    if (!title || !author || !category || !language || !description) {
+      showNotification('Please fill in all required fields', 'error');
+      return;
+    }
+
+    showNotification('Submitting book for approval...', 'info');
+
+    // Create book data
+    const bookData = {
+      title,
+      author,
+      category,
+      language,
+      description
+    };
+
+    const response = await fetch('/api/publisher/books', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(bookData)
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      showNotification('Book submitted successfully! Waiting for admin approval.', 'success');
       
-      try {
-        // Show loading state
-        submitBtn.innerHTML = '<div class="loading-spinner"></div> Submitting...';
-        submitBtn.disabled = true;
-        
-        const title = document.getElementById('bookTitle').value.trim();
-        const author = document.getElementById('bookAuthor').value.trim();
-        const category = document.getElementById('bookCategory').value;
-        const language = document.getElementById('bookLanguage').value;
-        const description = document.getElementById('bookDescription').value.trim();
-        const coverFile = document.getElementById('coverUpload').files[0];
-        const bookFile = document.getElementById('bookFile').files[0];
-        
-        // Enhanced validation
-        if (!title || !author || !category || !language || !description) {
-          throw new Error('Please fill in all required fields');
-        }
-        
-        if (!bookFile) {
-          throw new Error('Please upload a PDF file');
-        }
-
-        if (bookFile && !bookFile.type.includes('pdf')) {
-          throw new Error('Please upload a valid PDF file');
-        }
-
-        // Generate unique book ID
-        const bookId = generateBookId();
-        
-        // Create book data with publisher association
-        const bookData = {
-          id: bookId,
-          title,
-          author,
-          category,
-          language,
-          description,
-          publisherId: currentPublisher.id,
-          publisherName: currentPublisher.name,
-          status: 'pending',
-          dateAdded: new Date().toISOString(),
-          downloads: 0,
-          cover: ''
-        };
-
-        // Handle cover image
-        if (coverFile) {
-          try {
-            const coverDataUrl = await readFileAsDataURL(coverFile);
-            bookData.cover = coverDataUrl;
-          } catch (error) {
-            console.error('Error processing cover image:', error);
-            // Continue without cover image
-          }
-        }
-
-        showNotification('Submitting book for approval...', 'info');
-
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        // Add to local array
-        publisherBooks.unshift(bookData);
-        
-        // Save to local storage
-        savePublisherBooks();
-        
-        showNotification('Book submitted successfully! Waiting for admin approval.', 'success');
-        
-        // Reset form
-        resetBookForm();
-        
-        // Refresh UI
-        updateBooksUI();
-        
-        // Switch to My Books section
-        showSection('myBooks');
-
-      } catch (error) {
-        console.error('Error adding book:', error);
-        showNotification(error.message, 'error');
-      } finally {
-        // Reset button state
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-      }
+      // Reset form
+      resetBookForm();
+      
+      // Reload books list
+      loadPublisherBooks();
+      
+      // Switch to My Books section
+      showSection('myBooks');
+    } else {
+      showNotification('Error: ' + data.message, 'error');
     }
 
-    // Helper function to read file as data URL
-    function readFileAsDataURL(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(new Error('Failed to read file'));
-        reader.readAsDataURL(file);
-      });
-    }
+  } catch (error) {
+    console.error('Error adding book:', error);
+    showNotification('Error submitting book. Please try again.', 'error');
+  }
+}
 
     // Save publisher's books to localStorage
     function savePublisherBooks() {
-      if (currentPublisher && currentPublisher.id) {
-        localStorage.setItem(`publisherBooks_${currentPublisher.id}`, JSON.stringify(publisherBooks));
-      }
+      localStorage.setItem(`publisherBooks_${currentPublisher.id}`, JSON.stringify(publisherBooks));
     }
 
     // Reset book form
@@ -1946,13 +1837,6 @@
 
     // Show notification
     function showNotification(message, type) {
-      // Remove existing notifications
-      document.querySelectorAll('.notification').forEach(notification => {
-        if (document.body.contains(notification)) {
-          document.body.removeChild(notification);
-        }
-      });
-      
       // Create notification element
       const notification = document.createElement('div');
       notification.className = `notification ${type}`;
@@ -1984,12 +1868,8 @@
 
     // Format date
     function formatDate(dateString) {
-      try {
-        const options = { year: 'numeric', month: 'short', day: 'numeric' };
-        return new Date(dateString).toLocaleDateString(undefined, options);
-      } catch (error) {
-        return 'Invalid Date';
-      }
+      const options = { year: 'numeric', month: 'short', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString(undefined, options);
     }
 
     // Logout function
@@ -2005,13 +1885,10 @@
         logoutMessageContainer.textContent = "Successfully logged out!";
         logoutMessageContainer.style.backgroundColor = '#28a745';
         
-        // Clear user data
-        localStorage.removeItem('user');
-        sessionStorage.removeItem('user');
-        localStorage.removeItem('currentPublisher');
-        
         // Redirect to login page after a delay
         setTimeout(() => {
+          // In a real app, this would redirect to the login page
+          // alert('Redirecting to login page...');
           window.location.href = 'login.html';
         }, 1000);
       }, 1500);
