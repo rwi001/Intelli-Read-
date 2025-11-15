@@ -2267,7 +2267,7 @@ function updatePendingBadge() {
                         </div>
                         
                         <div style="margin: 1rem 0; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
-                            <strong>Publisher:</strong> ${book.publisherName || 'Unknown'}
+                            <strong>Publisher:</strong> ${book.uploadedBy ? (book.uploadedBy.fullName || book.uploadedBy.email) : 'Unknown'}
                         </div>
                         
                         ${book.description ? `
@@ -2281,6 +2281,14 @@ function updatePendingBadge() {
                             <div class="stat">
                                 <label>Language:</label>
                                 <span>${book.language || 'English'}</span>
+                            </div>
+                            <div class="stat">
+                                <label>Downloads:</label>
+                                <span>${book.downloadCount || 0}</span>
+                            </div>
+                            <div class="stat">
+                                <label>Reads:</label>
+                                <span>${book.readCount || 0}</span>
                             </div>
                             <div class="stat">
                                 <label>Submitted:</label>
@@ -2313,15 +2321,6 @@ function updatePendingBadge() {
                     <button class="btn-primary" onclick="editBook('${book._id}')">
                         <i class='bx bx-edit'></i> Edit
                     </button>
-                    ${book.isFeatured ? `
-                        <button class="btn-secondary" onclick="unfeatureBook('${book._id}')">
-                            <i class='bx bx-star'></i> Unfeature
-                        </button>
-                    ` : `
-                        <button class="btn-success" onclick="featureBook('${book._id}')">
-                            <i class='bx bx-star'></i> Feature
-                        </button>
-                    `}
                     <button class="btn-danger" onclick="deleteBook('${book._id}')">
                         <i class='bx bx-trash'></i> Delete
                     </button>
@@ -2334,14 +2333,6 @@ function updatePendingBadge() {
 
     async function editBook(bookId) {
         showNotification('Edit book functionality coming soon!', 'info');
-    }
-
-    async function featureBook(bookId) {
-        showNotification('Feature book functionality coming soon!', 'info');
-    }
-
-    async function unfeatureBook(bookId) {
-        showNotification('Unfeature book functionality coming soon!', 'info');
     }
 
     async function deleteBook(bookId) {
@@ -2659,8 +2650,6 @@ function updatePendingBadge() {
     window.rejectBook = rejectBook;
     window.viewBook = viewBook;
     window.editBook = editBook;
-    window.featureBook = featureBook;
-    window.unfeatureBook = unfeatureBook;
     window.deleteBook = deleteBook;
     window.exportUsers = exportUsers;
     window.saveSettings = saveSettings;

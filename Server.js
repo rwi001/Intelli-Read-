@@ -5,6 +5,8 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const nodemailer = require('nodemailer');
+const multer = require('multer');
+const fs = require('fs');
 
 // ===== MIDDLEWARE SETUP =====
 // Parse JSON bodies first
@@ -13,6 +15,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Serve static files
 app.use(express.static(path.join(__dirname)));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Session middleware
 app.use(session({
@@ -34,6 +37,57 @@ app.use((req, res, next) => {
     return res.sendStatus(200);
   }
   next();
+});
+
+// ===== FILE UPLOAD CONFIGURATION =====
+// Ensure upload directories exist
+const createUploadDirs = () => {
+  const dirs = ['uploads/covers', 'uploads/books'];
+  dirs.forEach(dir => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  });
+};
+createUploadDirs();
+
+// Configure multer for file storage
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    if (file.fieldname === 'coverImage') {
+      cb(null, 'uploads/covers/');
+    } else if (file.fieldname === 'bookFile') {
+      cb(null, 'uploads/books/');
+    }
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  },
+  fileFilter: function (req, file, cb) {
+    if (file.fieldname === 'coverImage') {
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only image files are allowed for cover'), false);
+      }
+    } else if (file.fieldname === 'bookFile') {
+      if (file.mimetype === 'application/pdf') {
+        cb(null, true);
+      } else {
+        cb(new Error('Only PDF files are allowed'), false);
+      }
+    } else {
+      cb(new Error('Unexpected field'), false);
+    }
+  }
 });
 
 // ===== EMAIL CONFIGURATION =====
@@ -601,12 +655,15 @@ const bookSchema = new mongoose.Schema({
   author: { type: String, required: true },
   description: { type: String },
   category: { type: String },
-  status: { type: String, default: 'pending' }, // pending, approved, rejected
+  language: { type: String, default: 'English' },
+  status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
   coverImage: { type: String },
-  bookFile: { type: String }, // PDF or EPUB file path
+  bookFile: { type: String }, // PDF file path
   uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   downloadCount: { type: Number, default: 0 },
   readCount: { type: Number, default: 0 },
+  adminNotes: { type: String },
+  reviewedAt: { type: Date },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -659,7 +716,6 @@ async function createDefaultAdmins() {
         password: 'teamArpit$04',
         role: 'admin'
       }
-      
     ];
 
     for (const adminData of defaultAdmins) {
@@ -1149,32 +1205,28 @@ app.get("/api/admin/books", requireAdminAuth, async (req, res) => {
   }
 });
 
-// Update Book Status (Enhanced with admin notes)
-app.put("/api/admin/books/:id", requireAdminAuth, async (req, res) => {
+// Update Book Status
+app.put("/api/admin/books/:id/status", requireAdminAuth, async (req, res) => {
   try {
     const bookId = req.params.id;
     const { status, adminNotes } = req.body;
 
-    if (!['pending', 'approved', 'rejected'].includes(status)) {
+    if (!['approved', 'rejected'].includes(status)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid status'
+        message: 'Invalid status. Must be "approved" or "rejected"'
       });
-    }
-
-    const updateData = { status };
-    if (adminNotes) {
-      updateData.adminNotes = adminNotes;
-    }
-    if (status !== 'pending') {
-      updateData.reviewedAt = new Date();
     }
 
     const book = await Book.findByIdAndUpdate(
       bookId,
-      updateData,
+      { 
+        status,
+        adminNotes: adminNotes || '',
+        reviewedAt: new Date()
+      },
       { new: true }
-    ).populate('uploadedBy', 'fullName email role isApproved');
+    ).populate('uploadedBy', 'fullName email');
 
     if (!book) {
       return res.status(404).json({
@@ -1183,6 +1235,8 @@ app.put("/api/admin/books/:id", requireAdminAuth, async (req, res) => {
       });
     }
 
+    console.log(`✅ Book ${status}: ${book.title} by ${book.uploadedBy.email}`);
+
     res.json({
       success: true,
       message: `Book ${status} successfully`,
@@ -1190,10 +1244,10 @@ app.put("/api/admin/books/:id", requireAdminAuth, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Update book error:', error);
+    console.error('❌ Update book status error:', error);
     res.status(500).json({ 
       success: false,
-      message: 'Error updating book' 
+      message: 'Error updating book status' 
     });
   }
 });
@@ -1759,7 +1813,7 @@ app.get("/api/books/:id/download", requireUserAuth, async (req, res) => {
     res.json({
       success: true,
       message: 'Download started',
-      downloadUrl: `/books/files/${book.bookFile}`,
+      downloadUrl: `/uploads/books/${path.basename(book.bookFile)}`,
       book: {
         title: book.title,
         author: book.author
@@ -1797,31 +1851,12 @@ app.get("/api/publisher/books", requirePublisherAuth, async (req, res) => {
 
     const totalBooks = await Book.countDocuments(query);
 
-    // Get stats for publisher dashboard
-    const pendingCount = await Book.countDocuments({ 
-      uploadedBy: req.session.user.id, 
-      status: 'pending' 
-    });
-    const approvedCount = await Book.countDocuments({ 
-      uploadedBy: req.session.user.id, 
-      status: 'approved' 
-    });
-    const totalDownloads = await Book.aggregate([
-      { $match: { uploadedBy: req.session.user.id } },
-      { $group: { _id: null, total: { $sum: '$downloadCount' } } }
-    ]);
-
     res.json({
       success: true,
       books,
       totalPages: Math.ceil(totalBooks / limit),
       currentPage: page,
-      totalBooks,
-      stats: {
-        pending: pendingCount,
-        approved: approvedCount,
-        totalDownloads: totalDownloads[0]?.total || 0
-      }
+      totalBooks
     });
 
   } catch (error) {
@@ -1829,259 +1864,6 @@ app.get("/api/publisher/books", requirePublisherAuth, async (req, res) => {
     res.status(500).json({ 
       success: false,
       message: 'Error fetching your books' 
-    });
-  }
-});
-
-// ===== BOOK APPROVAL ROUTES =====
-
-// Get books for approval (Admin)
-app.get("/api/admin/books/pending", requireAdminAuth, async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-
-    const pendingBooks = await Book.find({ status: 'pending' })
-      .populate('uploadedBy', 'fullName email')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-
-    const totalPending = await Book.countDocuments({ status: 'pending' });
-
-    res.json({
-      success: true,
-      books: pendingBooks,
-      totalPages: Math.ceil(totalPending / limit),
-      currentPage: page,
-      totalPending
-    });
-  } catch (error) {
-    console.error('❌ Get pending books error:', error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Error fetching pending books' 
-    });
-  }
-});
-
-// Approve/Reject Book (Admin)
-app.put("/api/admin/books/:id/status", requireAdminAuth, async (req, res) => {
-  try {
-    const bookId = req.params.id;
-    const { status, adminNotes } = req.body;
-
-    if (!['approved', 'rejected'].includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid status. Must be "approved" or "rejected"'
-      });
-    }
-
-    const book = await Book.findByIdAndUpdate(
-      bookId,
-      { 
-        status,
-        adminNotes: adminNotes || '',
-        reviewedAt: new Date()
-      },
-      { new: true }
-    ).populate('uploadedBy', 'fullName email');
-
-    if (!book) {
-      return res.status(404).json({
-        success: false,
-        message: 'Book not found'
-      });
-    }
-
-    console.log(`✅ Book ${status}: ${book.title} by ${book.uploadedBy.email}`);
-
-    res.json({
-      success: true,
-      message: `Book ${status} successfully`,
-      book
-    });
-
-  } catch (error) {
-    console.error('❌ Update book status error:', error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Error updating book status' 
-    });
-  }
-});
-
-// Get book details for admin
-app.get("/api/admin/books/:id", requireAdminAuth, async (req, res) => {
-  try {
-    const bookId = req.params.id;
-
-    const book = await Book.findById(bookId)
-      .populate('uploadedBy', 'fullName email role isApproved');
-
-    if (!book) {
-      return res.status(404).json({
-        success: false,
-        message: 'Book not found'
-      });
-    }
-
-    res.json({
-      success: true,
-      book
-    });
-
-  } catch (error) {
-    console.error('❌ Get book details error:', error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Error fetching book details' 
-    });
-  }
-});
-
-// Add New Book (Publisher) - With file upload
-app.post("/api/publisher/books", requirePublisherAuth, async (req, res) => {
-  try {
-    const { title, author, description, category } = req.body;
-    
-    if (!title || !author) {
-      return res.status(400).json({
-        success: false,
-        message: 'Title and author are required'
-      });
-    }
-
-    // File upload handling (simplified - actual me multer use karo)
-    const coverImage = req.files?.coverImage ? `/uploads/covers/${req.files.coverImage.name}` : null;
-    const bookFile = req.files?.bookFile ? `/uploads/books/${req.files.bookFile.name}` : null;
-
-    const newBook = new Book({
-      title,
-      author,
-      description,
-      category,
-      coverImage,
-      bookFile,
-      uploadedBy: req.session.user.id,
-      status: 'pending'
-    });
-
-    await newBook.save();
-
-    // Send notification email to admin (optional)
-    console.log(`📚 New book submitted for approval: "${title}" by ${req.session.user.email}`);
-
-    res.status(201).json({
-      success: true,
-      message: 'Book submitted successfully. Waiting for admin approval.',
-      book: newBook
-    });
-
-  } catch (error) {
-    console.error('❌ Add book error:', error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Error adding book' 
-    });
-  }
-});
-
-// Get books for approval (Admin)
-app.get("/api/admin/books/pending", requireAdminAuth, async (req, res) => {
-  try {
-    const pendingBooks = await Book.find({ status: 'pending' })
-      .populate('uploadedBy', 'fullName email')
-      .sort({ createdAt: -1 });
-
-    res.json({
-      success: true,
-      books: pendingBooks
-    });
-  } catch (error) {
-    console.error('❌ Get pending books error:', error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Error fetching pending books' 
-    });
-  }
-});
-
-// Update Book (Publisher only)
-app.put("/api/publisher/books/:id", requirePublisherAuth, async (req, res) => {
-  try {
-    const bookId = req.params.id;
-    const { title, author, description, category, coverImage, bookFile } = req.body;
-
-    // Check if book exists and belongs to the publisher
-    const book = await Book.findOne({ _id: bookId, uploadedBy: req.session.user.id });
-    
-    if (!book) {
-      return res.status(404).json({
-        success: false,
-        message: 'Book not found or you do not have permission to edit it'
-      });
-    }
-
-    // Update book fields
-    if (title) book.title = title;
-    if (author) book.author = author;
-    if (description) book.description = description;
-    if (category) book.category = category;
-    if (coverImage) book.coverImage = coverImage;
-    if (bookFile) book.bookFile = bookFile;
-    
-    // Reset status to pending if significant changes were made
-    if (title || author) {
-      book.status = 'pending';
-    }
-
-    await book.save();
-
-    res.json({
-      success: true,
-      message: 'Book updated successfully',
-      book
-    });
-
-  } catch (error) {
-    console.error('❌ Update book error:', error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Error updating book' 
-    });
-  }
-});
-
-// Delete Book (Publisher only)
-app.delete("/api/publisher/books/:id", requirePublisherAuth, async (req, res) => {
-  try {
-    const bookId = req.params.id;
-
-    // Check if book exists and belongs to the publisher
-    const book = await Book.findOne({ _id: bookId, uploadedBy: req.session.user.id });
-    
-    if (!book) {
-      return res.status(404).json({
-        success: false,
-        message: 'Book not found or you do not have permission to delete it'
-      });
-    }
-
-    await Book.findByIdAndDelete(bookId);
-
-    res.json({
-      success: true,
-      message: 'Book deleted successfully'
-    });
-
-  } catch (error) {
-    console.error('❌ Delete book error:', error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Error deleting book' 
     });
   }
 });
@@ -2131,6 +1913,227 @@ app.get("/api/publisher/stats", requirePublisherAuth, async (req, res) => {
   }
 });
 
+// Add New Book (Publisher) - With file upload
+app.post("/api/publisher/books", requirePublisherAuth, upload.fields([
+  { name: 'coverImage', maxCount: 1 },
+  { name: 'bookFile', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const { title, author, description, category, language } = req.body;
+    
+    if (!title || !author || !category) {
+      return res.status(400).json({
+        success: false,
+        message: 'Title, author, and category are required'
+      });
+    }
+
+    // Check if book file was uploaded
+    if (!req.files || !req.files.bookFile) {
+      return res.status(400).json({
+        success: false,
+        message: 'Book file (PDF) is required'
+      });
+    }
+
+    const newBook = new Book({
+      title,
+      author,
+      description,
+      category,
+      language: language || 'English',
+      coverImage: req.files.coverImage ? `/uploads/covers/${req.files.coverImage[0].filename}` : null,
+      bookFile: `/uploads/books/${req.files.bookFile[0].filename}`,
+      uploadedBy: req.session.user.id,
+      status: 'pending'
+    });
+
+    await newBook.save();
+
+    // Populate the uploadedBy field for response
+    await newBook.populate('uploadedBy', 'fullName email');
+
+    console.log(`📚 New book submitted for approval: "${title}" by ${req.session.user.email}`);
+
+    res.status(201).json({
+      success: true,
+      message: 'Book submitted successfully. Waiting for admin approval.',
+      book: newBook
+    });
+
+  } catch (error) {
+    console.error('❌ Add book error:', error);
+    
+    // Clean up uploaded files if book creation fails
+    if (req.files) {
+      Object.values(req.files).forEach(files => {
+        files.forEach(file => {
+          fs.unlink(file.path, (err) => {
+            if (err) console.error('Error deleting file:', err);
+          });
+        });
+      });
+    }
+    
+    res.status(500).json({ 
+      success: false,
+      message: 'Error adding book: ' + error.message
+    });
+  }
+});
+
+// Update Book (Publisher only)
+app.put("/api/publisher/books/:id", requirePublisherAuth, async (req, res) => {
+  try {
+    const bookId = req.params.id;
+    const { title, author, description, category } = req.body;
+
+    // Check if book exists and belongs to the publisher
+    const book = await Book.findOne({ _id: bookId, uploadedBy: req.session.user.id });
+    
+    if (!book) {
+      return res.status(404).json({
+        success: false,
+        message: 'Book not found or you do not have permission to edit it'
+      });
+    }
+
+    // Update book fields
+    if (title) book.title = title;
+    if (author) book.author = author;
+    if (description) book.description = description;
+    if (category) book.category = category;
+    
+    // Reset status to pending if significant changes were made
+    if (title || author) {
+      book.status = 'pending';
+    }
+
+    await book.save();
+
+    res.json({
+      success: true,
+      message: 'Book updated successfully',
+      book
+    });
+
+  } catch (error) {
+    console.error('❌ Update book error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error updating book' 
+    });
+  }
+});
+
+// Delete Book (Publisher only)
+app.delete("/api/publisher/books/:id", requirePublisherAuth, async (req, res) => {
+  try {
+    const bookId = req.params.id;
+
+    // Check if book exists and belongs to the publisher
+    const book = await Book.findOne({ _id: bookId, uploadedBy: req.session.user.id });
+    
+    if (!book) {
+      return res.status(404).json({
+        success: false,
+        message: 'Book not found or you do not have permission to delete it'
+      });
+    }
+
+    // Delete associated files
+    if (book.coverImage) {
+      const coverPath = path.join(__dirname, book.coverImage);
+      fs.unlink(coverPath, (err) => {
+        if (err) console.error('Error deleting cover image:', err);
+      });
+    }
+    
+    if (book.bookFile) {
+      const bookPath = path.join(__dirname, book.bookFile);
+      fs.unlink(bookPath, (err) => {
+        if (err) console.error('Error deleting book file:', err);
+      });
+    }
+
+    await Book.findByIdAndDelete(bookId);
+
+    res.json({
+      success: true,
+      message: 'Book deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('❌ Delete book error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error deleting book' 
+    });
+  }
+});
+
+// ===== BOOK APPROVAL ROUTES =====
+
+// Get books for approval (Admin)
+app.get("/api/admin/books/pending", requireAdminAuth, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const pendingBooks = await Book.find({ status: 'pending' })
+      .populate('uploadedBy', 'fullName email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const totalPending = await Book.countDocuments({ status: 'pending' });
+
+    res.json({
+      success: true,
+      books: pendingBooks,
+      totalPages: Math.ceil(totalPending / limit),
+      currentPage: page,
+      totalPending
+    });
+  } catch (error) {
+    console.error('❌ Get pending books error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error fetching pending books' 
+    });
+  }
+});
+
+// Get book details for admin
+app.get("/api/admin/books/:id", requireAdminAuth, async (req, res) => {
+  try {
+    const bookId = req.params.id;
+
+    const book = await Book.findById(bookId)
+      .populate('uploadedBy', 'fullName email role isApproved');
+
+    if (!book) {
+      return res.status(404).json({
+        success: false,
+        message: 'Book not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      book
+    });
+
+  } catch (error) {
+    console.error('❌ Get book details error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error fetching book details' 
+    });
+  }
+});
+
 // ===== PASSWORD RESET ROUTES ===== 
 
 // Store OTPs temporarily (in production, use Redis or database)
@@ -2138,7 +2141,7 @@ const otpStore = new Map();
 
 // Generate random OTP - 4 digits
 function generateOTP() {
-  return Math.floor(1000 + Math.random() * 9000).toString(); // This generates 4-digit OTP
+  return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
 // Function to send OTP email
@@ -2550,6 +2553,7 @@ app.get("/", (req, res) => {
 app.get("/login", (req, res) => {
   res.sendFile(path.join(__dirname, "Login.html"));
 });
+
 app.get("/user", (req, res) => {
   res.sendFile(path.join(__dirname, "User.html"));
 });
@@ -2565,6 +2569,7 @@ app.get("/admin", (req, res) => {
 app.get("/books", (req, res) => {
   res.sendFile(path.join(__dirname, "Books.html"));
 });
+
 app.get("/bookscreen", (req, res) => {
   res.sendFile(path.join(__dirname, "BookScreen.html"));
 });
@@ -2572,7 +2577,6 @@ app.get("/bookscreen", (req, res) => {
 app.get("/forgotpassword", (req, res) => {
   res.sendFile(path.join(__dirname, "ForgotPass.html"));
 });
-
 
 // Publisher Dashboard
 app.get("/publisher-dashboard", requirePublisherAuth, (req, res) => {
@@ -2602,6 +2606,17 @@ app.use((req, res) => {
 // Error handling middleware
 app.use((error, req, res, next) => {
   console.error('🚨 Server error:', error);
+  
+  // Handle multer errors
+  if (error instanceof multer.MulterError) {
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({
+        success: false,
+        message: 'File too large. Maximum size is 10MB.'
+      });
+    }
+  }
+  
   res.status(500).json({ 
     success: false,
     message: 'Internal server error'
@@ -2624,5 +2639,6 @@ app.listen(PORT, () => {
   console.log("📚 User roles: User (Auto-approved), Publisher (Requires Admin Approval)");
   console.log("🔐 Authentication: Session-based with publisher approval system");
   console.log("📊 Analytics: Login tracking, download/read counts");
+  console.log("📁 File upload: Enabled for book covers and PDFs");
   console.log("🐛 Debug endpoints: /api/debug/users, /api/debug/admins");
 });
