@@ -1826,7 +1826,7 @@
       currentBookFile = null;
     }
 
-    // Show section
+    // Show section - FIXED VERSION
     function showSection(sectionId) {
       document.querySelectorAll('.section').forEach(section => {
         section.classList.remove('active');
@@ -1837,7 +1837,15 @@
       });
       
       document.getElementById(sectionId).classList.add('active');
-      event.currentTarget.classList.add('active');
+      
+      // Find and activate the corresponding menu item
+      const menuItems = document.querySelectorAll('.menu-item');
+      for (let item of menuItems) {
+        if (item.getAttribute('onclick') && item.getAttribute('onclick').includes(sectionId)) {
+          item.classList.add('active');
+          break;
+        }
+      }
     }
 
     // Open modal
