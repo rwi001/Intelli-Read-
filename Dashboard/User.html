@@ -51,6 +51,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
 
     .header-left h1 {
@@ -151,6 +153,17 @@
       font-weight: 500;
     }
 
+    /* Mobile menu toggle */
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+
     /* Main Container */
     .admin-container {
       display: flex;
@@ -159,14 +172,18 @@
     }
 
     /* Sidebar */
-    .sidebar {
-      width: 260px;
-      background: white;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-      height: calc(100vh - 70px);
-      position: fixed;
-      overflow-y: auto;
-    }
+   .sidebar {
+  width: 260px;
+  background: white;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  height: calc(100vh - 70px);
+  position: fixed;
+  left: 0; /* यह line जोड़ें */
+  top: 70px; /* Header के नीचे शुरू हो */
+  overflow-y: auto;
+  transition: transform 0.3s ease;
+  z-index: 999;
+}
 
     .sidebar-header {
       padding: 2rem 1.5rem;
@@ -210,10 +227,26 @@
 
     /* Main Content */
     .main-content {
-      flex: 1;
-      margin-left: 260px;
-      padding: 2rem;
-    }
+  flex: 1;
+  margin-left: 260px;
+  padding: 2rem;
+  transition: margin-left 0.3s ease;
+}
+@media (max-width: 991px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: 280px;
+  }
+  
+  .sidebar.active {
+    transform: translateX(0);
+  }
+  
+  .main-content {
+    margin-left: 0;
+    padding: 1rem;
+  }
+}
 
     .section {
       display: none;
@@ -304,6 +337,7 @@
       border-radius: 12px;
       padding: 1.5rem;
       box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      margin-bottom: 2rem;
     }
 
     .activity-list {
@@ -330,9 +364,12 @@
       align-items: center;
       justify-content: center;
       color: white;
+      flex-shrink: 0;
     }
 
     .activity-icon.book { background: var(--success); }
+    .activity-icon.reading { background: var(--primary); }
+    .activity-icon.download { background: var(--warning); }
 
     /* Profile Section */
     .profile-section {
@@ -382,6 +419,11 @@
       color: var(--success);
     }
 
+    .status-pending {
+      background-color: rgba(255, 193, 7, 0.2);
+      color: #856404;
+    }
+
     .profile-info-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -401,6 +443,87 @@
     .info-value {
       font-size: 16px;
       font-weight: 500;
+    }
+
+    /* Books Grid */
+    .books-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .book-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .book-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .book-cover {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .book-info h4 {
+      margin-bottom: 8px;
+      color: var(--dark);
+    }
+
+    .book-info p {
+      color: var(--gray);
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .book-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--gray);
+      margin-bottom: 15px;
+    }
+
+    .book-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .book-btn {
+      flex: 1;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .book-btn:hover {
+      background: var(--secondary);
+    }
+
+    .book-btn.secondary {
+      background: var(--gray);
+    }
+
+    .book-btn.secondary:hover {
+      background: #5a6268;
     }
 
     /* Downloads Section */
@@ -437,6 +560,7 @@
       justify-content: center;
       color: white;
       font-size: 1.5rem;
+      flex-shrink: 0;
     }
 
     .download-info {
@@ -497,24 +621,247 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Responsive */
-    @media (max-width: 768px) {
+     .empty-state-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            padding: 40px 30px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .empty-state-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .empty-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            color: #6a11cb;
+        }
+
+        h2 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            color: #7f8c8d;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border-radius: 50px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: #6a11cb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #5a0db3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(106, 17, 203, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: #6a11cb;
+            border: 2px solid #6a11cb;
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(106, 17, 203, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .empty-state-container {
+                padding: 30px 20px;
+            }
+            
+            .empty-icon {
+                font-size: 60px;
+            }
+            
+            h2 {
+                font-size: 24px;
+            }
+            
+            p {
+                font-size: 15px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 15px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-buttons .btn {
+                width: 100%;
+                max-width: 250px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .empty-state-container {
+                padding: 25px 15px;
+            }
+            
+            h2 {
+                font-size: 22px;
+            }
+            
+            p {
+                font-size: 14px;
+            }
+        }
+
+    /* Notification */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      z-index: 10000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      max-width: 300px;
+      transform: translateX(400px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .notification.success {
+      background: linear-gradient(135deg, #28a745, #20c997);
+    }
+
+    .notification.error {
+      background: linear-gradient(135deg, #dc3545, #e83e8c);
+    }
+
+    .notification.warning {
+      background: linear-gradient(135deg, #ffc107, #fd7e14);
+    }
+
+    .notification.info {
+      background: linear-gradient(135deg, #17a2b8, #6f42c1);
+    }
+
+
+    
+
+    /* ===== RESPONSIVE STYLES ===== */
+    
+    /* Large screens (1200px and up) */
+    @media (min-width: 1200px) {
+      .admin-container {
+        max-width: 1400px;
+        margin: 70px auto 0;
+      }
+    }
+
+    /* Medium screens (992px to 1199px) */
+    @media (max-width: 1199px) {
       .sidebar {
+        width: 220px;
+      }
+      
+      .main-content {
+        margin-left: 220px;
+        padding: 1.5rem;
+      }
+      
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .books-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* Tablets (768px to 991px) */
+    @media (max-width: 991px) {
+      .admin-header {
+        padding: 1rem;
+      }
+      
+      .header-content {
+        flex-wrap: wrap;
+      }
+      
+      .header-left h1 {
+        font-size: 1.3rem;
+      }
+      
+      .admin-info {
+        margin-top: 0.5rem;
         width: 100%;
-        height: auto;
-        position: relative;
+        justify-content: flex-end;
+      }
+      
+      .sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+      }
+      
+      .sidebar.active {
+        transform: translateX(0);
       }
       
       .main-content {
         margin-left: 0;
+        padding: 1rem;
       }
       
-      .admin-container {
-        flex-direction: column;
+      .mobile-menu-toggle {
+        display: block;
       }
       
       .stats-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      
+      .stat-card {
+        padding: 1.25rem;
       }
       
       .profile-header {
@@ -527,14 +874,179 @@
         margin-bottom: 15px;
       }
       
+      .books-grid {
+        grid-template-columns: 1fr;
+      }
+      
       .downloads-grid {
         grid-template-columns: 1fr;
       }
+      
+      .activity-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        text-align: left;
+      }
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    /* Mobile phones (576px to 767px) */
+    @media (max-width: 767px) {
+      .admin-header {
+        padding: 0.75rem 1rem;
+      }
+      
+      .header-left h1 {
+        font-size: 1.2rem;
+      }
+      
+      .user-info {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.5rem;
+      }
+      
+      .user-details {
+        text-align: right;
+      }
+      
+      .main-content {
+        padding: 1rem 0.75rem;
+      }
+      
+      .section-header h1 {
+        font-size: 1.5rem;
+      }
+      
+      .section-header p {
+        font-size: 0.9rem;
+      }
+      
+      .stat-card {
+        padding: 1rem;
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+      }
+      
+      .stat-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+      }
+      
+      .stat-info h3 {
+        font-size: 1.5rem;
+      }
+      
+      .stat-info p {
+        font-size: 0.85rem;
+      }
+      
+      .profile-section {
+        padding: 1.25rem;
+      }
+      
+      .profile-info-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .book-actions {
+        flex-direction: column;
+      }
+      
+      .download-item {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .download-info {
+        text-align: center;
+      }
+      
+      .download-actions {
+        justify-content: center;
+      }
+    }
+
+    /* Small phones (up to 575px) */
+    @media (max-width: 575px) {
+      .admin-header {
+        padding: 0.5rem;
+      }
+      
+      .header-left h1 {
+        font-size: 1.1rem;
+      }
+      
+      .main-content {
+        padding: 0.75rem 0.5rem;
+      }
+      
+      .section-header h1 {
+        font-size: 1.3rem;
+      }
+      
+      .stats-grid {
+        gap: 0.75rem;
+      }
+      
+      .stat-card {
+        padding: 0.75rem;
+      }
+      
+      .activity-section {
+        padding: 1rem;
+      }
+      
+      .profile-section {
+        padding: 1rem;
+      }
+      
+      .books-grid {
+        gap: 1rem;
+      }
+      
+      .book-card {
+        padding: 1rem;
+      }
+      
+      .downloads-grid {
+        gap: 1rem;
+      }
+      
+      .download-item {
+        padding: 1rem;
+      }
+      
+      .notification {
+        max-width: 90%;
+        left: 5%;
+        right: 5%;
+      }
+    }
+
+    /* Extra small devices (landscape phones, 480px and down) */
+    @media (max-width: 480px) {
+      .sidebar {
+        width: 100%;
+      }
+      
+      .sidebar-header {
+        padding: 1.5rem 1rem;
+      }
+      
+      .menu-item {
+        padding: 1rem;
+      }
+      
+      .stats-grid {
+        gap: 0.5rem;
+      }
+      
+      .profile-info-grid {
+        gap: 1rem;
+      }
     }
   </style>
 </head>
@@ -542,6 +1054,9 @@
   <!-- Header -->
   <header class="admin-header">
     <div class="header-content">
+      <button class="mobile-menu-toggle" onclick="toggleSidebar()">
+        <i class='bx bx-menu'></i>
+      </button>
       <div class="header-left">
         <h1>📚 Intelli-Read User</h1>
       </div>
@@ -565,7 +1080,7 @@
 
   <div class="admin-container">
     <!-- Sidebar -->
-    <nav class="sidebar">
+    <nav class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <h2>User Panel</h2>
       </div>
@@ -609,7 +1124,7 @@
         <!-- Profile Section -->
         <div class="profile-section">
           <div class="profile-header">
-            <img src="/images/avatar.jpg" alt="Profile" class="profile-avatar">
+            <img src="/images/avatar.jpg" alt="Profile" class="profile-avatar" id="profileAvatar">
             <div class="profile-details">
               <h3 id="profileName">Loading...</h3>
               <p id="profileEmail">Loading...</p>
@@ -748,8 +1263,8 @@
         
         <div class="activity-section">
           <h3>Your Book Collection</h3>
-          <div id="myBooksList">
-            <p>Loading your book collection...</p>
+          <div class="books-grid" id="myBooksList">
+            <!-- Books will be loaded here -->
           </div>
         </div>
       </section>
@@ -763,8 +1278,8 @@
         
         <div class="activity-section">
           <h3>Your Reading List</h3>
-          <div id="readingListContent">
-            <p>Loading your reading list...</p>
+          <div class="books-grid" id="readingListContent">
+            <!-- Reading list books will be loaded here -->
           </div>
         </div>
       </section>
@@ -811,7 +1326,7 @@
         <div class="activity-section">
           <h3>Your Downloads</h3>
           <div class="downloads-grid" id="downloadsList">
-            <p>Loading your downloads...</p>
+            <!-- Downloads will be loaded here -->
           </div>
         </div>
       </section>
@@ -825,8 +1340,8 @@
         
         <div class="activity-section">
           <h3>Your Reading History</h3>
-          <div id="readingHistoryContent">
-            <p>Loading your reading history...</p>
+          <div class="activity-list" id="readingHistoryContent">
+            <!-- Reading history will be loaded here -->
           </div>
         </div>
       </section>
@@ -840,7 +1355,7 @@
         
         <div class="profile-section">
           <div class="profile-header">
-            <img src="/images/avatar.jpg" alt="Profile" class="profile-avatar">
+            <img src="/images/avatar.jpg" alt="Profile" class="profile-avatar" id="profileAvatar2">
             <div class="profile-details">
               <h3 id="profileName2">Loading...</h3>
               <p id="profileEmail2">Loading...</p>
@@ -882,12 +1397,61 @@
   <script>
     // Global variable to store user data
     let currentUser = null;
+    let userStats = null;
+    let userBooks = null;
+    let userReadingList = null;
+    let userDownloads = null;
+    let userHistory = null;
 
     // Initialize the dashboard
     document.addEventListener('DOMContentLoaded', function() {
       checkAuthAndLoadUser();
       setupEventListeners();
+      setupResponsiveBehavior();
     });
+
+    // Set up responsive behavior
+    function setupResponsiveBehavior() {
+      // Auto-close sidebar when clicking on a menu item on mobile
+      const menuItems = document.querySelectorAll('.menu-item');
+      menuItems.forEach(item => {
+        item.addEventListener('click', function() {
+          if (window.innerWidth <= 991) {
+            toggleSidebar(false);
+          }
+        });
+      });
+      
+      // Close sidebar when clicking outside on mobile
+      document.addEventListener('click', function(event) {
+        const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.querySelector('.mobile-menu-toggle');
+        
+        if (window.innerWidth <= 991 && 
+            sidebar.classList.contains('active') && 
+            !sidebar.contains(event.target) && 
+            !menuToggle.contains(event.target)) {
+          toggleSidebar(false);
+        }
+      });
+      
+      // Handle window resize
+      window.addEventListener('resize', function() {
+        if (window.innerWidth > 991) {
+          // Ensure sidebar is visible on larger screens
+          document.getElementById('sidebar').classList.remove('active');
+        }
+      });
+    }
+
+    function toggleSidebar(forceState) {
+      const sidebar = document.getElementById('sidebar');
+      if (forceState !== undefined) {
+        sidebar.classList.toggle('active', forceState);
+      } else {
+        sidebar.classList.toggle('active');
+      }
+    }
 
     // Set up event listeners
     function setupEventListeners() {
@@ -925,67 +1489,182 @@
     // Check authentication and load user data
     async function checkAuthAndLoadUser() {
       try {
+        showLoadingState();
+        
         const response = await fetch('/api/auth/status');
         const data = await response.json();
 
         if (data.success && data.isLoggedIn && data.user) {
           currentUser = data.user;
-          await loadUserData();
-          await loadUserStats();
+          await loadAllUserData();
         } else {
           // Redirect to login if not authenticated
           window.location.href = '/login';
         }
       } catch (error) {
         console.error('Error checking authentication:', error);
-        showError('Failed to verify authentication. Please login again.');
+        showNotification('Failed to verify authentication. Please login again.', 'error');
         setTimeout(() => {
           window.location.href = '/login';
         }, 2000);
       }
     }
 
-    // Load user data from server
-    async function loadUserData() {
+    // Load all user data
+    async function loadAllUserData() {
+      try {
+        // Load user profile data
+        await loadUserProfile();
+        
+        // Load user statistics
+        await loadUserStats();
+        
+        // Load user books
+        await loadUserBooks();
+        
+        // Load reading list
+        await loadReadingList();
+        
+        // Load downloads
+        await loadDownloads();
+        
+        // Load reading history
+        await loadReadingHistory();
+        
+        // Populate all data in UI
+        populateAllData();
+        
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        showNotification('Failed to load user data', 'error');
+      }
+    }
+
+    // Load user profile data
+    async function loadUserProfile() {
       try {
         const response = await fetch('/api/user/profile');
         const data = await response.json();
 
         if (data.success && data.user) {
           currentUser = { ...currentUser, ...data.user };
-          populateUserData();
         } else {
-          throw new Error('Failed to load user data');
+          throw new Error('Failed to load user profile');
         }
       } catch (error) {
-        console.error('Error loading user data:', error);
-        showError('Failed to load user data');
+        console.error('Error loading user profile:', error);
+        throw error;
       }
     }
 
     // Load user statistics
     async function loadUserStats() {
       try {
-        // Simulate loading user stats - you can replace this with actual API calls
-        setTimeout(() => {
-          document.getElementById('totalBooks').textContent = '12';
-          document.getElementById('readBooks').textContent = '8';
-          document.getElementById('readingBooks').textContent = '3';
-          document.getElementById('readingHours').textContent = '24.5';
-          
-          document.getElementById('myBooksTotal').textContent = '12';
-          document.getElementById('myBooksRead').textContent = '8';
-          document.getElementById('myBooksReading').textContent = '3';
-        }, 1000);
+        const response = await fetch('/api/user/stats');
+        const data = await response.json();
+
+        if (data.success) {
+          userStats = data.stats;
+        } else {
+          throw new Error('Failed to load user statistics');
+        }
       } catch (error) {
         console.error('Error loading user stats:', error);
+        // Set default empty stats
+        userStats = {
+          totalBooks: 0,
+          readBooks: 0,
+          readingBooks: 0,
+          readingHours: 0,
+          totalDownloads: 0,
+          availableDownloads: 0,
+          expiringDownloads: 0
+        };
       }
+    }
+
+    // Load user books
+    async function loadUserBooks() {
+      try {
+        const response = await fetch('/api/user/books');
+        const data = await response.json();
+
+        if (data.success) {
+          userBooks = data.books || [];
+        } else {
+          userBooks = [];
+        }
+      } catch (error) {
+        console.error('Error loading user books:', error);
+        userBooks = [];
+      }
+    }
+
+    // Load reading list
+    async function loadReadingList() {
+      try {
+        const response = await fetch('/api/user/reading-list');
+        const data = await response.json();
+
+        if (data.success) {
+          userReadingList = data.readingList || [];
+        } else {
+          userReadingList = [];
+        }
+      } catch (error) {
+        console.error('Error loading reading list:', error);
+        userReadingList = [];
+      }
+    }
+
+    // Load downloads
+    async function loadDownloads() {
+      try {
+        const response = await fetch('/api/user/downloads');
+        const data = await response.json();
+
+        if (data.success) {
+          userDownloads = data.downloads || [];
+        } else {
+          userDownloads = [];
+        }
+      } catch (error) {
+        console.error('Error loading downloads:', error);
+        userDownloads = [];
+      }
+    }
+
+    // Load reading history
+    async function loadReadingHistory() {
+      try {
+        const response = await fetch('/api/user/history');
+        const data = await response.json();
+
+        if (data.success) {
+          userHistory = data.history || [];
+        } else {
+          userHistory = [];
+        }
+      } catch (error) {
+        console.error('Error loading reading history:', error);
+        userHistory = [];
+      }
+    }
+
+    // Populate all data in the UI
+    function populateAllData() {
+      if (!currentUser) return;
+
+      populateUserData();
+      populateStatsData();
+      populateBooksData();
+      populateReadingListData();
+      populateDownloadsData();
+      populateHistoryData();
     }
 
     // Populate user data in the UI
     function populateUserData() {
-      if (!currentUser) return;
-
       // Header
       document.getElementById('userName').textContent = currentUser.fullName || 'User';
       document.getElementById('userRole').textContent = currentUser.role ? 
@@ -1001,11 +1680,18 @@
       document.getElementById('infoEmail').textContent = currentUser.email || 'No email';
       document.getElementById('infoRole').textContent = currentUser.role ? 
         currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1) : 'User';
-      document.getElementById('infoStatus').textContent = currentUser.isApproved ? 'ACTIVE' : 'PENDING';
+      document.getElementById('infoStatus').textContent = currentUser.isActive !== false ? 'ACTIVE' : 'INACTIVE';
       document.getElementById('infoMemberSince').textContent = currentUser.createdAt ? 
-        new Date(currentUser.createdAt).toLocaleDateString() : 'Unknown';
+        formatDate(currentUser.createdAt) : 'Unknown';
       document.getElementById('infoLastLogin').textContent = currentUser.lastLogin ? 
-        new Date(currentUser.lastLogin).toLocaleString() : 'Never';
+        formatDateTime(currentUser.lastLogin) : 'Never';
+
+      // Profile images
+      if (currentUser.profileImage) {
+        document.getElementById('profileAvatar').src = currentUser.profileImage;
+        document.getElementById('profileAvatar2').src = currentUser.profileImage;
+        document.getElementById('userProfileImg').src = currentUser.profileImage;
+      }
 
       // Profile Section
       document.getElementById('profileName2').textContent = currentUser.fullName || 'User';
@@ -1017,17 +1703,220 @@
       document.getElementById('profileEmailAddress').textContent = currentUser.email || 'No email';
       document.getElementById('profileUserRole').textContent = currentUser.role ? 
         currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1) : 'User';
-      document.getElementById('profileAccountStatus').textContent = currentUser.isApproved ? 'ACTIVE' : 'PENDING';
+      document.getElementById('profileAccountStatus').textContent = currentUser.isActive !== false ? 'ACTIVE' : 'INACTIVE';
       document.getElementById('profileMemberSince').textContent = currentUser.createdAt ? 
-        new Date(currentUser.createdAt).toLocaleDateString() : 'Unknown';
+        formatDate(currentUser.createdAt) : 'Unknown';
       document.getElementById('profileLastLogin').textContent = currentUser.lastLogin ? 
-        new Date(currentUser.lastLogin).toLocaleString() : 'Never';
+        formatDateTime(currentUser.lastLogin) : 'Never';
 
       // Update status badges
       const statusBadges = document.querySelectorAll('.status-badge');
       statusBadges.forEach(badge => {
-        badge.textContent = currentUser.isApproved ? 'ACTIVE' : 'PENDING';
-        badge.className = currentUser.isApproved ? 'status-badge status-active' : 'status-badge status-pending';
+        badge.textContent = currentUser.isActive !== false ? 'ACTIVE' : 'INACTIVE';
+        badge.className = currentUser.isActive !== false ? 'status-badge status-active' : 'status-badge status-pending';
+      });
+    }
+
+    // Populate statistics data
+    function populateStatsData() {
+      if (!userStats) return;
+
+      // Dashboard stats
+      document.getElementById('totalBooks').textContent = userStats.totalBooks || 0;
+      document.getElementById('readBooks').textContent = userStats.readBooks || 0;
+      document.getElementById('readingBooks').textContent = userStats.readingBooks || 0;
+      document.getElementById('readingHours').textContent = userStats.readingHours || 0;
+      
+      // My Books stats
+      document.getElementById('myBooksTotal').textContent = userStats.totalBooks || 0;
+      document.getElementById('myBooksRead').textContent = userStats.readBooks || 0;
+      document.getElementById('myBooksReading').textContent = userStats.readingBooks || 0;
+      
+      // Downloads stats
+      document.getElementById('totalDownloads').textContent = userStats.totalDownloads || 0;
+      document.getElementById('availableDownloads').textContent = userStats.availableDownloads || 0;
+      document.getElementById('expiringDownloads').textContent = userStats.expiringDownloads || 0;
+    }
+
+    // Populate books data
+    function populateBooksData() {
+      const booksContainer = document.getElementById('myBooksList');
+      
+      if (!userBooks || userBooks.length === 0) {
+        booksContainer.innerHTML = `
+          <div class="empty-state">
+            <i class='bx bx-book-open'></i>
+            <p>No books in your collection yet</p>
+            <button class="book-btn" onclick="goToBooksScreen()" style="margin-top: 1rem;">
+              <i class='bx bx-book'></i> Browse Books
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      booksContainer.innerHTML = userBooks.map(book => `
+        <div class="book-card">
+          <img src="${book.coverImage || '/images/book-placeholder.jpg'}" alt="${book.title}" class="book-cover">
+          <div class="book-info">
+            <h4>${book.title || 'Untitled'}</h4>
+            <p>by ${book.author || 'Unknown Author'}</p>
+            <div class="book-meta">
+              <span>${book.category || 'Uncategorized'}</span>
+              <span>${book.pages || 'N/A'} pages</span>
+            </div>
+            <div class="book-actions">
+              <button class="book-btn" onclick="readBook('${book._id}')">
+                <i class='bx bx-book-reader'></i> Read
+              </button>
+              <button class="book-btn secondary" onclick="removeFromCollection('${book._id}')">
+                <i class='bx bx-trash'></i> Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Populate reading list data
+    function populateReadingListData() {
+      const readingListContainer = document.getElementById('readingListContent');
+      
+      if (!userReadingList || userReadingList.length === 0) {
+        readingListContainer.innerHTML = `
+          <div class="empty-state">
+            <i class='bx bx-list-check'></i>
+            <p>Your reading list is empty</p>
+            <button class="book-btn" onclick="goToBooksScreen()" style="margin-top: 1rem;">
+              <i class='bx bx-book'></i> Add Books
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      readingListContainer.innerHTML = userReadingList.map(book => `
+        <div class="book-card">
+          <img src="${book.coverImage || '/images/book-placeholder.jpg'}" alt="${book.title}" class="book-cover">
+          <div class="book-info">
+            <h4>${book.title || 'Untitled'}</h4>
+            <p>by ${book.author || 'Unknown Author'}</p>
+            <div class="book-meta">
+              <span>${book.category || 'Uncategorized'}</span>
+              <span>${book.pages || 'N/A'} pages</span>
+            </div>
+            <div class="book-actions">
+              <button class="book-btn" onclick="readBook('${book._id}')">
+                <i class='bx bx-book-reader'></i> Read Now
+              </button>
+              <button class="book-btn secondary" onclick="removeFromReadingList('${book._id}')">
+                <i class='bx bx-trash'></i> Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Populate downloads data
+    function populateDownloadsData() {
+      const downloadsContainer = document.getElementById('downloadsList');
+      
+      if (!userDownloads || userDownloads.length === 0) {
+        downloadsContainer.innerHTML = `
+          <div class="empty-state">
+            <i class='bx bx-download'></i>
+            <p>No downloads yet</p>
+            <button class="book-btn" onclick="goToBooksScreen()" style="margin-top: 1rem;">
+              <i class='bx bx-book'></i> Browse Books
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      downloadsContainer.innerHTML = userDownloads.map(download => `
+        <div class="download-item">
+          <div class="download-icon">
+            <i class='bx bx-book'></i>
+          </div>
+          <div class="download-info">
+            <h4>${download.bookTitle || 'Unknown Book'}</h4>
+            <p>Downloaded on ${formatDate(download.downloadedAt)}</p>
+            <div class="download-meta">
+              <span>Format: ${download.format || 'PDF'}</span>
+              <span>Size: ${download.fileSize || 'N/A'}</span>
+            </div>
+          </div>
+          <div class="download-actions">
+            <button class="download-btn" onclick="openDownload('${download._id}')">
+              <i class='bx bx-folder-open'></i> Open
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Populate history data
+    function populateHistoryData() {
+      const historyContainer = document.getElementById('readingHistoryContent');
+      
+      if (!userHistory || userHistory.length === 0) {
+        historyContainer.innerHTML = `
+          <div class="empty-state">
+            <i class='bx bx-history'></i>
+            <p>No reading history yet</p>
+            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Start reading to see your history here</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Recent Activity in Dashboard
+      const recentActivityContainer = document.getElementById('recentActivity');
+      recentActivityContainer.innerHTML = userHistory.slice(0, 5).map(activity => `
+        <div class="activity-item">
+          <div class="activity-icon ${activity.type === 'download' ? 'download' : activity.type === 'reading' ? 'reading' : 'book'}">
+            <i class='bx bx-${getActivityIcon(activity.type)}'></i>
+          </div>
+          <div class="activity-details">
+            <h4>${activity.description || 'Activity'}</h4>
+            <p>${formatDateTime(activity.timestamp)}</p>
+          </div>
+        </div>
+      `).join('');
+
+      // Full History in History Section
+      historyContainer.innerHTML = userHistory.map(activity => `
+        <div class="activity-item">
+          <div class="activity-icon ${activity.type === 'download' ? 'download' : activity.type === 'reading' ? 'reading' : 'book'}">
+            <i class='bx bx-${getActivityIcon(activity.type)}'></i>
+          </div>
+          <div class="activity-details">
+            <h4>${activity.description || 'Activity'}</h4>
+            <p>${formatDateTime(activity.timestamp)}</p>
+            ${activity.duration ? `<span style="font-size: 0.8rem; color: var(--success);">Duration: ${activity.duration}</span>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Helper function to get activity icon
+    function getActivityIcon(type) {
+      const icons = {
+        'reading': 'book-reader',
+        'download': 'download',
+        'completed': 'check-circle',
+        'bookmark': 'bookmark'
+      };
+      return icons[type] || 'book';
+    }
+
+    // Show loading state
+    function showLoadingState() {
+      const loadingElements = document.querySelectorAll('#totalBooks, #readBooks, #readingBooks, #readingHours, #myBooksTotal, #myBooksRead, #myBooksReading');
+      loadingElements.forEach(el => {
+        el.innerHTML = '<div class="loading-spinner"></div>';
       });
     }
 
@@ -1050,21 +1939,143 @@
       event.currentTarget.classList.add('active');
     }
 
-    // Utility functions for notifications
-    function showSuccess(message) {
-      // You can implement a toast notification system here
-      console.log('✅ ' + message);
+    // Book actions
+    async function readBook(bookId) {
+      try {
+        showNotification('Opening book...', 'info');
+        // Implement book reading functionality
+        window.location.href = `/read/${bookId}`;
+      } catch (error) {
+        console.error('Error opening book:', error);
+        showNotification('Failed to open book', 'error');
+      }
     }
 
-    function showError(message) {
-      // You can implement a toast notification system here
-      console.error('❌ ' + message);
+    async function removeFromCollection(bookId) {
+      if (confirm('Are you sure you want to remove this book from your collection?')) {
+        try {
+          const response = await fetch(`/api/user/books/${bookId}`, {
+            method: 'DELETE'
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            showNotification('Book removed from collection', 'success');
+            // Reload books data
+            await loadUserBooks();
+            populateBooksData();
+          } else {
+            throw new Error(data.message);
+          }
+        } catch (error) {
+          console.error('Error removing book:', error);
+          showNotification('Failed to remove book', 'error');
+        }
+      }
+    }
+
+    async function removeFromReadingList(bookId) {
+      if (confirm('Are you sure you want to remove this book from your reading list?')) {
+        try {
+          const response = await fetch(`/api/user/reading-list/${bookId}`, {
+            method: 'DELETE'
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            showNotification('Book removed from reading list', 'success');
+            // Reload reading list data
+            await loadReadingList();
+            populateReadingListData();
+          } else {
+            throw new Error(data.message);
+          }
+        } catch (error) {
+          console.error('Error removing from reading list:', error);
+          showNotification('Failed to remove from reading list', 'error');
+        }
+      }
+    }
+
+    async function openDownload(downloadId) {
+      try {
+        showNotification('Opening download...', 'info');
+        // Implement download opening functionality
+        window.open(`/downloads/${downloadId}`, '_blank');
+      } catch (error) {
+        console.error('Error opening download:', error);
+        showNotification('Failed to open download', 'error');
+      }
+    }
+
+    // Notification system
+    function showNotification(message, type = 'info') {
+      // Remove existing notifications
+      const existingNotifications = document.querySelectorAll('.notification');
+      existingNotifications.forEach(notification => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      });
+      
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.innerHTML = `
+        <div class="notification-content">
+          <i class='bx ${getNotificationIcon(type)}'></i>
+          <span>${message}</span>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      // Add show class after a delay for animation
+      setTimeout(() => {
+        notification.classList.add('show');
+      }, 100);
+      
+      // Auto remove after 5 seconds
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+          }
+        }, 300);
+      }, 5000);
+    }
+
+    function getNotificationIcon(type) {
+      const icons = {
+        'success': 'bx-check-circle',
+        'error': 'bx-error-circle',
+        'warning': 'bx-error',
+        'info': 'bx-info-circle'
+      };
+      return icons[type] || 'bx-info-circle';
     }
 
     // Format date for display
     function formatDate(dateString) {
-      const options = { year: 'numeric', month: 'short', day: 'numeric' };
-      return new Date(dateString).toLocaleDateString(undefined, options);
+      if (!dateString) return 'Unknown';
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    }
+
+    function formatDateTime(dateString) {
+      if (!dateString) return 'Unknown';
+      return new Date(dateString).toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
     }
   </script>
 </body>
