@@ -6,6 +6,7 @@
   <title>Admin Dashboard | Intelli-Read</title>
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
   <style>
     * {
       margin: 0;
@@ -2164,50 +2165,50 @@ function updatePendingBadge() {
         }
     }
 
-    // Handle rejection form submission
-    document.getElementById('rejectionForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        if (!currentRejectBookId) return;
-        
-        const reason = document.getElementById('rejectionReason').value;
-        if (!reason.trim()) {
-            showNotification('Please provide a reason for rejection', 'error');
-            return;
-        }
-        
-        await rejectBook(currentRejectBookId, reason);
-    });
-
-    async function rejectBook(bookId, reason) {
-        try {
-            showNotification('Rejecting book...', 'info');
-            
-            const response = await fetch(`/api/admin/books/${bookId}/status`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ 
-                    status: 'rejected',
-                    adminNotes: reason 
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                showNotification('Book rejected successfully!', 'success');
-                loadBooks(currentBookPage);
-                closeRejectionModal();
-            } else {
-                showNotification('Error: ' + data.message, 'error');
-            }
-        } catch (error) {
-            console.error('Error rejecting book:', error);
-            showNotification('Error rejecting book', 'error');
-        }
+    // Handle rejection form submission - UPDATED VERSION
+document.getElementById('rejectionForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    if (!currentRejectBookId) return;
+    
+    const reason = document.getElementById('rejectionReason').value;
+    if (!reason.trim()) {
+        showNotification('Please provide a reason for rejection', 'error');
+        return;
     }
+    
+    await rejectBook(currentRejectBookId, reason);
+});
+
+async function rejectBook(bookId, reason) {
+    try {
+        showNotification('Rejecting book and removing files...', 'info');
+        
+        const response = await fetch(`/api/admin/books/${bookId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                status: 'rejected',
+                adminNotes: reason 
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showNotification('Book rejected and files removed successfully!', 'success');
+            loadBooks(currentBookPage);
+            closeRejectionModal();
+        } else {
+            showNotification('Error: ' + data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error rejecting book:', error);
+        showNotification('Error rejecting book', 'error');
+    }
+}
 
     async function viewBook(bookId) {
         try {
@@ -2335,36 +2336,37 @@ function updatePendingBadge() {
         showNotification('Edit book functionality coming soon!', 'info');
     }
 
-    async function deleteBook(bookId) {
-        const book = allBooks.find(b => b._id === bookId);
-        if (!book) return;
-        
-        if (confirm(`Are you sure you want to delete "${book.title}"? This action cannot be undone.`)) {
-            try {
-                showNotification('Deleting book...', 'info');
-                
-                const response = await fetch(`/api/admin/books/${bookId}`, {
-                    method: 'DELETE'
-                });
+    // Delete book - UPDATED VERSION
+async function deleteBook(bookId) {
+    const book = allBooks.find(b => b._id === bookId);
+    if (!book) return;
+    
+    if (confirm(`Are you sure you want to delete "${book.title}"? This will permanently remove the book and all associated files. This action cannot be undone.`)) {
+        try {
+            showNotification('Deleting book and files...', 'info');
+            
+            const response = await fetch(`/api/admin/books/${bookId}`, {
+                method: 'DELETE'
+            });
 
-                const data = await response.json();
+            const data = await response.json();
 
-                if (data.success) {
-                    showNotification('Book deleted successfully!', 'success');
-                    loadBooks(currentBookPage);
-                    loadDashboardSummary();
-                    // Close modal if open
-                    const modal = document.getElementById('bookModal');
-                    if (modal) modal.style.display = 'none';
-                } else {
-                    showNotification('Error: ' + data.message, 'error');
-                }
-            } catch (error) {
-                console.error('Error deleting book:', error);
-                showNotification('Error deleting book', 'error');
+            if (data.success) {
+                showNotification('Book and files deleted successfully!', 'success');
+                loadBooks(currentBookPage);
+                loadDashboardSummary();
+                // Close modal if open
+                const modal = document.getElementById('bookModal');
+                if (modal) modal.style.display = 'none';
+            } else {
+                showNotification('Error: ' + data.message, 'error');
             }
+        } catch (error) {
+            console.error('Error deleting book:', error);
+            showNotification('Error deleting book', 'error');
         }
     }
+}
 
     // ===== SEARCH AND FILTER =====
     function searchUsers() {

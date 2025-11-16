@@ -1216,7 +1216,7 @@ app.get("/api/admin/books", requireAdminAuth, async (req, res) => {
   }
 });
 
-// Update Book Status (with improved file deletion for rejection)
+// Update Book Status (with file deletion for rejection)
 app.put("/api/admin/books/:id/status", requireAdminAuth, async (req, res) => {
   try {
     const bookId = req.params.id;
@@ -1240,12 +1240,7 @@ app.put("/api/admin/books/:id/status", requireAdminAuth, async (req, res) => {
 
     // If status is changing to rejected, delete files
     if (status === 'rejected' && book.status !== 'rejected') {
-      console.log(`🗑️ Rejecting book, deleting files for: ${book.title}`);
-      const deletionSuccess = await deleteBookFiles(book);
-      
-      if (!deletionSuccess) {
-        console.log('⚠️ Some files could not be deleted, but continuing with status update');
-      }
+      await deleteBookFiles(book);
     }
 
     // Update book status
@@ -1274,7 +1269,7 @@ app.put("/api/admin/books/:id/status", requireAdminAuth, async (req, res) => {
   }
 });
 
-// Delete Book (Admin - with improved file deletion)
+// Delete Book (Admin - with file deletion)
 app.delete("/api/admin/books/:id", requireAdminAuth, async (req, res) => {
   try {
     const bookId = req.params.id;
@@ -1288,19 +1283,13 @@ app.delete("/api/admin/books/:id", requireAdminAuth, async (req, res) => {
       });
     }
 
-    console.log(`🗑️ Admin deleting book and files: ${book.title}`);
-    
     // Delete associated files
-    const deletionSuccess = await deleteBookFiles(book);
-    
-    if (!deletionSuccess) {
-      console.log('⚠️ Some files could not be deleted, but continuing with database deletion');
-    }
+    await deleteBookFiles(book);
 
     // Delete book from database
     await Book.findByIdAndDelete(bookId);
 
-    console.log(`✅ Book and files deleted: ${book.title}`);
+    console.log('✅ Book and files deleted:', book.title);
 
     res.json({
       success: true,
@@ -2062,7 +2051,7 @@ app.put("/api/publisher/books/:id", requirePublisherAuth, async (req, res) => {
   }
 });
 
-// Delete Book (Publisher only - with improved file deletion)
+// Delete Book (Publisher only - with file deletion)
 app.delete("/api/publisher/books/:id", requirePublisherAuth, async (req, res) => {
   try {
     const bookId = req.params.id;
@@ -2077,19 +2066,13 @@ app.delete("/api/publisher/books/:id", requirePublisherAuth, async (req, res) =>
       });
     }
 
-    console.log(`🗑️ Publisher deleting book and files: ${book.title}`);
-
     // Delete associated files
-    const deletionSuccess = await deleteBookFiles(book);
-    
-    if (!deletionSuccess) {
-      console.log('⚠️ Some files could not be deleted, but continuing with database deletion');
-    }
+    await deleteBookFiles(book);
 
     // Delete book from database
     await Book.findByIdAndDelete(bookId);
 
-    console.log(`✅ Book deleted by publisher: ${book.title}`);
+    console.log('✅ Book deleted by publisher:', book.title);
 
     res.json({
       success: true,
@@ -2420,64 +2403,45 @@ app.post("/api/forgot-password/verify-otp", async (req, res) => {
 });
 
 
-// Improved file deletion function
+// Function to delete files safely
 async function deleteFile(filePath) {
   try {
-    if (!filePath) {
-      console.log('⚠️ No file path provided for deletion');
-      return false;
+    if (filePath) {
+      const fullPath = path.join(__dirname, filePath);
+      await fs.access(fullPath); // Check if file exists
+      await fs.unlink(fullPath);
+      console.log('✅ File deleted successfully:', filePath);
+      return true;
     }
-
-    // Remove leading slash if present to make path relative
-    const cleanPath = filePath.startsWith('/') ? filePath.substring(1) : filePath;
-    const fullPath = path.join(__dirname, cleanPath);
-    
-    // Check if file exists
-    if (!fs.existsSync(fullPath)) {
-      console.log(`⚠️ File not found, skipping deletion: ${cleanPath}`);
-      return false;
-    }
-
-    // Delete the file
-    await fs.promises.unlink(fullPath);
-    console.log(`✅ File deleted successfully: ${cleanPath}`);
-    return true;
+    return false;
   } catch (error) {
     if (error.code === 'ENOENT') {
-      console.log(`⚠️ File not found, skipping deletion: ${filePath}`);
+      console.log('⚠️ File not found, skipping deletion:', filePath);
     } else {
-      console.error(`❌ Error deleting file ${filePath}:`, error.message);
+      console.error('❌ Error deleting file:', error.message);
     }
     return false;
   }
 }
 
-// Improved book files deletion function
+// Function to delete book files (cover and PDF)
 async function deleteBookFiles(book) {
   try {
-    console.log(`🗑️ Starting file deletion for book: ${book.title}`);
-    
     const deletePromises = [];
     
     if (book.coverImage) {
-      console.log(`📸 Deleting cover image: ${book.coverImage}`);
       deletePromises.push(deleteFile(book.coverImage));
     }
     
     if (book.bookFile) {
-      console.log(`📚 Deleting book file: ${book.bookFile}`);
       deletePromises.push(deleteFile(book.bookFile));
     }
     
-    // Wait for all deletions to complete
-    const results = await Promise.allSettled(deletePromises);
-    
-    const successfulDeletions = results.filter(result => result.status === 'fulfilled' && result.value).length;
-    console.log(`✅ Successfully deleted ${successfulDeletions} files for book: ${book.title}`);
-    
-    return successfulDeletions > 0;
+    await Promise.all(deletePromises);
+    console.log('✅ All book files deleted for:', book.title);
+    return true;
   } catch (error) {
-    console.error('❌ Error in deleteBookFiles:', error);
+    console.error('❌ Error deleting book files:', error);
     return false;
   }
 }
