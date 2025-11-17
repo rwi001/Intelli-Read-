@@ -285,6 +285,105 @@ main {
   text-align: center;
 }
 
+/* ===== PAGINATION ===== */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin: 30px 0;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  z-index: 100;
+  position: relative;
+}
+
+.pagination button {
+  background: #4f46e5;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 14px;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #3730a3;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+}
+
+.pagination button:disabled {
+  background: #6b7280;
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.6;
+}
+
+.pagination .page-numbers {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination .page-circle {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f0941b 0%, #e37616 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(240, 148, 27, 0.4);
+  font-family: 'Chakra Petch', sans-serif;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .pagination {
+    gap: 10px;
+    padding: 12px;
+    margin: 20px 10px;
+  }
+  
+  .pagination button {
+    padding: 10px 15px;
+    font-size: 13px;
+  }
+  
+  .pagination .page-circle {
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination {
+    gap: 8px;
+  }
+  
+  .pagination button {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  
+  .pagination .page-circle {
+    width: 35px;
+    height: 35px;
+    font-size: 13px;
+  }
+}
 /* ===== FOOTER ===== */
 .main-footer {
   width: 100%;
@@ -342,41 +441,21 @@ main {
   .book img {
     height: 220px;
   }
-}
 
-/* ===== PAGINATION ===== */
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 15px;
-  margin: 30px 0;
-}
+  .pagination {
+    gap: 10px;
+  }
 
-.pagination button {
-  background: #4f46e5;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
+  .pagination button {
+    padding: 8px 15px;
+    font-size: 14px;
+  }
 
-.pagination button:hover {
-  background: #3730a3;
-  transform: scale(1.05);
-}
-
-.pagination button:disabled {
-  background: #aaa;
-  cursor: not-allowed;
-}
-
-.pagination span {
-  font-size: 16px;
-  color: #abf326;
+  .pagination .page-circle {
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+  }
 }
 
 /* ===== Modal Popup ===== */

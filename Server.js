@@ -16,6 +16,8 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static files
 app.use(express.static(path.join(__dirname)));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads/books', express.static(path.join(__dirname, 'uploads/books')));
+app.use('/uploads/covers', express.static(path.join(__dirname, 'uploads/covers')));
 
 // Session middleware
 app.use(session({
@@ -664,7 +666,11 @@ const bookSchema = new mongoose.Schema({
   readCount: { type: Number, default: 0 },
   adminNotes: { type: String },
   reviewedAt: { type: Date },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  // ADD THESE NEW FIELDS:
+  publicationYear: { type: Number },
+  pages: { type: Number },
+  isbn: { type: String }
 });
 
 // Login history schema for tracking
@@ -681,6 +687,8 @@ const User = mongoose.models.User || mongoose.model('User', userSchema);
 const Admin = mongoose.models.Admin || mongoose.model('Admin', adminSchema);
 const Book = mongoose.models.Book || mongoose.model('Book', bookSchema);
 const LoginHistory = mongoose.models.LoginHistory || mongoose.model('LoginHistory', loginHistorySchema);
+
+
 
 // ===== CREATE MULTIPLE DEFAULT ADMIN ACCOUNTS =====
 async function createDefaultAdmins() {
@@ -1739,40 +1747,83 @@ app.get("/api/auth/status", (req, res) => {
 
 // ===== BOOK ROUTES (PUBLIC & USER) =====
 
-// Get All Approved Books (Public)
+// Get All Approved Books (Public) - UPDATED FOR FRONTEND
 app.get("/api/books", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 12;
+    const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
-    const category = req.query.category || '';
     const search = req.query.search || '';
+    const genres = req.query.genres || '';
 
     let query = { status: 'approved' };
     
-    if (category) {
-      query.category = category;
-    }
-    
+    // Search functionality
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
         { author: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
+        { description: { $regex: search, $options: 'i' } },
+        { category: { $regex: search, $options: 'i' } }
       ];
     }
 
+    // Genre filter functionality
+    if (genres) {
+      const genreArray = genres.split(',');
+      // Convert genre IDs to category names (e.g., "fiction" -> "Fiction")
+      const categoryArray = genreArray.map(genre => {
+        const genreMap = {
+          'fiction': 'Fiction',
+          'fantasy': 'Fantasy', 
+          'science': 'Science',
+          'history': 'History',
+          'romance': 'Romance',
+          'mystery': 'Mystery',
+          'horror': 'Horror',
+          'adventure': 'Adventure',
+          'biography': 'Biography',
+          'thriller': 'Thriller',
+          'children': 'Children',
+          'young_adult': 'Young Adult',
+          'classics': 'Classics'
+        };
+        return genreMap[genre] || genre;
+      });
+      
+      query.category = { $in: categoryArray };
+    }
+
     const books = await Book.find(query)
-      .populate('uploadedBy', 'fullName email role isApproved')
+      .select('title author description category language coverImage bookFile publicationYear pages isbn downloadCount readCount createdAt')
+      .populate('uploadedBy', 'fullName email')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
     const totalBooks = await Book.countDocuments(query);
 
+    // Transform data for frontend
+    const transformedBooks = books.map(book => ({
+      id: book._id,
+      title: book.title,
+      author: book.author,
+      description: book.description,
+      genre: book.category,
+      publicationYear: book.publicationYear,
+      pages: book.pages,
+      isbn: book.isbn,
+      imagePath: book.coverImage,
+      filePath: book.bookFile,
+      downloadCount: book.downloadCount,
+      readCount: book.readCount,
+      createdAt: book.createdAt,
+      uploadedBy: book.uploadedBy
+    }));
+
     res.json({
       success: true,
-      books,
+      books: transformedBooks,
       totalPages: Math.ceil(totalBooks / limit),
       currentPage: page,
       totalBooks
@@ -1783,6 +1834,42 @@ app.get("/api/books", async (req, res) => {
     res.status(500).json({ 
       success: false,
       message: 'Error fetching books' 
+    });
+  }
+});
+
+// Get Recommended Books for User
+app.get("/api/user/recommendations", async (req, res) => {
+  try {
+    // For now, return random approved books as recommendations
+    // In future, you can implement personalized recommendations based on user history
+    const recommendedBooks = await Book.aggregate([
+      { $match: { status: 'approved' } },
+      { $sample: { size: 8 } },
+      { 
+        $project: {
+          title: 1,
+          author: 1,
+          description: 1,
+          genre: '$category',
+          publicationYear: 1,
+          imagePath: '$coverImage',
+          filePath: '$bookFile'
+        }
+      }
+    ]);
+
+    res.json({
+      success: true,
+      recommendations: recommendedBooks
+    });
+
+  } catch (error) {
+    console.error('❌ Get recommendations error:', error);
+    // Return empty array instead of error
+    res.json({
+      success: true,
+      recommendations: []
     });
   }
 });
@@ -1955,7 +2042,7 @@ app.post("/api/publisher/books", requirePublisherAuth, upload.fields([
   { name: 'bookFile', maxCount: 1 }
 ]), async (req, res) => {
   try {
-    const { title, author, description, category, language } = req.body;
+    const { title, author, description, category, language, publicationYear, pages, isbn } = req.body;
     
     if (!title || !author || !category) {
       return res.status(400).json({
@@ -1981,7 +2068,11 @@ app.post("/api/publisher/books", requirePublisherAuth, upload.fields([
       coverImage: req.files.coverImage ? `/uploads/covers/${req.files.coverImage[0].filename}` : null,
       bookFile: `/uploads/books/${req.files.bookFile[0].filename}`,
       uploadedBy: req.session.user.id,
-      status: 'pending'
+      status: 'pending',
+      // ADD NEW FIELDS:
+      publicationYear: publicationYear || new Date().getFullYear(),
+      pages: pages || 0,
+      isbn: isbn || ''
     });
 
     await newBook.save();
@@ -2641,6 +2732,93 @@ app.post("/api/forgot-password/resend-otp", async (req, res) => {
   }
 });
 
+// Add sample books if database is empty (Temporary route)
+app.post("/api/add-sample-books", async (req, res) => {
+  try {
+    const existingBooks = await Book.countDocuments();
+    if (existingBooks > 0) {
+      return res.json({
+        success: true,
+        message: 'Books already exist in database'
+      });
+    }
+
+    const sampleBooks = [
+      {
+        title: "The Great Gatsby",
+        author: "F. Scott Fitzgerald",
+        description: "A classic novel about the American dream set in the Jazz Age.",
+        category: "Fiction",
+        publicationYear: 1925,
+        pages: 180,
+        isbn: "978-0743273565",
+        coverImage: "/uploads/covers/great-gatsby.jpg",
+        bookFile: "/uploads/books/great-gatsby.pdf",
+        status: "approved",
+        downloadCount: 150,
+        readCount: 300
+      },
+      {
+        title: "To Kill a Mockingbird",
+        author: "Harper Lee", 
+        description: "A powerful story of racial injustice and childhood innocence.",
+        category: "Fiction",
+        publicationYear: 1960,
+        pages: 281,
+        isbn: "978-0061120084",
+        coverImage: "/uploads/covers/mockingbird.jpg",
+        bookFile: "/uploads/books/mockingbird.pdf",
+        status: "approved",
+        downloadCount: 200,
+        readCount: 450
+      },
+      {
+        title: "1984",
+        author: "George Orwell",
+        description: "A dystopian social science fiction novel about totalitarian regime.",
+        category: "Science Fiction",
+        publicationYear: 1949,
+        pages: 328,
+        isbn: "978-0451524935",
+        coverImage: "/uploads/covers/1984.jpg",
+        bookFile: "/uploads/books/1984.pdf",
+        status: "approved",
+        downloadCount: 180,
+        readCount: 320
+      },
+      {
+        title: "Pride and Prejudice",
+        author: "Jane Austen",
+        description: "A romantic novel of manners that depicts the emotional development of protagonist Elizabeth Bennet.",
+        category: "Romance",
+        publicationYear: 1813,
+        pages: 432,
+        isbn: "978-0141439518",
+        coverImage: "/uploads/covers/pride-prejudice.jpg",
+        bookFile: "/uploads/books/pride-prejudice.pdf",
+        status: "approved",
+        downloadCount: 220,
+        readCount: 380
+      }
+    ];
+
+    await Book.insertMany(sampleBooks);
+    
+    res.json({
+      success: true,
+      message: 'Sample books added successfully',
+      count: sampleBooks.length
+    });
+
+  } catch (error) {
+    console.error('Error adding sample books:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error adding sample books'
+    });
+  }
+});
+
 // ===== HTML ROUTES =====
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "Home.html"));
@@ -2736,5 +2914,8 @@ app.listen(PORT, () => {
   console.log("🔐 Authentication: Session-based with publisher approval system");
   console.log("📊 Analytics: Login tracking, download/read counts");
   console.log("📁 File upload: Enabled for book covers and PDFs");
+  console.log("🎯 Books API: Updated for frontend compatibility");
+  console.log("⭐ Recommendations API: Added for BookScreen");
   console.log("🐛 Debug endpoints: /api/debug/users, /api/debug/admins");
+  console.log("📖 Sample books: Add via /api/add-sample-books if needed");
 });
