@@ -1,12 +1,11 @@
 // ===== API CONFIGURATION =====
 const API_URL = '/api/books';
-// const IMG_BASE_URL = '/uploads/books/';
-// const PDF_BASE_URL = '/uploads/pdfs/';
 
 // ===== GLOBAL VARIABLES =====
 let currentUser = null;
 let recommendedBooks = [];
 const genres = [
+    { "id": "all", "name": "All" },
     { "id": "fiction", "name": "Fiction" },
     { "id": "fantasy", "name": "Fantasy" },
     { "id": "science", "name": "Science" },
@@ -28,11 +27,14 @@ let totalPages = 1;
 let currentQuery = '';
 
 // ===== PAGE DETECTION =====
-const isBookScreen = document.getElementById('recommended-container') !== null;
+const isBookScreen = window.location.pathname.includes('BookScreen') || 
+                    document.title.includes('BookScreen');
 
 // ===== INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('📚 Intelli-Read Initializing...');
+    console.log('Current Page:', window.location.pathname);
+    console.log('Is BookScreen:', isBookScreen);
     
     initializeGenres();
     initializeCommonFeatures();
@@ -48,13 +50,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ===== BOOKSCREEN PAGE =====
 async function initializeBookScreen() {
+    console.log('🔄 Starting BookScreen initialization...');
+    
     try {
         await initializeUserSession();
+        console.log('✅ User session initialized');
+        
         await loadRecommendedBooks();
-        await loadDatabaseBooks();
+        console.log('✅ Recommended books loaded');
+        
+        await loadDatabaseBooks('', 1);
+        console.log('✅ Database books loaded');
+        
     } catch (error) {
-        console.error('Error initializing book screen:', error);
-        await loadDatabaseBooks(); // Still load books even if recommendations fail
+        console.error('❌ Error initializing book screen:', error);
+        await loadDatabaseBooks('', 1);
     }
 }
 
@@ -66,7 +76,10 @@ function initializeBooksPage() {
 
 async function loadDatabaseBooks(query = '', page = 1) {
     const main = document.getElementById('main');
-    if (!main) return;
+    if (!main) {
+        console.error('❌ Main container not found!');
+        return;
+    }
     
     try {
         main.innerHTML = '<div class="loading">📚 Loading books from database...</div>';
@@ -78,40 +91,46 @@ async function loadDatabaseBooks(query = '', page = 1) {
         });
         
         if (query) params.append('search', query);
-        if (selectedGenre.length > 0) params.append('genres', selectedGenre.join(','));
+        if (selectedGenre.length > 0 && !selectedGenre.includes('all')) {
+            params.append('genres', selectedGenre.join(','));
+        }
         
+        console.log('🔗 Fetching books from API...');
         const response = await fetch(`${API_URL}?${params}`);
         
         if (response.ok) {
             const data = await response.json();
+            console.log('✅ API Response received:', data);
             
             if (data.success && data.books && data.books.length > 0) {
-                // ✅ YEH LINE ADD KARO - totalPages set karo
                 totalPages = data.totalPages || Math.ceil(data.totalCount / 20) || 1;
-                currentPage = page; // ✅ Current page update karo
+                currentPage = page;
                 
+                console.log(`🎨 Rendering ${data.books.length} books`);
                 renderBooks(data.books, 'main');
-                updatePagination(); // ✅ Ye function call karo
+                updatePagination();
             } else {
+                console.log('ℹ️ No books found in response');
                 showNoBooksMessage(main);
-                updatePagination(); // ✅ Empty case mein bhi call karo
+                updatePagination();
             }
         } else {
-            throw new Error('API request failed');
+            throw new Error(`API request failed with status: ${response.status}`);
         }
         
     } catch (error) {
-        console.error('Error loading database books:', error);
+        console.error('❌ Error loading database books:', error);
         const main = document.getElementById('main');
         if (main) {
             main.innerHTML = `
                 <div class="no-results">
                     <h2>⚠️ Connection Error</h2>
                     <p>Unable to load books from database. Please try again later.</p>
+                    <p>Error: ${error.message}</p>
                 </div>
             `;
         }
-        updatePagination(); // ✅ Error case mein bhi call karo
+        updatePagination();
     }
 }
 
@@ -128,7 +147,6 @@ async function loadRecommendedBooks() {
             recommendedBooks = data.recommendations || [];
         }
         
-        // If no recommendations from API, use some database books as recommendations
         if (recommendedBooks.length === 0) {
             const dbResponse = await fetch(`${API_URL}?limit=8&status=approved`);
             if (dbResponse.ok) {
@@ -143,7 +161,6 @@ async function loadRecommendedBooks() {
         
     } catch (error) {
         console.error('Error loading recommendations:', error);
-        // Try to get some database books for recommendations
         try {
             const dbResponse = await fetch(`${API_URL}?limit=6&status=approved`);
             if (dbResponse.ok) {
@@ -165,9 +182,12 @@ function renderBooks(books, containerId) {
     if (!container) return;
     
     console.log(`🎨 Rendering ${books.length} books in ${containerId}`);
-    container.innerHTML = '';
+    
+    if (containerId === 'main') {
+        container.innerHTML = '';
+    }
 
-    if (books.length === 0) {
+    if (books.length === 0 && containerId === 'main') {
         showNoBooksMessage(container);
         return;
     }
@@ -194,7 +214,6 @@ function renderRecommendedBooks() {
         const bookCard = document.createElement('div');
         bookCard.className = 'book-card';
         
-        // ✅ CORRECTED: Use path directly from API
         const imageUrl = book.imagePath ? book.imagePath : '/images/default-book.jpg';
         
         bookCard.innerHTML = `
@@ -213,10 +232,15 @@ function renderRecommendedBooks() {
 
 function createBookElement(book) {
     const bookEl = document.createElement('div');
-    bookEl.classList.add('book');
+    
+    if (isBookScreen) {
+        bookEl.classList.add('book', 'book-screen-book');
+    } else {
+        bookEl.classList.add('book');
+    }
+    
     bookEl.setAttribute('data-id', book.id);
 
-    // ✅ CORRECTED: Use the path directly from API response
     const imageUrl = book.imagePath ? book.imagePath : '/images/default-book.jpg';
     const pdfUrl = book.filePath ? book.filePath : null;
 
@@ -236,8 +260,6 @@ function createBookElement(book) {
                 <p class="overlay-author"><strong>Author:</strong> ${book.author || 'Unknown Author'}</p>
                 <p class="overlay-year"><strong>Published:</strong> ${book.publicationYear || 'N/A'}</p>
                 <p class="overlay-genre"><strong>Genre:</strong> ${book.genre || 'General'}</p>
-               
-                
             </div>
         </div>
     `;
@@ -278,22 +300,37 @@ function initializeGenres() {
         });
         tagsEl.appendChild(tag);
     });
+    
+    // Select "All" by default
+    if (genres.length > 0 && genres[0].id === 'all') {
+        toggleGenreSelection('all');
+    }
 }
 
 function toggleGenreSelection(genreId) {
-    if (selectedGenre.includes(genreId)) {
-        selectedGenre = selectedGenre.filter(id => id !== genreId);
+    if (genreId === 'all') {
+        // If "All" is clicked, clear all other selections and select only "All"
+        selectedGenre = ['all'];
     } else {
-        selectedGenre.push(genreId);
+        // If another genre is clicked, remove "all" from selection
+        selectedGenre = selectedGenre.filter(id => id !== 'all');
+        
+        if (selectedGenre.includes(genreId)) {
+            selectedGenre = selectedGenre.filter(id => id !== genreId);
+        } else {
+            selectedGenre.push(genreId);
+        }
+        
+        // If no genres are selected, automatically select "All"
+        if (selectedGenre.length === 0) {
+            selectedGenre = ['all'];
+        }
     }
+    
     highlightSelectedGenres();
     currentPage = 1;
     
-    if (isBookScreen) {
-        loadDatabaseBooks(currentQuery);
-    } else {
-        loadDatabaseBooks(currentQuery);
-    }
+    loadDatabaseBooks(currentQuery);
 }
 
 function highlightSelectedGenres() {
@@ -434,7 +471,6 @@ function closeModal() {
 function showBookDetails(book) {
     initializeModal();
     
-    // ✅ CORRECTED: Use path directly from API
     const imageUrl = book.imagePath ? book.imagePath : '/images/default-book.jpg';
     const pdfUrl = book.filePath ? book.filePath : null;
 
