@@ -642,13 +642,13 @@
             <p id="modalBookDescription">No description available for this book.</p>
           </div>
           <div class="modal-actions">
-            <button class="btn-primary" id="readNowBtn">
+            <button class="btn-primary" id="readNowBtn" onclick="showLoginNotification('read')">
               <i class='bx bx-play-circle'></i> Read Now
             </button>
-            <button class="btn-success" id="addToReadListBtn">
+            <button class="btn-success" id="addToReadListBtn" onclick="showLoginNotification('add')">
               <i class='bx bx-list-plus'></i> Add to Read List
             </button>
-            <button class="btn-tertiary" id="downloadBookBtn">
+            <button class="btn-tertiary" id="downloadBookBtn" onclick="showLoginNotification('download')">
               <i class='bx bx-download'></i> Download
             </button>
           </div>
@@ -743,70 +743,76 @@
   </footer>
 
   <script>
+    // ===== SEARCH FUNCTIONALITY =====
     const searchForm = document.querySelector('.search-form');
     const searchButton = document.querySelector('.search-form button');
 
     searchButton.addEventListener('click', (e) => {
       if (window.innerWidth <= 768) {
         if (!searchForm.classList.contains('active')) {
-          e.preventDefault(); // prevent submit when just expanding
+          e.preventDefault();
           searchForm.classList.add('active');
         }
       }
     });
 
     // ===== MODAL FUNCTIONALITY =====
-const bookModal = document.getElementById('bookModal');
-const pdfViewer = document.getElementById('pdfViewer');
-let modalCurrentBook = null;
-let modalCurrentPage = 1;
-const modalTotalPages = 5;
+    const bookModal = document.getElementById('bookModal');
+    const pdfViewer = document.getElementById('pdfViewer');
+    let modalCurrentBook = null;
+    let modalCurrentPage = 1;
+    const modalTotalPages = 5;
 
-// Initialize modals
-function initializeModals() {
-  // Book details modal
-  const closeModalBtn = bookModal.querySelector('.close-btn');
-  // ❌ YE LINE HATA DO - kyunki ye element exist nahi karta
-  // const closeModalBtn2 = bookModal.querySelector('.close-modal-btn');
-  
-  closeModalBtn.addEventListener('click', closeBookModal);
-  // ❌ YE LINE BHI HATA DO
-  // closeModalBtn2.addEventListener('click', closeBookModal');
-  
-  bookModal.addEventListener('click', (e) => {
-    if (e.target === bookModal) closeBookModal();
-  });
-  
-  // PDF viewer modal
-  const closePdfBtn = document.getElementById('closePdfBtn');
-  closePdfBtn.addEventListener('click', closePdfViewer);
-  
-  pdfViewer.addEventListener('click', (e) => {
-    if (e.target === pdfViewer) closePdfViewer();
-  });
-  
-  // Page navigation
-  document.getElementById('prevPageBtn').addEventListener('click', modalPrevPage);
-  document.getElementById('nextPageBtn').addEventListener('click', modalNextPage);
-  document.getElementById('prevPageNav').addEventListener('click', modalPrevPage);
-  document.getElementById('nextPageNav').addEventListener('click', modalNextPage);
-  
-  // Book action buttons
-  document.getElementById('readNowBtn').addEventListener('click', openPdfViewer);
-  document.getElementById('downloadBookBtn').addEventListener('click', downloadBook);
-  document.getElementById('addToReadListBtn').addEventListener('click', addToReadList);
-  
-  // Escape key to close modals
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      if (pdfViewer.classList.contains('active')) {
-        closePdfViewer();
-      } else if (bookModal.classList.contains('active')) {
-        closeBookModal();
-      }
+    // Show login notification
+    function showLoginNotification(action) {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      const messages = {
+        'read': 'Please login first to read this book',
+        'download': 'Please login first to download this book', 
+        'add': 'Please login first to add books to your reading list'
+      };
+      
+      showNotification(messages[action] || 'Please login first to continue', false);
     }
-  });
-}
+    
+    // Initialize modals
+    function initializeModals() {
+      // Book details modal
+      const closeModalBtn = bookModal.querySelector('.close-btn');
+      
+      closeModalBtn.addEventListener('click', closeBookModal);
+      
+      bookModal.addEventListener('click', (e) => {
+        if (e.target === bookModal) closeBookModal();
+      });
+      
+      // PDF viewer modal
+      const closePdfBtn = document.getElementById('closePdfBtn');
+      closePdfBtn.addEventListener('click', closePdfViewer);
+      
+      pdfViewer.addEventListener('click', (e) => {
+        if (e.target === pdfViewer) closePdfViewer();
+      });
+      
+      // Page navigation
+      document.getElementById('prevPageBtn').addEventListener('click', modalPrevPage);
+      document.getElementById('nextPageBtn').addEventListener('click', modalNextPage);
+      document.getElementById('prevPageNav').addEventListener('click', modalPrevPage);
+      document.getElementById('nextPageNav').addEventListener('click', modalNextPage);
+      
+      // Escape key to close modals
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (pdfViewer.classList.contains('active')) {
+            closePdfViewer();
+          } else if (bookModal.classList.contains('active')) {
+            closeBookModal();
+          }
+        }
+      });
+    }
 
     // Show book details modal
     function showBookDetails(book) {
@@ -850,6 +856,12 @@ function initializeModals() {
     // Open PDF viewer
     function openPdfViewer() {
       if (!modalCurrentBook) return;
+      
+      // Check if user is logged in
+      if (!isUserLoggedIn()) {
+        showNotification('Please login first to read this book', false);
+        return;
+      }
       
       // Set PDF viewer title
       document.getElementById('pdfBookTitle').textContent = modalCurrentBook.title;
@@ -928,28 +940,11 @@ function initializeModals() {
       }
     }
 
-    // Download book
-    function downloadBook() {
-      if (!modalCurrentBook || !modalCurrentBook.filePath) {
-        showNotification('Download not available for this book', false);
-        return;
-      }
-      
-      // In a real implementation, this would trigger the actual download
-      showNotification('Download started for ' + modalCurrentBook.title);
-      
-      // Simulate download
-      setTimeout(() => {
-        showNotification('Download completed!');
-      }, 2000);
-    }
-
-    // Add to read list
-    function addToReadList() {
-      if (!modalCurrentBook) return;
-      
-      // In a real implementation, this would call an API
-      showNotification('Added "' + modalCurrentBook.title + '" to your reading list');
+    // Check if user is logged in (simulated)
+    function isUserLoggedIn() {
+      // In a real implementation, this would check authentication status
+      // For demo purposes, returning false to show login notifications
+      return false;
     }
 
     // Show notification
@@ -1008,95 +1003,103 @@ function initializeModals() {
         showNotification('This book is not available for reading yet.', false);
         return;
       }
+      
+      // Check if user is logged in
+      if (!isUserLoggedIn()) {
+        showNotification('Please login first to read this book', false);
+        return;
+      }
+      
       // For demo, we'll use our PDF viewer
       // In a real implementation, this might open the actual PDF
       openPdfViewer();
     };
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Wait for BookScript.js to load books
-    setTimeout(() => {
+    // Make books clickable when BookScript.js loads
+    document.addEventListener('DOMContentLoaded', function() {
+      // Wait for BookScript.js to load books
+      setTimeout(() => {
         console.log('Making books clickable...');
         
         // Override BookScript.js modal functions
         if (typeof window.showBookDetails === 'function') {
-            const originalShowBookDetails = window.showBookDetails;
-            window.showBookDetails = function(book) {
-                console.log('Opening modal for:', book.title);
-                
-                // Use HTML modal instead of BookScript.js modal
-                const modal = document.getElementById('bookModal');
-                if (modal) {
-                    // Populate modal data
-                    document.getElementById('modalBookTitle').textContent = book.title;
-                    document.getElementById('modalBookAuthor').textContent = `by ${book.author || 'Unknown Author'}`;
-                    document.getElementById('modalBookCover').src = book.imagePath || '/images/default-book.jpg';
-                    document.getElementById('modalBookYear').textContent = book.publicationYear || 'N/A';
-                    document.getElementById('modalBookGenre').textContent = book.genre || 'General';
-                    document.getElementById('modalBookISBN').textContent = book.isbn || 'N/A';
-                    document.getElementById('modalBookPages').textContent = book.pages || 'N/A';
-                    document.getElementById('modalBookLanguage').textContent = book.language || 'English';
-                    document.getElementById('modalBookDescription').textContent = book.description || 'No description available for this book.';
-                    
-                    // Show/hide buttons based on PDF availability
-                    const readNowBtn = document.getElementById('readNowBtn');
-                    const downloadBookBtn = document.getElementById('downloadBookBtn');
-                    
-                    if (book.filePath) {
-                        readNowBtn.style.display = 'flex';
-                        downloadBookBtn.style.display = 'flex';
-                    } else {
-                        readNowBtn.style.display = 'none';
-                        downloadBookBtn.style.display = 'none';
-                    }
-                    
-                    // Show modal
-                    modal.classList.add('active');
-                    document.body.style.overflow = 'hidden';
-                }
-            };
+          const originalShowBookDetails = window.showBookDetails;
+          window.showBookDetails = function(book) {
+            console.log('Opening modal for:', book.title);
+            
+            // Use HTML modal instead of BookScript.js modal
+            const modal = document.getElementById('bookModal');
+            if (modal) {
+              // Populate modal data
+              document.getElementById('modalBookTitle').textContent = book.title;
+              document.getElementById('modalBookAuthor').textContent = `by ${book.author || 'Unknown Author'}`;
+              document.getElementById('modalBookCover').src = book.imagePath || '/images/default-book.jpg';
+              document.getElementById('modalBookYear').textContent = book.publicationYear || 'N/A';
+              document.getElementById('modalBookGenre').textContent = book.genre || 'General';
+              document.getElementById('modalBookISBN').textContent = book.isbn || 'N/A';
+              document.getElementById('modalBookPages').textContent = book.pages || 'N/A';
+              document.getElementById('modalBookLanguage').textContent = book.language || 'English';
+              document.getElementById('modalBookDescription').textContent = book.description || 'No description available for this book.';
+              
+              // Show/hide buttons based on PDF availability
+              const readNowBtn = document.getElementById('readNowBtn');
+              const downloadBookBtn = document.getElementById('downloadBookBtn');
+              
+              if (book.filePath) {
+                readNowBtn.style.display = 'flex';
+                downloadBookBtn.style.display = 'flex';
+              } else {
+                readNowBtn.style.display = 'none';
+                downloadBookBtn.style.display = 'none';
+              }
+              
+              // Show modal
+              modal.classList.add('active');
+              document.body.style.overflow = 'hidden';
+            }
+          };
         }
 
         // Make all books clickable
         function makeBooksClickable() {
-            const books = document.querySelectorAll('.book');
-            console.log('Found books:', books.length);
+          const books = document.querySelectorAll('.book');
+          console.log('Found books:', books.length);
+          
+          books.forEach(book => {
+            // Remove any existing click listeners
+            const newBook = book.cloneNode(true);
+            book.parentNode.replaceChild(newBook, book);
             
-            books.forEach(book => {
-                // Remove any existing click listeners
-                const newBook = book.cloneNode(true);
-                book.parentNode.replaceChild(newBook, book);
-                
-                // Add click listener to new book element
-                newBook.style.cursor = 'pointer';
-                newBook.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    // Get book data from attributes or elements
-                    const title = this.querySelector('h3')?.textContent || 'Unknown Title';
-                    const author = this.querySelector('.book-author')?.textContent?.replace('by ', '') || 'Unknown Author';
-                    const genre = this.querySelector('.book-genre')?.textContent || 'General';
-                    const imgSrc = this.querySelector('img')?.src || '/images/default-book.jpg';
-                    
-                    // Create book object for modal
-                    const bookData = {
-                        title: title,
-                        author: author,
-                        genre: genre,
-                        imagePath: imgSrc,
-                        filePath: "/pdfs/sample.pdf", // Default for demo
-                        publicationYear: "2020",
-                        isbn: "978-0000000000", 
-                        pages: "300",
-                        language: "English",
-                        description: `This is a sample description for "${title}" by ${author}. In a real implementation, this would come from your database.`
-                    };
-                    
-                    console.log('Opening modal for:', title);
-                    window.showBookDetails(bookData);
-                });
+            // Add click listener to new book element
+            newBook.style.cursor = 'pointer';
+            newBook.addEventListener('click', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              
+              // Get book data from attributes or elements
+              const title = this.querySelector('h3')?.textContent || 'Unknown Title';
+              const author = this.querySelector('.book-author')?.textContent?.replace('by ', '') || 'Unknown Author';
+              const genre = this.querySelector('.book-genre')?.textContent || 'General';
+              const imgSrc = this.querySelector('img')?.src || '/images/default-book.jpg';
+              
+              // Create book object for modal
+              const bookData = {
+                title: title,
+                author: author,
+                genre: genre,
+                imagePath: imgSrc,
+                filePath: "/pdfs/sample.pdf", // Default for demo
+                publicationYear: "2020",
+                isbn: "978-0000000000", 
+                pages: "300",
+                language: "English",
+                description: `This is a sample description for "${title}" by ${author}. In a real implementation, this would come from your database.`
+              };
+              
+              console.log('Opening modal for:', title);
+              window.showBookDetails(bookData);
             });
+          });
         }
 
         // Try multiple times to ensure books are clickable
@@ -1104,37 +1107,18 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(makeBooksClickable, 1000);
         setTimeout(makeBooksClickable, 2000);
         
-    }, 2000);
-});
+      }, 2000);
+    });
 
-
-// Console warnings ko minimize karne ke liye
-const originalError = console.error;
-console.error = function(...args) {
-  if (args[0] && args[0].includes('com.chrome.devtools')) {
-    return; // Chrome DevTools related errors ignore karo
-  }
-  originalError.apply(console, args);
-};
-
-// Also add a test function to check if modal works
-function testModal() {
-    const testBook = {
-        title: "The Great Gatsby",
-        author: "F. Scott Fitzgerald", 
-        genre: "Classic Fiction",
-        imagePath: "/images/default-book.jpg",
-        filePath: "/pdfs/sample.pdf",
-        publicationYear: "1925",
-        isbn: "978-0743273565",
-        pages: "180", 
-        language: "English",
-        description: "A classic novel about the American Dream set in the Jazz Age."
+    // Console warnings ko minimize karne ke liye
+    const originalError = console.error;
+    console.error = function(...args) {
+      if (args[0] && args[0].includes('com.chrome.devtools')) {
+        return; // Chrome DevTools related errors ignore karo
+      }
+      originalError.apply(console, args);
     };
-    
-    console.log('Test modal opening...');
-    window.showBookDetails(testBook);
-}
+
   </script>
   <script src="BookScript.js"></script>
 </body>

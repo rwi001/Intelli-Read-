@@ -1,5 +1,6 @@
 // ===== API CONFIGURATION =====
 const API_URL = '/api/books';
+const USER_API_URL = '/api/user';
 
 // ===== GLOBAL VARIABLES =====
 let currentUser = null;
@@ -7,10 +8,14 @@ let recommendedBooks = [];
 const genres = [
     { "id": "all", "name": "All" },
     { "id": "fiction", "name": "Fiction" },
-    { "id": "fantasy", "name": "Fantasy" },
+    { "id": "non_fiction", "name": "Non-Fiction" },
     { "id": "science", "name": "Science" },
+    { "id": "technology", "name": "Technology" },
+    { "id": "self_help", "name": "Self-Help" },
+    { "id": "business", "name": "Business" },
     { "id": "history", "name": "History" },
     { "id": "romance", "name": "Romance" },
+    { "id": "fantasy", "name": "Fantasy" },
     { "id": "mystery", "name": "Mystery" },
     { "id": "horror", "name": "Horror" },
     { "id": "adventure", "name": "Adventure" },
@@ -18,10 +23,16 @@ const genres = [
     { "id": "thriller", "name": "Thriller" },
     { "id": "children", "name": "Children" },
     { "id": "young_adult", "name": "Young Adult" },
-    { "id": "classics", "name": "Classics" }
+    { "id": "classics", "name": "Classics" },
+    { "id": "comics", "name": "Comics" },
+    { "id": "poetry", "name": "Poetry" },
+    { "id": "cooking", "name": "Cooking" },
+    { "id": "art", "name": "Art" },
+    { "id": "travel", "name": "Travel" },
+    { "id": "health", "name": "Health" }
 ];
 
-let selectedGenre = [];
+let selectedGenre = ['all'];
 let currentPage = 1;
 let totalPages = 1;
 let currentQuery = '';
@@ -87,7 +98,9 @@ async function loadDatabaseBooks(query = '', page = 1) {
         const params = new URLSearchParams({
             page: page.toString(),
             limit: '30',
-            status: 'approved'
+            status: 'approved',
+            sort: 'createdAt',
+            order: 'desc'
         });
         
         if (query) params.append('search', query);
@@ -106,8 +119,11 @@ async function loadDatabaseBooks(query = '', page = 1) {
                 totalPages = data.totalPages || Math.ceil(data.totalCount / 20) || 1;
                 currentPage = page;
                 
-                console.log(`🎨 Rendering ${data.books.length} books`);
-                renderBooks(data.books, 'main');
+                // Sort books to ensure newest at the end
+                const sortedBooks = sortBooksByDate(data.books);
+                console.log(`🎨 Rendering ${sortedBooks.length} books`);
+                console.log('📖 First book data:', sortedBooks[0]);
+                renderBooks(sortedBooks, 'main');
                 updatePagination();
             } else {
                 console.log('ℹ️ No books found in response');
@@ -132,6 +148,15 @@ async function loadDatabaseBooks(query = '', page = 1) {
         }
         updatePagination();
     }
+}
+
+// Sort books with newest at the end
+function sortBooksByDate(books) {
+    return books.sort((a, b) => {
+        const dateA = new Date(a.createdAt || a.uploadDate || a.addedDate || 0);
+        const dateB = new Date(b.createdAt || b.uploadDate || b.addedDate || 0);
+        return dateA - dateB; // Oldest first (new books at end)
+    });
 }
 
 // ===== RECOMMENDED BOOKS FUNCTIONS =====
@@ -225,7 +250,7 @@ function renderRecommendedBooks() {
             </div>
         `;
         
-        bookCard.addEventListener('click', () => showBookDetails(book));
+        bookCard.addEventListener('click', () => showBookDetailsInHTMLModal(book));
         container.appendChild(bookCard);
     });
 }
@@ -240,9 +265,9 @@ function createBookElement(book) {
     }
     
     bookEl.setAttribute('data-id', book.id);
+    bookEl.setAttribute('data-book', JSON.stringify(book));
 
     const imageUrl = book.imagePath ? book.imagePath : '/images/default-book.jpg';
-    const pdfUrl = book.filePath ? book.filePath : null;
 
     bookEl.innerHTML = `
         <div class="book-image-container">
@@ -266,7 +291,8 @@ function createBookElement(book) {
 
     bookEl.addEventListener('click', (e) => {
         if (!e.target.closest('button')) {
-            showBookDetails(book);
+            const bookData = JSON.parse(bookEl.getAttribute('data-book'));
+            showBookDetailsInHTMLModal(bookData);
         }
     });
     
@@ -281,6 +307,278 @@ function showNoBooksMessage(container) {
             <p>Please check back later or contact administrator.</p>
         </div>
     `;
+}
+
+// ===== ENHANCED USER DASHBOARD INTEGRATION =====
+
+// Function to update user dashboard data after actions
+async function updateUserDashboardData() {
+    try {
+        // Reload all user data to reflect changes
+        await loadUserDashboardData();
+        console.log('✅ User dashboard data updated');
+    } catch (error) {
+        console.error('❌ Error updating user dashboard:', error);
+    }
+}
+
+// Enhanced function to add book to user dashboard
+async function addToUserDashboard(book, listType) {
+    try {
+        const response = await fetch(`${USER_API_URL}/dashboard/${listType}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                bookId: book.id || book._id,
+                bookTitle: book.title,
+                bookAuthor: book.author,
+                bookGenre: book.genre,
+                bookCover: book.imagePath,
+                filePath: book.filePath,
+                addedAt: new Date().toISOString(),
+                status: listType === 'reading_list' ? 'pending' : 'completed'
+            })
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log(`✅ Book added to ${listType}:`, result);
+            
+            // Update dashboard data
+            await updateUserDashboardData();
+            return true;
+        } else {
+            throw new Error(`Failed to add book to ${listType}`);
+        }
+    } catch (error) {
+        console.error(`❌ Error adding book to ${listType}:`, error);
+        showNotification(`Failed to add book to ${listType.replace('_', ' ')}`, false);
+        return false;
+    }
+}
+
+// Enhanced function to track reading activity
+async function trackReadingActivity(bookId, action, duration = null) {
+    try {
+        const response = await fetch(`${USER_API_URL}/reading-activity`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                bookId: bookId,
+                action: action,
+                timestamp: new Date().toISOString(),
+                page: window.modalCurrentPage || 1,
+                duration: duration
+            })
+        });
+
+        if (response.ok) {
+            console.log('✅ Reading activity tracked:', action);
+            
+            // Update dashboard data
+            await updateUserDashboardData();
+        }
+    } catch (error) {
+        console.error('❌ Error tracking reading activity:', error);
+    }
+}
+
+// Enhanced download tracking
+async function trackDownloadActivity(book) {
+    try {
+        const response = await fetch(`${USER_API_URL}/downloads`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                bookId: book.id || book._id,
+                bookTitle: book.title,
+                bookAuthor: book.author,
+                downloadedAt: new Date().toISOString(),
+                filePath: book.filePath,
+                fileSize: book.fileSize || 'Unknown'
+            })
+        });
+
+        if (response.ok) {
+            console.log('✅ Download activity tracked');
+            
+            // Update dashboard data
+            await updateUserDashboardData();
+        }
+    } catch (error) {
+        console.error('❌ Error tracking download activity:', error);
+    }
+}
+
+// ===== HTML MODAL FUNCTION =====
+function showBookDetailsInHTMLModal(book) {
+    const modal = document.getElementById('bookModal');
+    if (!modal) {
+        console.error('❌ bookModal not found');
+        return;
+    }
+    
+    console.log('📖 Showing ACTUAL book data in modal:', book);
+    
+    // Store current book for PDF viewer
+    window.currentModalBook = book;
+    
+    // Populate modal with ACTUAL book data from API
+    document.getElementById('modalBookTitle').textContent = book.title;
+    document.getElementById('modalBookAuthor').textContent = `by ${book.author || 'Unknown Author'}`;
+    document.getElementById('modalBookCover').src = book.imagePath || '/images/default-book.jpg';
+    document.getElementById('modalBookYear').textContent = book.publicationYear || 'N/A';
+    document.getElementById('modalBookGenre').textContent = book.genre || 'General';
+    document.getElementById('modalBookISBN').textContent = book.isbn || 'N/A';
+    document.getElementById('modalBookPages').textContent = book.pages || 'N/A';
+    document.getElementById('modalBookLanguage').textContent = book.language || 'English';
+    document.getElementById('modalBookDescription').textContent = book.description || 'No description available for this book.';
+
+    // Show/hide buttons based on ACTUAL PDF availability
+    const readNowBtn = document.getElementById('readNowBtn');
+    const downloadBookBtn = document.getElementById('downloadBookBtn');
+    const addToReadListBtn = document.getElementById('addToReadListBtn');
+
+    if (book.filePath) {
+        readNowBtn.style.display = 'flex';
+        downloadBookBtn.style.display = 'flex';
+        
+        // Update read button to use ACTUAL PDF
+        readNowBtn.onclick = () => {
+            if (book.filePath) {
+                // Track reading start
+                trackReadingActivity(book.id || book._id, 'start_reading');
+                openActualPdfViewer(book);
+            } else {
+                showNotification('This book is not available for reading yet.', false);
+            }
+        };
+    } else {
+        readNowBtn.style.display = 'none';
+        downloadBookBtn.style.display = 'none';
+    }
+
+    // Update download button with ACTUAL file
+    downloadBookBtn.onclick = async () => {
+        if (book.filePath) {
+            // Add to downloads and track activity
+            await addToUserDashboard(book, 'downloads');
+            await trackDownloadActivity(book);
+            showNotification(`"${book.title}" added to your downloads!`);
+            
+            // Trigger actual download
+            const link = document.createElement('a');
+            link.href = book.filePath;
+            link.download = `${book.title}.pdf`;
+            link.click();
+        } else {
+            showNotification('Download not available for this book', false);
+        }
+    };
+
+    // Update add to read list button
+    addToReadListBtn.onclick = async () => {
+        await addToUserDashboard(book, 'reading_list');
+        showNotification(`"${book.title}" added to your reading list!`);
+    };
+
+    // Show modal
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+// ===== ACTUAL PDF VIEWER =====
+function openActualPdfViewer(book) {
+    if (!book.filePath) {
+        showNotification('PDF not available for this book', false);
+        return;
+    }
+    
+    const pdfViewer = document.getElementById('pdfViewer');
+    const pdfBookTitle = document.getElementById('pdfBookTitle');
+    const bookPages = document.getElementById('bookPagesContainer');
+    
+    if (!pdfViewer || !pdfBookTitle || !bookPages) {
+        console.error('PDF viewer elements not found');
+        return;
+    }
+    
+    // Set book title
+    pdfBookTitle.textContent = book.title;
+    
+    // Show loading state
+    bookPages.innerHTML = `
+        <div class="page loading-page">
+            <div class="page-content">
+                <div class="loading-spinner">
+                    <i class='bx bx-loader-alt bx-spin'></i>
+                </div>
+                <p>Loading "${book.title}"...</p>
+                <p>Opening actual PDF file...</p>
+            </div>
+        </div>
+    `;
+    
+    // Open PDF viewer
+    pdfViewer.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Track reading activity
+    trackReadingActivity(book.id || book._id, 'start_reading');
+    
+    // Set up reading completion tracking when PDF viewer is closed
+    const startTime = new Date();
+    const originalClosePdf = window.closePdfViewer;
+    
+    window.closePdfViewer = function() {
+        const endTime = new Date();
+        const readingDuration = Math.round((endTime - startTime) / 1000); // in seconds
+        
+        // Track reading completion
+        if (readingDuration > 30) { // Only track if read for more than 30 seconds
+            trackReadingActivity(book.id || book._id, 'completed_reading', readingDuration);
+        }
+        
+        // Call original close function
+        if (typeof originalClosePdf === 'function') {
+            originalClosePdf();
+        }
+        
+        // Restore original function
+        window.closePdfViewer = originalClosePdf;
+    };
+    
+    // Open actual PDF in embedded viewer
+    setTimeout(() => {
+        renderActualPdf(book, bookPages);
+    }, 1000);
+}
+
+function renderActualPdf(book, container) {
+    // Create embedded PDF viewer
+    container.innerHTML = `
+        <div class="pdf-embed-container">
+            <embed 
+                src="${book.filePath}" 
+                type="application/pdf" 
+                width="100%" 
+                height="100%"
+                class="pdf-embed"
+            >
+            <div class="pdf-fallback">
+                <p>If PDF doesn't load, <a href="${book.filePath}" target="_blank" class="pdf-link">click here to open in new tab</a></p>
+            </div>
+        </div>
+    `;
+
+    // Add to reading history
+    addToUserDashboard(book, 'reading_history');
 }
 
 // ===== GENRES =====
@@ -302,26 +600,27 @@ function initializeGenres() {
     });
     
     // Select "All" by default
-    if (genres.length > 0 && genres[0].id === 'all') {
-        toggleGenreSelection('all');
-    }
+    selectedGenre = ['all'];
+    highlightSelectedGenres();
 }
 
 function toggleGenreSelection(genreId) {
+    // If "All" is selected, clear other selections
     if (genreId === 'all') {
-        // If "All" is clicked, clear all other selections and select only "All"
         selectedGenre = ['all'];
     } else {
-        // If another genre is clicked, remove "all" from selection
+        // Remove "all" if another genre is selected
         selectedGenre = selectedGenre.filter(id => id !== 'all');
         
-        if (selectedGenre.includes(genreId)) {
-            selectedGenre = selectedGenre.filter(id => id !== genreId);
-        } else {
+        // Toggle the selected genre
+        const index = selectedGenre.indexOf(genreId);
+        if (index === -1) {
             selectedGenre.push(genreId);
+        } else {
+            selectedGenre.splice(index, 1);
         }
         
-        // If no genres are selected, automatically select "All"
+        // If no genres selected, default to "all"
         if (selectedGenre.length === 0) {
             selectedGenre = ['all'];
         }
@@ -335,11 +634,18 @@ function toggleGenreSelection(genreId) {
 
 function highlightSelectedGenres() {
     const tags = document.querySelectorAll('.tag');
-    tags.forEach(tag => tag.classList.remove('highlight'));
+    tags.forEach(tag => {
+        tag.classList.remove('highlight');
+        tag.style.backgroundColor = '';
+        tag.style.color = '';
+    });
+    
     selectedGenre.forEach(id => {
         const tagElement = document.getElementById(id);
         if (tagElement) {
             tagElement.classList.add('highlight');
+            tagElement.style.backgroundColor = '#4f46e5';
+            tagElement.style.color = 'white';
         }
     });
 }
@@ -358,6 +664,9 @@ async function initializeUserSession() {
             if (usernameElement) {
                 usernameElement.textContent = currentUser.fullName || currentUser.email;
             }
+            
+            // Load user-specific data
+            await loadUserDashboardData();
             return currentUser;
         } else {
             window.location.href = '/login';
@@ -368,6 +677,38 @@ async function initializeUserSession() {
         window.location.href = '/login';
         return null;
     }
+}
+
+// ===== USER DASHBOARD DATA =====
+async function loadUserDashboardData() {
+    try {
+        const response = await fetch(`${USER_API_URL}/dashboard/data`);
+        if (response.ok) {
+            const data = await response.json();
+            console.log('✅ User dashboard data loaded:', data);
+            
+            // Update UI with user-specific data
+            updateUserDashboardUI(data);
+        }
+    } catch (error) {
+        console.error('❌ Error loading user dashboard data:', error);
+    }
+}
+
+function updateUserDashboardUI(data) {
+    // Update user stats if elements exist
+    const statsElements = {
+        'totalBooksRead': data?.stats?.booksRead || 0,
+        'readingListCount': data?.stats?.readingListCount || 0,
+        'downloadsCount': data?.stats?.downloadsCount || 0
+    };
+    
+    Object.keys(statsElements).forEach(elementId => {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = statsElements[elementId];
+        }
+    });
 }
 
 // ===== SEARCH =====
@@ -405,7 +746,6 @@ function updatePagination() {
         main.insertAdjacentElement('afterend', paginationEl);
     }
 
-    
     paginationEl.innerHTML = `
         <button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''} id="prev">
             ← Prev
@@ -431,88 +771,6 @@ function updatePagination() {
             loadDatabaseBooks(currentQuery, currentPage);
         }
     });
-}
-
-// ===== MODAL SYSTEM =====
-let modal, modalBody;
-
-function initializeModal() {
-    if (document.querySelector('.modal')) return;
-    
-    modal = document.createElement('div');
-    modal.classList.add('modal');
-    modal.innerHTML = `
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <div class="modal-body"></div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-
-    modalBody = modal.querySelector('.modal-body');
-    const closeBtn = modal.querySelector('.close-btn');
-
-    closeBtn.addEventListener('click', closeModal);
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeModal();
-    });
-    
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal.classList.contains('active')) {
-            closeModal();
-        }
-    });
-}
-
-function closeModal() {
-    modal.classList.remove('active');
-}
-
-function showBookDetails(book) {
-    initializeModal();
-    
-    const imageUrl = book.imagePath ? book.imagePath : '/images/default-book.jpg';
-    const pdfUrl = book.filePath ? book.filePath : null;
-
-    modalBody.innerHTML = `
-        <div class="modal-header">
-            <h2>${book.title}</h2>
-            <p class="modal-subtitle">by ${book.author || 'Unknown Author'}</p>
-        </div>
-        <div class="modal-body-content">
-            <div class="modal-cover-container">
-                <img src="${imageUrl}" alt="${book.title}" class="modal-cover" 
-                     onerror="this.src='/images/default-book.jpg'">
-            </div>
-            <div class="modal-info">
-                <div class="book-meta">
-                    <p><strong>Publication Year:</strong> ${book.publicationYear || 'N/A'}</p>
-                    <p><strong>Genre:</strong> ${book.genre || 'General'}</p>
-                    <p><strong>ISBN:</strong> ${book.isbn || 'N/A'}</p>
-                    <p><strong>Pages:</strong> ${book.pages || 'N/A'}</p>
-                    <p><strong>Status:</strong> <span class="status-approved">Approved</span></p>
-                </div>
-                <div class="book-description-full">
-                    <h4>Description</h4>
-                    <p>${book.description || 'No description available for this book.'}</p>
-                </div>
-                <div class="modal-actions">
-                    ${pdfUrl ? 
-                        `<button class="btn-primary read-btn-large" onclick="readBook('${pdfUrl}')">
-                            <i class='bx bx-book-reader'></i> Read Book
-                        </button>` 
-                        : 
-                        '<p class="no-pdf-message">📚 Digital version not available</p>'
-                    }
-                    <button class="btn-secondary close-modal-btn" onclick="closeModal()">
-                        <i class='bx bx-x'></i> Close
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    modal.classList.add('active');
 }
 
 // ===== NOTIFICATION SYSTEM =====
@@ -564,7 +822,6 @@ function initializeCommonFeatures() {
 function initializeUserMenu() {
     const userMenu = document.getElementById('userMenu');
     const dropdown = document.getElementById('dropdownMenu');
-    const logoutBtn = document.getElementById('logoutBtn');
 
     if (userMenu && dropdown) {
         userMenu.addEventListener('click', (e) => {
@@ -575,25 +832,6 @@ function initializeUserMenu() {
         document.addEventListener('click', (e) => {
             if (!userMenu.contains(e.target)) {
                 dropdown.classList.remove('active');
-            }
-        });
-    }
-
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            try {
-                const response = await fetch('/api/logout', { method: 'POST' });
-                const data = await response.json();
-                
-                if (data.success) {
-                    showNotification("Logged out successfully!");
-                    setTimeout(() => window.location.href = "/login", 1500);
-                } else {
-                    showNotification("Logout failed. Please try again.", false);
-                }
-            } catch (error) {
-                showNotification("Logout failed. Please try again.", false);
             }
         });
     }
@@ -619,10 +857,200 @@ function initializeMobileSearch() {
         });
     }
 }
+// ===== ENHANCED BOOK ACTIONS =====
 
-// Global functions
+// Add to Reading List Function
+async function addToReadingList(book) {
+    try {
+        const userResponse = await fetch('/api/auth/status');
+        const authData = await userResponse.json();
+        
+        if (!authData.success || !authData.isLoggedIn) {
+            showNotification('Please login to add books to reading list', false);
+            return false;
+        }
+
+        const response = await fetch('/api/user/reading-list', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                bookId: book.id || book._id,
+                bookTitle: book.title,
+                bookAuthor: book.author,
+                bookGenre: book.genre,
+                bookCover: book.imagePath,
+                addedAt: new Date().toISOString(),
+                status: 'pending'
+            })
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log('✅ Book added to reading list:', result);
+            showNotification(`"${book.title}" added to your reading list!`);
+            return true;
+        } else {
+            throw new Error('Failed to add to reading list');
+        }
+    } catch (error) {
+        console.error('❌ Error adding to reading list:', error);
+        showNotification('Failed to add book to reading list', false);
+        return false;
+    }
+}
+
+// Download Book Function
+async function downloadBook(book) {
+    try {
+        const userResponse = await fetch('/api/auth/status');
+        const authData = await userResponse.json();
+        
+        if (!authData.success || !authData.isLoggedIn) {
+            showNotification('Please login to download books', false);
+            return false;
+        }
+
+        // Add to downloads in user dashboard
+        const downloadResponse = await fetch('/api/user/downloads', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                bookId: book.id || book._id,
+                bookTitle: book.title,
+                bookAuthor: book.author,
+                bookGenre: book.genre,
+                bookCover: book.imagePath,
+                filePath: book.filePath,
+                downloadedAt: new Date().toISOString(),
+                format: 'PDF'
+            })
+        });
+
+        if (downloadResponse.ok) {
+            const result = await downloadResponse.json();
+            console.log('✅ Book added to downloads:', result);
+            
+            // Trigger actual file download
+            if (book.filePath) {
+                const link = document.createElement('a');
+                link.href = book.filePath;
+                link.download = `${book.title}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showNotification(`"${book.title}" downloaded successfully!`);
+            } else {
+                showNotification('Book added to downloads, but file not available', false);
+            }
+            return true;
+        } else {
+            throw new Error('Failed to add to downloads');
+        }
+    } catch (error) {
+        console.error('❌ Error downloading book:', error);
+        showNotification('Failed to download book', false);
+        return false;
+    }
+}
+
+// Read Book Function - Enhanced
+function readBookNow(book) {
+    if (!book.filePath) {
+        showNotification('This book is not available for reading yet.', false);
+        return;
+    }
+    
+    // Track reading activity
+    trackReadingActivity(book.id || book._id, 'start_reading');
+    
+    // Open PDF in modal viewer
+    openActualPdfViewer(book);
+}
+
+// ===== ENHANCED MODAL BUTTON HANDLERS =====
+
+function setupModalButtonHandlers(book) {
+    const readNowBtn = document.getElementById('readNowBtn');
+    const downloadBookBtn = document.getElementById('downloadBookBtn');
+    const addToReadListBtn = document.getElementById('addToReadListBtn');
+
+    // Read Now Button
+    if (readNowBtn) {
+        readNowBtn.onclick = () => readBookNow(book);
+    }
+
+    // Download Button
+    if (downloadBookBtn) {
+        downloadBookBtn.onclick = async () => {
+            await downloadBook(book);
+        };
+    }
+
+    // Add to Reading List Button
+    if (addToReadListBtn) {
+        addToReadListBtn.onclick = async () => {
+            await addToReadingList(book);
+        };
+    }
+}
+
+// ===== UPDATED HTML MODAL FUNCTION =====
+
+function showBookDetailsInHTMLModal(book) {
+    const modal = document.getElementById('bookModal');
+    if (!modal) {
+        console.error('❌ bookModal not found');
+        return;
+    }
+    
+    console.log('📖 Showing ACTUAL book data in modal:', book);
+    
+    // Store current book for PDF viewer
+    window.currentModalBook = book;
+    
+    // Populate modal with ACTUAL book data from API
+    document.getElementById('modalBookTitle').textContent = book.title;
+    document.getElementById('modalBookAuthor').textContent = `by ${book.author || 'Unknown Author'}`;
+    document.getElementById('modalBookCover').src = book.imagePath || '/images/default-book.jpg';
+    document.getElementById('modalBookYear').textContent = book.publicationYear || 'N/A';
+    document.getElementById('modalBookGenre').textContent = book.genre || 'General';
+    document.getElementById('modalBookISBN').textContent = book.isbn || 'N/A';
+    document.getElementById('modalBookPages').textContent = book.pages || 'N/A';
+    document.getElementById('modalBookLanguage').textContent = book.language || 'English';
+    document.getElementById('modalBookDescription').textContent = book.description || 'No description available for this book.';
+
+    // Show/hide buttons based on ACTUAL PDF availability
+    const readNowBtn = document.getElementById('readNowBtn');
+    const downloadBookBtn = document.getElementById('downloadBookBtn');
+    const addToReadListBtn = document.getElementById('addToReadListBtn');
+
+    if (book.filePath) {
+        readNowBtn.style.display = 'flex';
+        downloadBookBtn.style.display = 'flex';
+        addToReadListBtn.style.display = 'flex';
+    } else {
+        readNowBtn.style.display = 'none';
+        downloadBookBtn.style.display = 'none';
+        addToReadListBtn.style.display = 'flex'; // Still allow adding to reading list
+    }
+
+    // Setup button handlers
+    setupModalButtonHandlers(book);
+
+    // Show modal
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+// ===== GLOBAL FUNCTIONS =====
 window.readBook = readBook;
-window.showBookDetails = showBookDetails;
-window.closeModal = closeModal;
+window.showBookDetailsInHTMLModal = showBookDetailsInHTMLModal;
+window.showNotification = showNotification;
+window.openActualPdfViewer = openActualPdfViewer;
+window.addToUserDashboard = addToUserDashboard;
 
-console.log('✅ BookScript.js loaded successfully!');
+console.log('✅ Enhanced BookScript.js with User Dashboard Integration loaded successfully!');

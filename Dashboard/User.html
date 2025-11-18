@@ -605,7 +605,6 @@
       background: var(--secondary);
     }
 
-    /* Loading Spinner */
     .loading-spinner {
       display: inline-block;
       width: 20px;
@@ -1483,7 +1482,7 @@
       document.getElementById('booksDropdown').classList.remove('active');
       
       // Redirect to books screen
-      window.location.href = '/bookscreen';
+      window.location.href = '/BookScreen.html';
     }
 
     // Check authentication and load user data
@@ -1583,7 +1582,7 @@
       }
     }
 
-    // Load user books
+    // Enhanced function to load user books with better categorization
     async function loadUserBooks() {
       try {
         const response = await fetch('/api/user/books');
@@ -1591,6 +1590,9 @@
 
         if (data.success) {
           userBooks = data.books || [];
+          
+          // Categorize books
+          categorizeUserBooks();
         } else {
           userBooks = [];
         }
@@ -1598,6 +1600,30 @@
         console.error('Error loading user books:', error);
         userBooks = [];
       }
+    }
+
+    // Categorize user books for different sections
+    function categorizeUserBooks() {
+      if (!userBooks) return;
+      
+      // Books in reading list (status: pending)
+      userReadingList = userBooks.filter(book => book.status === 'pending');
+      
+      // Completed books (status: completed)
+      const completedBooks = userBooks.filter(book => book.status === 'completed');
+      
+      // Downloaded books
+      userDownloads = userBooks.filter(book => book.listType === 'downloads');
+      
+      // Reading history
+      userHistory = userBooks.filter(book => book.listType === 'reading_history');
+      
+      console.log('📚 Categorized user books:', {
+        readingList: userReadingList.length,
+        completed: completedBooks.length,
+        downloads: userDownloads.length,
+        history: userHistory.length
+      });
     }
 
     // Load reading list
@@ -1744,12 +1770,17 @@
       
       if (!userBooks || userBooks.length === 0) {
         booksContainer.innerHTML = `
-          <div class="empty-state">
-            <i class='bx bx-book-open'></i>
-            <p>No books in your collection yet</p>
-            <button class="book-btn" onclick="goToBooksScreen()" style="margin-top: 1rem;">
-              <i class='bx bx-book'></i> Browse Books
-            </button>
+          <div class="empty-state-container">
+            <div class="empty-icon">
+              <i class='bx bx-book-open'></i>
+            </div>
+            <h2>No Books in Your Collection</h2>
+            <p>Books you add to your personal collection will appear here. Start building your digital library!</p>
+            <div class="action-buttons">
+              <button class="btn btn-primary" onclick="goToBooksScreen()">
+                <i class='bx bx-book'></i> Browse Books
+              </button>
+            </div>
           </div>
         `;
         return;
@@ -1757,16 +1788,16 @@
 
       booksContainer.innerHTML = userBooks.map(book => `
         <div class="book-card">
-          <img src="${book.coverImage || '/images/book-placeholder.jpg'}" alt="${book.title}" class="book-cover">
+          <img src="${book.bookCover || '/images/book-placeholder.jpg'}" alt="${book.bookTitle}" class="book-cover">
           <div class="book-info">
-            <h4>${book.title || 'Untitled'}</h4>
-            <p>by ${book.author || 'Unknown Author'}</p>
+            <h4>${book.bookTitle || 'Untitled'}</h4>
+            <p>by ${book.bookAuthor || 'Unknown Author'}</p>
             <div class="book-meta">
-              <span>${book.category || 'Uncategorized'}</span>
-              <span>${book.pages || 'N/A'} pages</span>
+              <span>${book.bookGenre || 'Uncategorized'}</span>
+              <span>Added: ${formatDate(book.addedAt)}</span>
             </div>
             <div class="book-actions">
-              <button class="book-btn" onclick="readBook('${book._id}')">
+              <button class="book-btn" onclick="readBookFromList('${book.bookId}')">
                 <i class='bx bx-book-reader'></i> Read
               </button>
               <button class="book-btn secondary" onclick="removeFromCollection('${book._id}')">
@@ -1778,84 +1809,97 @@
       `).join('');
     }
 
-    // Populate reading list data
-    function populateReadingListData() {
-      const readingListContainer = document.getElementById('readingListContent');
-      
-      if (!userReadingList || userReadingList.length === 0) {
+    // Enhanced function to populate reading list
+function populateReadingListData() {
+    const readingListContainer = document.getElementById('readingListContent');
+    
+    if (!userReadingList || userReadingList.length === 0) {
         readingListContainer.innerHTML = `
-          <div class="empty-state">
-            <i class='bx bx-list-check'></i>
-            <p>Your reading list is empty</p>
-            <button class="book-btn" onclick="goToBooksScreen()" style="margin-top: 1rem;">
-              <i class='bx bx-book'></i> Add Books
-            </button>
-          </div>
+            <div class="empty-state-container">
+                <div class="empty-icon">
+                    <i class='bx bx-list-check'></i>
+                </div>
+                <h2>Your Reading List is Empty</h2>
+                <p>Books you add to your reading list from the book screen will appear here.</p>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="goToBooksScreen()">
+                        <i class='bx bx-book'></i> Browse Books
+                    </button>
+                </div>
+            </div>
         `;
         return;
-      }
+    }
 
-      readingListContainer.innerHTML = userReadingList.map(book => `
+    readingListContainer.innerHTML = userReadingList.map(book => `
         <div class="book-card">
-          <img src="${book.coverImage || '/images/book-placeholder.jpg'}" alt="${book.title}" class="book-cover">
-          <div class="book-info">
-            <h4>${book.title || 'Untitled'}</h4>
-            <p>by ${book.author || 'Unknown Author'}</p>
-            <div class="book-meta">
-              <span>${book.category || 'Uncategorized'}</span>
-              <span>${book.pages || 'N/A'} pages</span>
+            <img src="${book.bookCover || '/images/book-placeholder.jpg'}" alt="${book.bookTitle}" class="book-cover">
+            <div class="book-info">
+                <h4>${book.bookTitle || 'Untitled'}</h4>
+                <p>by ${book.bookAuthor || 'Unknown Author'}</p>
+                <div class="book-meta">
+                    <span>${book.bookGenre || 'Uncategorized'}</span>
+                    <span>Added: ${formatDate(book.addedAt)}</span>
+                </div>
+                <div class="book-actions">
+                    <button class="book-btn" onclick="readBookFromList('${book.bookId}')">
+                        <i class='bx bx-book-reader'></i> Read Now
+                    </button>
+                    <button class="book-btn secondary" onclick="removeFromReadingList('${book._id}')">
+                        <i class='bx bx-trash'></i> Remove
+                    </button>
+                </div>
             </div>
-            <div class="book-actions">
-              <button class="book-btn" onclick="readBook('${book._id}')">
-                <i class='bx bx-book-reader'></i> Read Now
-              </button>
-              <button class="book-btn secondary" onclick="removeFromReadingList('${book._id}')">
-                <i class='bx bx-trash'></i> Remove
-              </button>
-            </div>
-          </div>
         </div>
-      `).join('');
-    }
+    `).join('');
+}
 
-    // Populate downloads data
-    function populateDownloadsData() {
-      const downloadsContainer = document.getElementById('downloadsList');
-      
-      if (!userDownloads || userDownloads.length === 0) {
+// Enhanced function to populate downloads
+function populateDownloadsData() {
+    const downloadsContainer = document.getElementById('downloadsList');
+    
+    if (!userDownloads || userDownloads.length === 0) {
         downloadsContainer.innerHTML = `
-          <div class="empty-state">
-            <i class='bx bx-download'></i>
-            <p>No downloads yet</p>
-            <button class="book-btn" onclick="goToBooksScreen()" style="margin-top: 1rem;">
-              <i class='bx bx-book'></i> Browse Books
-            </button>
-          </div>
+            <div class="empty-state-container">
+                <div class="empty-icon">
+                    <i class='bx bx-download'></i>
+                </div>
+                <h2>No Downloads Yet</h2>
+                <p>Books you download from the book screen will appear here.</p>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="goToBooksScreen()">
+                        <i class='bx bx-book'></i> Browse Books
+                    </button>
+                </div>
+            </div>
         `;
         return;
-      }
-
-      downloadsContainer.innerHTML = userDownloads.map(download => `
-        <div class="download-item">
-          <div class="download-icon">
-            <i class='bx bx-book'></i>
-          </div>
-          <div class="download-info">
-            <h4>${download.bookTitle || 'Unknown Book'}</h4>
-            <p>Downloaded on ${formatDate(download.downloadedAt)}</p>
-            <div class="download-meta">
-              <span>Format: ${download.format || 'PDF'}</span>
-              <span>Size: ${download.fileSize || 'N/A'}</span>
-            </div>
-          </div>
-          <div class="download-actions">
-            <button class="download-btn" onclick="openDownload('${download._id}')">
-              <i class='bx bx-folder-open'></i> Open
-            </button>
-          </div>
-        </div>
-      `).join('');
     }
+
+    downloadsContainer.innerHTML = userDownloads.map(download => `
+        <div class="download-item">
+            <div class="download-icon">
+                <i class='bx bx-book'></i>
+            </div>
+            <div class="download-info">
+                <h4>${download.bookTitle || 'Unknown Book'}</h4>
+                <p>by ${download.bookAuthor || 'Unknown Author'}</p>
+                <div class="download-meta">
+                    <span>Downloaded: ${formatDate(download.downloadedAt || download.addedAt)}</span>
+                    <span>Format: ${download.format || 'PDF'}</span>
+                </div>
+            </div>
+            <div class="download-actions">
+                <button class="download-btn" onclick="openDownload('${download._id}')">
+                    <i class='bx bx-folder-open'></i> Open
+                </button>
+                <button class="download-btn secondary" onclick="redownloadBook('${download.bookId}')">
+                    <i class='bx bx-download'></i> Re-download
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
 
     // Populate history data
     function populateHistoryData() {
@@ -1863,10 +1907,17 @@
       
       if (!userHistory || userHistory.length === 0) {
         historyContainer.innerHTML = `
-          <div class="empty-state">
-            <i class='bx bx-history'></i>
-            <p>No reading history yet</p>
-            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Start reading to see your history here</p>
+          <div class="empty-state-container">
+            <div class="empty-icon">
+              <i class='bx bx-history'></i>
+            </div>
+            <h2>No Reading History</h2>
+            <p>Your reading history will appear here once you start reading books. Your progress and reading sessions will be tracked automatically.</p>
+            <div class="action-buttons">
+              <button class="btn btn-primary" onclick="goToBooksScreen()">
+                <i class='bx bx-book'></i> Start Reading
+              </button>
+            </div>
           </div>
         `;
         return;
@@ -1874,50 +1925,47 @@
 
       // Recent Activity in Dashboard
       const recentActivityContainer = document.getElementById('recentActivity');
-      recentActivityContainer.innerHTML = userHistory.slice(0, 5).map(activity => `
-        <div class="activity-item">
-          <div class="activity-icon ${activity.type === 'download' ? 'download' : activity.type === 'reading' ? 'reading' : 'book'}">
-            <i class='bx bx-${getActivityIcon(activity.type)}'></i>
+      const recentHistory = userHistory.slice(0, 5);
+      
+      if (recentHistory.length === 0) {
+        recentActivityContainer.innerHTML = `
+          <div class="activity-item">
+            <div class="activity-icon book">
+              <i class='bx bx-book'></i>
+            </div>
+            <div class="activity-details">
+              <h4>No recent activity</h4>
+              <p>Start reading to see your activity here</p>
+            </div>
           </div>
-          <div class="activity-details">
-            <h4>${activity.description || 'Activity'}</h4>
-            <p>${formatDateTime(activity.timestamp)}</p>
+        `;
+      } else {
+        recentActivityContainer.innerHTML = recentHistory.map(activity => `
+          <div class="activity-item">
+            <div class="activity-icon book">
+              <i class='bx bx-book-reader'></i>
+            </div>
+            <div class="activity-details">
+              <h4>Read "${activity.bookTitle}"</h4>
+              <p>${formatDateTime(activity.addedAt)}</p>
+            </div>
           </div>
-        </div>
-      `).join('');
+        `).join('');
+      }
 
       // Full History in History Section
       historyContainer.innerHTML = userHistory.map(activity => `
         <div class="activity-item">
-          <div class="activity-icon ${activity.type === 'download' ? 'download' : activity.type === 'reading' ? 'reading' : 'book'}">
-            <i class='bx bx-${getActivityIcon(activity.type)}'></i>
+          <div class="activity-icon book">
+            <i class='bx bx-book-reader'></i>
           </div>
           <div class="activity-details">
-            <h4>${activity.description || 'Activity'}</h4>
-            <p>${formatDateTime(activity.timestamp)}</p>
-            ${activity.duration ? `<span style="font-size: 0.8rem; color: var(--success);">Duration: ${activity.duration}</span>` : ''}
+            <h4>Read "${activity.bookTitle}"</h4>
+            <p>by ${activity.bookAuthor || 'Unknown Author'}</p>
+            <p>${formatDateTime(activity.addedAt)}</p>
           </div>
         </div>
       `).join('');
-    }
-
-    // Helper function to get activity icon
-    function getActivityIcon(type) {
-      const icons = {
-        'reading': 'book-reader',
-        'download': 'download',
-        'completed': 'check-circle',
-        'bookmark': 'bookmark'
-      };
-      return icons[type] || 'book';
-    }
-
-    // Show loading state
-    function showLoadingState() {
-      const loadingElements = document.querySelectorAll('#totalBooks, #readBooks, #readingBooks, #readingHours, #myBooksTotal, #myBooksRead, #myBooksReading');
-      loadingElements.forEach(el => {
-        el.innerHTML = '<div class="loading-spinner"></div>';
-      });
     }
 
     // Show section
@@ -1937,6 +1985,30 @@
       
       // Add active class to clicked menu item
       event.currentTarget.classList.add('active');
+    }
+
+    // New function to read book from reading list
+    async function readBookFromList(bookId) {
+      try {
+        showNotification('Opening book...', 'info');
+        // Redirect to book screen with the specific book
+        window.location.href = `/BookScreen.html?bookId=${bookId}`;
+      } catch (error) {
+        console.error('Error opening book from list:', error);
+        showNotification('Failed to open book', 'error');
+      }
+    }
+
+    // New function to re-download book
+    async function redownloadBook(bookId) {
+      try {
+        showNotification('Preparing download...', 'info');
+        // Implement re-download functionality
+        window.open(`/api/books/${bookId}/download`, '_blank');
+      } catch (error) {
+        console.error('Error re-downloading book:', error);
+        showNotification('Failed to download book', 'error');
+      }
     }
 
     // Book actions
@@ -2075,6 +2147,14 @@
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit'
+      });
+    }
+
+    // Show loading state
+    function showLoadingState() {
+      const loadingElements = document.querySelectorAll('#totalBooks, #readBooks, #readingBooks, #readingHours, #myBooksTotal, #myBooksRead, #myBooksReading');
+      loadingElements.forEach(el => {
+        el.innerHTML = '<div class="loading-spinner"></div>';
       });
     }
   </script>

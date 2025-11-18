@@ -20,7 +20,7 @@
         display: none;
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.9);
+        background: rgba(0, 0, 0, 0.4);
         backdrop-filter: blur(12px);
         justify-content: center;
         align-items: center;
@@ -95,7 +95,7 @@
       .modal-header h2 {
         margin: 0;
         font-size: 28px;
-        color: #fff;
+        color: #7bff00da;
         font-family: "Chakra Petch", sans-serif;
         font-weight: 700;
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
@@ -241,13 +241,27 @@
       }
 
       .modal-actions {
-        display: flex;
-        gap: 15px;
-        flex-wrap: wrap;
-        margin-top: 20px;
-        padding-top: 20px;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-      }
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    justify-content: center; /* Add this line */
+}
+
+/* Add responsive design for modal actions */
+@media (max-width: 768px) {
+    .modal-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .modal-actions button {
+        width: 100%;
+        max-width: 280px;
+    }
+}
 
       .btn-primary,
       .btn-secondary,
@@ -327,7 +341,7 @@
         border: 1px dashed rgba(255, 255, 255, 0.2);
       }
 
-      /* ===== PDF VIEWER MODAL ===== */
+      /* ===== ENHANCED PDF VIEWER STYLES ===== */
       .pdf-modal {
         display: none;
         position: fixed;
@@ -362,6 +376,7 @@
       .pdf-controls {
         display: flex;
         gap: 10px;
+        align-items: center;
       }
 
       .pdf-controls button {
@@ -379,6 +394,11 @@
 
       .pdf-controls button:hover {
         background: rgba(255, 255, 255, 0.2);
+      }
+
+      .pdf-controls button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
 
       .pdf-viewer-container {
@@ -404,16 +424,27 @@
         width: 100%;
         height: 100%;
         background: white;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        box-shadow: 
+          0 2px 10px rgba(0,0,0,0.1),
+          inset 1px 0 0 rgba(255,255,255,0.5),
+          inset -1px 0 0 rgba(0,0,0,0.1);
         border-radius: 5px;
         display: flex;
         justify-content: center;
         align-items: center;
         font-size: 24px;
         color: #333;
-        transition: transform 1s ease;
+        transition: transform 0.8s ease, box-shadow 0.8s ease;
         transform-style: preserve-3d;
         backface-visibility: hidden;
+      }
+
+      .page.flipped {
+        transform: rotateY(-180deg);
+        box-shadow: 
+          -5px 0 15px rgba(0,0,0,0.2),
+          inset -1px 0 0 rgba(255,255,255,0.5),
+          inset 1px 0 0 rgba(0,0,0,0.1);
       }
 
       .page-content {
@@ -428,16 +459,38 @@
         align-items: center;
       }
 
+      .page-content h2 {
+        color: #1a1a2e;
+        margin-bottom: 10px;
+        font-size: 28px;
+      }
+
+      .page-content h3 {
+        color: #1a1a2e;
+        margin-bottom: 15px;
+        font-size: 22px;
+        border-bottom: 2px solid #f0941b;
+        padding-bottom: 5px;
+      }
+
+      .page-content .author {
+        color: #666;
+        font-style: italic;
+        margin-bottom: 20px;
+      }
+
+      .page-content p {
+        line-height: 1.6;
+        margin-bottom: 15px;
+        text-align: left;
+      }
+
       .page-number {
         position: absolute;
         bottom: 10px;
         right: 15px;
         font-size: 14px;
         color: #666;
-      }
-
-      .page.flipped {
-        transform: rotateY(-180deg);
       }
 
       .page-nav {
@@ -470,6 +523,107 @@
       .next-page {
         right: 20px;
         border-radius: 8px 0 0 8px;
+      }
+
+      /* Enhanced PDF Content Styles */
+      .loading-page {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #f8f9fa;
+      }
+
+      .loading-spinner {
+        font-size: 48px;
+        color: #4f46e5;
+        margin-bottom: 20px;
+      }
+
+      .loading-page p {
+        font-size: 18px;
+        color: #666;
+      }
+
+      .book-meta-pdf {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 20px 0;
+        border-left: 4px solid #4f46e5;
+      }
+
+      .book-meta-pdf p {
+        margin: 5px 0;
+        color: #555;
+        text-align: left;
+      }
+
+      .book-intro {
+        margin-top: 30px;
+        line-height: 1.6;
+      }
+
+      .chapter-highlight {
+        background: #e8f4ff;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 20px 0;
+        border-left: 4px solid #4f46e5;
+      }
+
+      .chapter-highlight ul {
+        text-align: left;
+        margin: 10px 0;
+      }
+
+      .chapter-highlight li {
+        margin-bottom: 5px;
+      }
+
+      blockquote {
+        background: #f8f9fa;
+        border-left: 4px solid #f0941b;
+        padding: 15px 20px;
+        margin: 20px 0;
+        font-style: italic;
+        text-align: left;
+      }
+
+      blockquote footer {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #666;
+        text-align: right;
+      }
+
+      .reading-tip {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        padding: 12px;
+        border-radius: 6px;
+        margin: 15px 0;
+        text-align: left;
+      }
+
+      .reading-stats {
+        background: #e8f5e8;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 30px;
+        border-left: 4px solid #10b981;
+      }
+
+      .reading-stats p {
+        margin: 8px 0;
+        text-align: left;
+      }
+
+      .completion-message {
+        background: #d1ecf1;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 20px;
+        border-left: 4px solid #17a2b8;
       }
 
       /* ===== PAGINATION STYLES ===== */
@@ -652,6 +806,40 @@
         margin: 8px 0;
       }
 
+      /* ===== NOTIFICATION STYLES ===== */
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #10b981;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        z-index: 10001;
+        transform: translateX(150%);
+        transition: transform 0.3s ease;
+      }
+
+      .notification.show {
+        transform: translateX(0);
+      }
+
+      .notification.error {
+        background: #ef4444;
+      }
+
+      .notification-close {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 18px;
+      }
+
       /* ===== RESPONSIVE DESIGN ===== */
       @media (max-width: 768px) {
         .modal-body-content {
@@ -721,66 +909,108 @@
           width: 200px;
           right: -10px;
         }
-      }
 
-      /* ===== NOTIFICATION STYLES ===== */
-      .notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #10b981;
-        color: white;
-        padding: 15px 20px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        z-index: 10001;
-        transform: translateX(150%);
-        transition: transform 0.3s ease;
-      }
+        .pdf-controls {
+          flex-wrap: wrap;
+          justify-content: center;
+        }
 
-      .notification.show {
-        transform: translateX(0);
-      }
-
-      .notification.error {
-        background: #ef4444;
-      }
-
-      .notification-close {
-        background: none;
-        border: none;
-        color: white;
-        cursor: pointer;
-        font-size: 18px;
+        .pdf-title {
+          font-size: 16px;
+        }
       }
 
       /* ===== LOGOUT CONFIRMATION MODAL STYLES ===== */
       #logoutConfirmationModal .modal-content {
-        max-width: 500px;
+          max-width: 420px !important;
+          width: 90% !important;
+      }
+
+      #logoutConfirmationModal .modal-header {
+          padding: 20px 25px !important;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          background: linear-gradient(90deg, rgba(79, 70, 229, 0.1) 0%, rgba(240, 148, 27, 0.1) 100%);
+      }
+
+      #logoutConfirmationModal .modal-header h2 {
+          font-size: 22px !important;
+          margin: 0;
       }
 
       #logoutConfirmationModal .modal-info {
-        text-align: center;
-        padding: 30px;
+          padding: 25px !important;
+          text-align: center;
       }
 
-      .confirmation-icon {
-        font-size: 80px;
-        margin-bottom: 20px;
-        color: #f0941b;
+      #logoutConfirmationModal .confirmation-icon {
+          font-size: 50px !important;
+          margin-bottom: 15px !important;
+          color: #f0941b;
       }
 
+      #logoutConfirmationModal .modal-info h3 {
+          color: white;
+          margin-bottom: 12px !important;
+          font-size: 18px;
+          line-height: 1.3;
+      }
+
+      #logoutConfirmationModal .modal-info p {
+          color: #e2e8f0;
+          line-height: 1.5;
+          margin-bottom: 20px !important;
+          font-size: 14px;
+      }
+
+      #logoutConfirmationModal .modal-actions {
+          display: flex;
+          gap: 12px;
+          justify-content: center;
+          border-top: none !important;
+          padding-top: 0 !important;
+          margin-top: 0 !important;
+      }
+
+      #logoutConfirmationModal .modal-actions button {
+          padding: 12px 20px !important;
+          min-width: 120px !important;
+          font-size: 14px !important;
+      }
+
+      /* Mobile responsiveness */
       @media (max-width: 768px) {
-        #logoutConfirmationModal .modal-actions {
-          flex-direction: column;
-        }
-        
-        #logoutConfirmationModal .modal-actions button {
-          min-width: 100%;
-        }
+          #logoutConfirmationModal .modal-content {
+              max-width: 90% !important;
+              margin: 20px;
+          }
+          
+          #logoutConfirmationModal .modal-info {
+              padding: 20px !important;
+          }
+          
+          #logoutConfirmationModal .confirmation-icon {
+              font-size: 45px !important;
+              margin-bottom: 12px !important;
+          }
+          
+          #logoutConfirmationModal .modal-info h3 {
+              font-size: 16px;
+          }
+          
+          #logoutConfirmationModal .modal-info p {
+              font-size: 13px;
+              margin-bottom: 15px !important;
+          }
+          
+          #logoutConfirmationModal .modal-actions {
+              flex-direction: column;
+              gap: 10px;
+          }
+          
+          #logoutConfirmationModal .modal-actions button {
+              min-width: 100% !important;
+              padding: 10px 16px !important;
+          }
       }
     </style>
   </head>
@@ -863,15 +1093,11 @@
                 <span id="modalBookYear">N/A</span>
               </p>
               <p>
-                <strong>Genre:</strong> <span id="modalBookGenre">General</span>
+                <strong>Genre:</strong> <span id="modalBookGenre">N/A</span>
               </p>
               <p><strong>ISBN:</strong> <span id="modalBookISBN">N/A</span></p>
               <p>
                 <strong>Pages:</strong> <span id="modalBookPages">N/A</span>
-              </p>
-              <p>
-                <strong>Status:</strong>
-                <span class="status-approved">Approved</span>
               </p>
               <p>
                 <strong>Language:</strong>
@@ -900,7 +1126,7 @@
       </div>
     </div>
 
-    <!-- ===== PDF VIEWER MODAL ===== -->
+    <!-- ===== ENHANCED PDF VIEWER MODAL ===== -->
     <div class="pdf-modal" id="pdfViewer">
       <div class="pdf-header">
         <h3 class="pdf-title" id="pdfBookTitle">Book Title</h3>
@@ -908,9 +1134,7 @@
           <button id="prevPageBtn">
             <i class="bx bx-chevron-left"></i> Previous
           </button>
-          <span style="color: white; padding: 0 15px" id="pageIndicator"
-            >Page 1 of 5</span
-          >
+          <span style="color: white; padding: 0 15px" id="pageIndicator">Page 1 of 5</span>
           <button id="nextPageBtn">
             Next <i class="bx bx-chevron-right"></i>
           </button>
@@ -921,74 +1145,8 @@
         <button class="page-nav prev-page" id="prevPageNav">
           <i class="bx bx-chevron-left"></i>
         </button>
-        <div class="book-pages">
-          <div class="page" id="page1">
-            <div class="page-content">
-              <h2 id="pdfTitle">Book Title</h2>
-              <p id="pdfAuthor">by Author Name</p>
-              <div style="margin-top: 50px">
-                <p>This is a sample PDF viewer with page turning animation.</p>
-                <p>
-                  In a real implementation, this would display actual PDF
-                  content.
-                </p>
-              </div>
-              <div class="page-number">1</div>
-            </div>
-          </div>
-          <div class="page" id="page2">
-            <div class="page-content">
-              <h3>Chapter 1</h3>
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua.
-              </p>
-              <p>
-                Ut enim ad minim veniam, quis nostrud exercitation ullamco
-                laboris nisi ut aliquip ex ea commodo consequat.
-              </p>
-              <div class="page-number">2</div>
-            </div>
-          </div>
-          <div class="page" id="page3">
-            <div class="page-content">
-              <h3>Chapter 1 (Continued)</h3>
-              <p>
-                Duis aute irure dolor in reprehenderit in voluptate velit esse
-                cillum dolore eu fugiat nulla pariatur.
-              </p>
-              <p>
-                Excepteur sint occaecat cupidatat non proident, sunt in culpa
-                qui officia deserunt mollit anim id est laborum.
-              </p>
-              <div class="page-number">3</div>
-            </div>
-          </div>
-          <div class="page" id="page4">
-            <div class="page-content">
-              <h3>Chapter 2</h3>
-              <p>
-                Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-                accusantium doloremque laudantium.
-              </p>
-              <p>
-                Totam rem aperiam, eaque ipsa quae ab illo inventore veritatis
-                et quasi architecto beatae vitae dicta sunt explicabo.
-              </p>
-              <div class="page-number">4</div>
-            </div>
-          </div>
-          <div class="page" id="page5">
-            <div class="page-content">
-              <h3>The End</h3>
-              <p>Thank you for reading this sample book!</p>
-              <p>
-                In a real implementation, this PDF viewer would display the
-                actual book content.
-              </p>
-              <div class="page-number">5</div>
-            </div>
-          </div>
+        <div class="book-pages" id="bookPagesContainer">
+          <!-- Pages will be dynamically inserted here -->
         </div>
         <button class="page-nav next-page" id="nextPageNav">
           <i class="bx bx-chevron-right"></i>
@@ -998,20 +1156,18 @@
 
     <!-- ===== LOGOUT CONFIRMATION MODAL ===== -->
     <div class="modal" id="logoutConfirmationModal">
-      <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-content">
         <div class="modal-header">
           <h2>Confirm Logout</h2>
           <button class="close-btn" id="closeLogoutModal">&times;</button>
         </div>
-        <div class="modal-info" style="padding: 30px; text-align: center;">
-          <div style="font-size: 80px; margin-bottom: 20px; color: #f0941b;">
+        <div class="modal-info">
+          <div class="confirmation-icon">
             <i class='bx bx-log-out-circle'></i>
           </div>
-          <h3 style="color: white; margin-bottom: 15px;">Are you sure you want to logout?</h3>
-          <p style="color: #e2e8f0; line-height: 1.6; margin-bottom: 30px;">
-            You will be redirected to the login page and will need to sign in again to access your account.
-          </p>
-          <div class="modal-actions" style="justify-content: center; border-top: none; padding-top: 0;">
+          <h3>Are you sure you want to logout?</h3>
+          <p>You will be redirected to the login page and will need to sign in again to access your account.</p>
+          <div class="modal-actions">
             <button class="btn-secondary" id="cancelLogoutBtn">
               <i class="bx bx-x"></i> Cancel
             </button>
@@ -1290,6 +1446,73 @@ setTimeout(() => {
     }
 }, 3000);
 
+// ===== ENHANCED PDF VIEWER FUNCTIONALITY =====
+let modalCurrentPage = 1;
+const modalTotalPages = 5;
+
+function updatePdfView() {
+    // Update page indicator
+    document.getElementById("pageIndicator").textContent = `Page ${modalCurrentPage} of ${modalTotalPages}`;
+
+    // Show/hide navigation buttons
+    document.getElementById("prevPageBtn").disabled = modalCurrentPage === 1;
+    document.getElementById("prevPageNav").style.display = modalCurrentPage === 1 ? "none" : "flex";
+    document.getElementById("nextPageBtn").disabled = modalCurrentPage === modalTotalPages;
+    document.getElementById("nextPageNav").style.display = modalCurrentPage === modalTotalPages ? "none" : "flex";
+
+    // Show current page, hide others
+    for (let i = 1; i <= modalTotalPages; i++) {
+        const pageEl = document.getElementById(`page${i}`);
+        if (pageEl) {
+            if (i === modalCurrentPage) {
+                pageEl.style.zIndex = "10";
+                pageEl.style.display = "flex";
+            } else {
+                pageEl.style.zIndex = "1";
+                pageEl.style.display = "none";
+            }
+        }
+    }
+}
+
+function modalPrevPage() {
+    if (modalCurrentPage > 1) {
+        // Flip page animation
+        const currentPageEl = document.getElementById(`page${modalCurrentPage}`);
+        if (currentPageEl) {
+            currentPageEl.classList.add("flipped");
+        }
+
+        modalCurrentPage--;
+
+        setTimeout(() => {
+            updatePdfView();
+            if (currentPageEl) {
+                currentPageEl.classList.remove("flipped");
+            }
+        }, 400);
+    }
+}
+
+function modalNextPage() {
+    if (modalCurrentPage < modalTotalPages) {
+        // Flip page animation
+        const currentPageEl = document.getElementById(`page${modalCurrentPage}`);
+        if (currentPageEl) {
+            currentPageEl.classList.add("flipped");
+        }
+
+        modalCurrentPage++;
+
+        setTimeout(() => {
+            updatePdfView();
+            if (currentPageEl) {
+                currentPageEl.classList.remove("flipped");
+            }
+        }, 400);
+    }
+}
+
 // ===== SEARCH FUNCTIONALITY =====
 const searchForm = document.querySelector(".search-form");
 const searchButton = document.querySelector(".search-form button");
@@ -1307,8 +1530,6 @@ if (searchButton) {
 
 // ===== USER PROFILE DROPDOWN FUNCTIONALITY =====
 const userProfile = document.getElementById("userProfile");
-const userName = document.getElementById("userName");
-const userAvatar = document.getElementById("userAvatar");
 const logoutBtn = document.getElementById("logoutBtn");
 const dashboardBtn = document.getElementById("dashboardBtn");
 
@@ -1346,18 +1567,53 @@ logoutBtn.addEventListener("click", function (e) {
     showLogoutConfirmation();
 });
 
+function initializeLogoutModal() {
+    const logoutModal = document.getElementById("logoutConfirmationModal");
+    const closeLogoutModalBtn = document.getElementById("closeLogoutModal");
+    const cancelLogoutBtn = document.getElementById("cancelLogoutBtn");
+    const confirmLogoutBtn = document.getElementById("confirmLogoutBtn");
+
+    // Close modal events
+    closeLogoutModalBtn.addEventListener("click", function(e) {
+        e.stopPropagation();
+        closeLogoutConfirmation();
+    });
+    
+    cancelLogoutBtn.addEventListener("click", function(e) {
+        e.stopPropagation();
+        closeLogoutConfirmation();
+    });
+    
+    // Modal background click
+    logoutModal.addEventListener("click", function(e) {
+        if (e.target === logoutModal) {
+            closeLogoutConfirmation();
+        }
+    });
+
+    // Confirm logout button
+    confirmLogoutBtn.addEventListener("click", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('✅ User confirmed logout');
+        showNotification("Logging out...");
+        closeLogoutConfirmation();
+        
+        // Perform logout after a short delay
+        setTimeout(() => {
+            userManager.logout();
+        }, 1000);
+    });
+}
+
 // ===== MODAL FUNCTIONALITY =====
 const bookModal = document.getElementById("bookModal");
 const pdfViewer = document.getElementById("pdfViewer");
-let modalCurrentBook = null;
-let modalCurrentPage = 1;
-const modalTotalPages = 5;
 
 // Initialize modals
 function initializeModals() {
     // Book details modal
     const closeModalBtn = bookModal.querySelector(".close-btn");
-
     closeModalBtn.addEventListener("click", closeBookModal);
 
     bookModal.addEventListener("click", (e) => {
@@ -1378,11 +1634,6 @@ function initializeModals() {
     document.getElementById("prevPageNav").addEventListener("click", modalPrevPage);
     document.getElementById("nextPageNav").addEventListener("click", modalNextPage);
 
-    // Book action buttons
-    document.getElementById("readNowBtn").addEventListener("click", openPdfViewer);
-    document.getElementById("downloadBookBtn").addEventListener("click", downloadBook);
-    document.getElementById("addToReadListBtn").addEventListener("click", addToReadList);
-
     // Initialize logout confirmation modal
     initializeLogoutModal();
 
@@ -1400,148 +1651,16 @@ function initializeModals() {
     });
 }
 
-// Show book details modal
-function showBookDetails(book) {
-    modalCurrentBook = book;
-
-    // Populate modal with book data
-    document.getElementById("modalBookTitle").textContent = book.title;
-    document.getElementById("modalBookAuthor").textContent = `by ${book.author || "Unknown Author"}`;
-    document.getElementById("modalBookCover").src = book.imagePath || "/images/default-book.jpg";
-    document.getElementById("modalBookCover").alt = book.title;
-    document.getElementById("modalBookYear").textContent = book.publicationYear || "N/A";
-    document.getElementById("modalBookGenre").textContent = book.genre || "General";
-    document.getElementById("modalBookISBN").textContent = book.isbn || "N/A";
-    document.getElementById("modalBookPages").textContent = book.pages || "N/A";
-    document.getElementById("modalBookLanguage").textContent = book.language || "English";
-    document.getElementById("modalBookDescription").textContent = book.description || "No description available for this book.";
-
-    // Show/hide buttons based on PDF availability
-    const readNowBtn = document.getElementById("readNowBtn");
-    const downloadBookBtn = document.getElementById("downloadBookBtn");
-
-    if (book.filePath) {
-        readNowBtn.style.display = "flex";
-        downloadBookBtn.style.display = "flex";
-    } else {
-        readNowBtn.style.display = "none";
-        downloadBookBtn.style.display = "none";
-    }
-
-    // Show modal
-    bookModal.classList.add("active");
-    document.body.style.overflow = "hidden";
-}
-
 // Close book details modal
 function closeBookModal() {
     bookModal.classList.remove("active");
     document.body.style.overflow = "auto";
 }
 
-// Open PDF viewer
-function openPdfViewer() {
-    if (!modalCurrentBook) return;
-
-    // Set PDF viewer title
-    document.getElementById("pdfBookTitle").textContent = modalCurrentBook.title;
-    document.getElementById("pdfTitle").textContent = modalCurrentBook.title;
-    document.getElementById("pdfAuthor").textContent = `by ${modalCurrentBook.author || "Unknown Author"}`;
-
-    // Reset to first page
-    modalCurrentPage = 1;
-    updatePdfView();
-
-    // Close book modal and open PDF viewer
-    closeBookModal();
-    pdfViewer.classList.add("active");
-    document.body.style.overflow = "hidden";
-}
-
 // Close PDF viewer
 function closePdfViewer() {
     pdfViewer.classList.remove("active");
     document.body.style.overflow = "auto";
-}
-
-// Previous page in PDF viewer
-function modalPrevPage() {
-    if (modalCurrentPage > 1) {
-        // Flip page animation
-        const currentPageEl = document.getElementById(`page${modalCurrentPage}`);
-        currentPageEl.classList.add("flipped");
-
-        modalCurrentPage--;
-        updatePdfView();
-
-        // Reset animation after delay
-        setTimeout(() => {
-            currentPageEl.classList.remove("flipped");
-        }, 1000);
-    }
-}
-
-// Next page in PDF viewer
-function modalNextPage() {
-    if (modalCurrentPage < modalTotalPages) {
-        // Flip page animation
-        const currentPageEl = document.getElementById(`page${modalCurrentPage}`);
-        currentPageEl.classList.add("flipped");
-
-        modalCurrentPage++;
-        updatePdfView();
-
-        // Reset animation after delay
-        setTimeout(() => {
-            currentPageEl.classList.remove("flipped");
-        }, 1000);
-    }
-}
-
-// Update PDF viewer display
-function updatePdfView() {
-    // Update page indicator
-    document.getElementById("pageIndicator").textContent = `Page ${modalCurrentPage} of ${modalTotalPages}`;
-
-    // Show/hide navigation buttons
-    document.getElementById("prevPageBtn").disabled = modalCurrentPage === 1;
-    document.getElementById("prevPageNav").style.display = modalCurrentPage === 1 ? "none" : "flex";
-    document.getElementById("nextPageBtn").disabled = modalCurrentPage === modalTotalPages;
-    document.getElementById("nextPageNav").style.display = modalCurrentPage === modalTotalPages ? "none" : "flex";
-
-    // Show current page, hide others
-    for (let i = 1; i <= modalTotalPages; i++) {
-        const pageEl = document.getElementById(`page${i}`);
-        if (i === modalCurrentPage) {
-            pageEl.style.zIndex = 10;
-        } else {
-            pageEl.style.zIndex = 1;
-        }
-    }
-}
-
-// Download book
-function downloadBook() {
-    if (!modalCurrentBook || !modalCurrentBook.filePath) {
-        showNotification("Download not available for this book", false);
-        return;
-    }
-
-    // In a real implementation, this would trigger the actual download
-    showNotification("Download started for " + modalCurrentBook.title);
-
-    // Simulate download
-    setTimeout(() => {
-        showNotification("Download completed!");
-    }, 2000);
-}
-
-// Add to read list
-function addToReadList() {
-    if (!modalCurrentBook) return;
-
-    // In a real implementation, this would call an API
-    showNotification('Added "' + modalCurrentBook.title + '" to your reading list');
 }
 
 // ===== LOGOUT CONFIRMATION MODAL FUNCTIONS - FIXED =====
@@ -1555,46 +1674,6 @@ function closeLogoutConfirmation() {
     const logoutModal = document.getElementById("logoutConfirmationModal");
     logoutModal.classList.remove("active");
     document.body.style.overflow = "auto";
-}
-
-function initializeLogoutModal() {
-    const logoutModal = document.getElementById("logoutConfirmationModal");
-    const closeLogoutModalBtn = document.getElementById("closeLogoutModal");
-    const cancelLogoutBtn = document.getElementById("cancelLogoutBtn");
-    const confirmLogoutBtn = document.getElementById("confirmLogoutBtn");
-
-    // Close modal events - FIXED: Stop event propagation
-    closeLogoutModalBtn.addEventListener("click", function(e) {
-        e.stopPropagation();
-        closeLogoutConfirmation();
-    });
-    
-    cancelLogoutBtn.addEventListener("click", function(e) {
-        e.stopPropagation();
-        closeLogoutConfirmation();
-    });
-    
-    // Modal background click - FIXED: Check if click is on modal background
-    logoutModal.addEventListener("click", function(e) {
-        if (e.target === logoutModal) {
-            closeLogoutConfirmation();
-        }
-    });
-
-    // ✅✅✅ YEH IMPORTANT FIX HAI - Confirm logout button
-    confirmLogoutBtn.addEventListener("click", function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log('✅✅✅ User confirmed logout');
-        showNotification("Logging out...");
-        closeLogoutConfirmation();
-        
-        // Perform logout after a short delay
-        setTimeout(() => {
-            userManager.logout();
-        }, 1500);
-    
-    });
 }
 
 // Show notification
@@ -1647,111 +1726,6 @@ document.addEventListener("DOMContentLoaded", function () {
     userManager.init();
 });
 
-// Global functions
-window.showBookDetails = showBookDetails;
-window.readBook = function (pdfUrl) {
-    if (!pdfUrl) {
-        showNotification("This book is not available for reading yet.", false);
-        return;
-    }
-    // For demo, we'll use our PDF viewer
-    // In a real implementation, this might open the actual PDF
-    openPdfViewer();
-};
-
-document.addEventListener("DOMContentLoaded", function () {
-    // Wait for BookScript.js to load books
-    setTimeout(() => {
-        console.log("Making books clickable...");
-
-        // Override BookScript.js modal functions
-        if (typeof window.showBookDetails === "function") {
-            const originalShowBookDetails = window.showBookDetails;
-            window.showBookDetails = function (book) {
-                console.log("Opening modal for:", book.title);
-
-                // Use HTML modal instead of BookScript.js modal
-                const modal = document.getElementById("bookModal");
-                if (modal) {
-                    // Populate modal data
-                    document.getElementById("modalBookTitle").textContent = book.title;
-                    document.getElementById("modalBookAuthor").textContent = `by ${book.author || "Unknown Author"}`;
-                    document.getElementById("modalBookCover").src = book.imagePath || "/images/default-book.jpg";
-                    document.getElementById("modalBookYear").textContent = book.publicationYear || "N/A";
-                    document.getElementById("modalBookGenre").textContent = book.genre || "General";
-                    document.getElementById("modalBookISBN").textContent = book.isbn || "N/A";
-                    document.getElementById("modalBookPages").textContent = book.pages || "N/A";
-                    document.getElementById("modalBookLanguage").textContent = book.language || "English";
-                    document.getElementById("modalBookDescription").textContent = book.description || "No description available for this book.";
-
-                    // Show/hide buttons based on PDF availability
-                    const readNowBtn = document.getElementById("readNowBtn");
-                    const downloadBookBtn = document.getElementById("downloadBookBtn");
-
-                    if (book.filePath) {
-                        readNowBtn.style.display = "flex";
-                        downloadBookBtn.style.display = "flex";
-                    } else {
-                        readNowBtn.style.display = "none";
-                        downloadBookBtn.style.display = "none";
-                    }
-
-                    // Show modal
-                    modal.classList.add("active");
-                    document.body.style.overflow = "hidden";
-                }
-            };
-        }
-
-        // Make all books clickable
-        function makeBooksClickable() {
-            const books = document.querySelectorAll(".book");
-            console.log("Found books:", books.length);
-
-            books.forEach((book) => {
-                // Remove any existing click listeners
-                const newBook = book.cloneNode(true);
-                book.parentNode.replaceChild(newBook, book);
-
-                // Add click listener to new book element
-                newBook.style.cursor = "pointer";
-                newBook.addEventListener("click", function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    // Get book data from attributes or elements
-                    const title = this.querySelector("h3")?.textContent || "Unknown Title";
-                    const author = this.querySelector(".book-author")?.textContent?.replace("by ", "") || "Unknown Author";
-                    const genre = this.querySelector(".book-genre")?.textContent || "General";
-                    const imgSrc = this.querySelector("img")?.src || "/images/default-book.jpg";
-
-                    // Create book object for modal
-                    const bookData = {
-                        title: title,
-                        author: author,
-                        genre: genre,
-                        imagePath: imgSrc,
-                        filePath: "/pdfs/sample.pdf", // Default for demo
-                        publicationYear: "2020",
-                        isbn: "978-0000000000",
-                        pages: "300",
-                        language: "English",
-                        description: `This is a sample description for "${title}" by ${author}. In a real implementation, this would come from your database.`,
-                    };
-
-                    console.log("Opening modal for:", title);
-                    window.showBookDetails(bookData);
-                });
-            });
-        }
-
-        // Try multiple times to ensure books are clickable
-        makeBooksClickable();
-        setTimeout(makeBooksClickable, 1000);
-        setTimeout(makeBooksClickable, 2000);
-    }, 2000);
-});
-
 // Console warnings ko minimize karne ke liye
 const originalError = console.error;
 console.error = function (...args) {
@@ -1760,7 +1734,7 @@ console.error = function (...args) {
     }
     originalError.apply(console, args);
 };
-    </script>
-    <script src="BookScript.js"></script>
-  </body>
+</script>
+<script src="BookScript.js"></script>
+</body>
 </html>
