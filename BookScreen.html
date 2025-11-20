@@ -15,19 +15,19 @@
     <link rel="stylesheet" href="Books.css" />
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
     <style>
-      /* ===== ENHANCED MODAL STYLES ===== */
+      /* ===== ENHANCED RESPONSIVE MODAL STYLES ===== */
       .modal {
         display: none;
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.4);
+        background: rgba(0, 0, 0, 0.6);
         backdrop-filter: blur(12px);
         justify-content: center;
         align-items: center;
         z-index: 9999;
         opacity: 0;
         transition: opacity 0.4s ease;
-        padding: 20px;
+        padding: 15px;
       }
 
       .modal.active {
@@ -36,18 +36,13 @@
       }
 
       .modal-content {
-        background: linear-gradient(
-          135deg,
-          #1a1a2e 0%,
-          #16213e 50%,
-          #0f3460 100%
-        );
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
         color: #fff;
         border-radius: 20px;
         padding: 0;
-        max-width: 1000px;
+        max-width: 1200px;
         width: 95%;
-        max-height: 90vh;
+        max-height: 95vh;
         overflow: hidden;
         position: relative;
         box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
@@ -69,17 +64,14 @@
       }
 
       .modal-header {
-        padding: 25px 30px;
+        padding: 20px 25px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        background: linear-gradient(
-          90deg,
-          rgba(79, 70, 229, 0.1) 0%,
-          rgba(240, 148, 27, 0.1) 100%
-        );
+        background: linear-gradient(90deg, rgba(79, 70, 229, 0.1) 0%, rgba(240, 148, 27, 0.1) 100%);
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
         position: relative;
+        gap: 15px;
       }
 
       .modal-header::before {
@@ -92,36 +84,47 @@
         background: linear-gradient(90deg, #4f46e5, #f0941b, #10b981);
       }
 
+      .modal-header-content {
+        flex: 1;
+        min-width: 0;
+      }
+
       .modal-header h2 {
         margin: 0;
-        font-size: 28px;
+        font-size: clamp(20px, 4vw, 28px);
         color: #7bff00da;
         font-family: "Chakra Petch", sans-serif;
         font-weight: 700;
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        line-height: 1.2;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
       }
 
       .modal-subtitle {
         color: #e2e8f0;
-        margin: 8px 0 0 0;
-        font-size: 16px;
+        margin: 6px 0 0 0;
+        font-size: clamp(14px, 3vw, 16px);
         font-weight: 500;
+        line-height: 1.3;
       }
 
       .close-btn {
-        font-size: 28px;
+        font-size: 24px;
         cursor: pointer;
         color: #fff;
         transition: all 0.3s ease;
         background: rgba(255, 255, 255, 0.1);
         border: none;
-        width: 45px;
-        height: 45px;
+        width: 40px;
+        height: 40px;
         display: flex;
         align-items: center;
         justify-content: center;
         border-radius: 50%;
         backdrop-filter: blur(10px);
+        flex-shrink: 0;
+        margin-top: 2px;
       }
 
       .close-btn:hover {
@@ -135,40 +138,28 @@
         padding: 0;
         height: 100%;
         overflow: hidden;
+        flex-direction: row;
       }
 
       .modal-cover-container {
-        flex: 0 0 350px;
-        padding: 30px;
+        flex: 0 0 300px;
+        padding: 25px;
         display: flex;
         align-items: center;
         justify-content: center;
         background: rgba(0, 0, 0, 0.3);
         position: relative;
-      }
-
-      .modal-cover-container::after {
-        content: "";
-        position: absolute;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        width: 1px;
-        background: linear-gradient(
-          to bottom,
-          transparent,
-          rgba(255, 255, 255, 0.2),
-          transparent
-        );
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
       }
 
       .modal-cover {
         width: 100%;
-        max-width: 280px;
+        max-width: 250px;
         height: auto;
         border-radius: 12px;
         box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
         transition: transform 0.3s ease;
+        object-fit: cover;
       }
 
       .modal-cover:hover {
@@ -177,109 +168,97 @@
 
       .modal-info {
         flex: 1;
-        padding: 30px;
+        padding: 25px;
         overflow-y: auto;
         display: flex;
         flex-direction: column;
-        gap: 25px;
+        gap: 20px;
+        min-height: 0;
       }
 
       .book-meta {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
         background: rgba(255, 255, 255, 0.05);
         padding: 20px;
         border-radius: 12px;
         border: 1px solid rgba(255, 255, 255, 0.1);
       }
 
-      .book-meta p {
-        margin: 0;
+      .meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .meta-item strong {
+        color: #f0941b;
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      .meta-item span {
+        color: #e2e8f0;
         font-size: 15px;
+        word-break: break-word;
+      }
+
+      .book-description-full h4 {
+        color: #f0941b;
+        margin-bottom: 12px;
+        font-size: clamp(18px, 3vw, 20px);
+        font-weight: 600;
         display: flex;
         align-items: center;
         gap: 8px;
       }
 
-      .book-meta strong {
-        color: #f0941b;
-        font-weight: 600;
-      }
-
-      .status-approved {
-        color: #10b981;
-        font-weight: bold;
-        background: rgba(16, 185, 129, 0.1);
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 14px;
-      }
-
-      .book-description-full h4 {
-        color: #f0941b;
-        margin-bottom: 15px;
-        font-size: 20px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
       .book-description-full h4::before {
         content: "📖";
-        font-size: 18px;
+        font-size: 16px;
       }
 
       .book-description-full p {
         line-height: 1.7;
         color: #e2e8f0;
         background: rgba(255, 255, 255, 0.03);
-        padding: 20px;
+        padding: 18px;
         border-radius: 10px;
         border-left: 4px solid #4f46e5;
+        font-size: 15px;
+        max-height: 200px;
+        overflow-y: auto;
+        margin: 0;
       }
 
       .modal-actions {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    justify-content: center; /* Add this line */
-}
-
-/* Add responsive design for modal actions */
-@media (max-width: 768px) {
-    .modal-actions {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .modal-actions button {
-        width: 100%;
-        max-width: 280px;
-    }
-}
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
 
       .btn-primary,
-      .btn-secondary,
       .btn-tertiary,
       .btn-success {
-        padding: 14px 24px;
-        border-radius: 12px;
+        padding: 12px 20px;
+        border-radius: 10px;
         font-weight: 600;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
         cursor: pointer;
         transition: all 0.3s ease;
         border: none;
-        font-size: 15px;
+        font-size: 14px;
         font-family: "Chakra Petch", sans-serif;
         min-width: 140px;
         justify-content: center;
+        flex: 1;
+        min-width: 120px;
       }
 
       .btn-primary {
@@ -290,32 +269,8 @@
 
       .btn-primary:hover {
         background: linear-gradient(135deg, #3730a3 0%, #312e81 100%);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
-      }
-
-      .btn-secondary {
-        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
-        color: white;
-        box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
-      }
-
-      .btn-secondary:hover {
-        background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(107, 114, 128, 0.4);
-      }
-
-      .btn-tertiary {
-        background: linear-gradient(135deg, #f0941b 0%, #e37616 100%);
-        color: white;
-        box-shadow: 0 4px 15px rgba(240, 148, 27, 0.3);
-      }
-
-      .btn-tertiary:hover {
-        background: linear-gradient(135deg, #e37616 0%, #d1580e 100%);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(240, 148, 27, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
       }
 
       .btn-success {
@@ -326,305 +281,602 @@
 
       .btn-success:hover {
         background: linear-gradient(135deg, #059669 0%, #047857 100%);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
       }
 
-      .no-pdf-message {
-        color: #94a3b8;
-        font-style: italic;
-        padding: 12px 0;
-        text-align: center;
-        background: rgba(255, 255, 255, 0.05);
-        padding: 15px;
-        border-radius: 8px;
-        border: 1px dashed rgba(255, 255, 255, 0.2);
-      }
-
-      /* ===== ENHANCED PDF VIEWER STYLES ===== */
-      .pdf-modal {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.95);
-        z-index: 10000;
-        flex-direction: column;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-      }
-
-      .pdf-modal.active {
-        display: flex;
-        opacity: 1;
-      }
-
-      .pdf-header {
-        padding: 15px 20px;
-        background: rgba(0, 0, 0, 0.8);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .pdf-title {
+      .btn-tertiary {
+        background: linear-gradient(135deg, #f0941b 0%, #e37616 100%);
         color: white;
-        font-size: 18px;
-        margin: 0;
+        box-shadow: 0 4px 15px rgba(240, 148, 27, 0.3);
       }
 
-      .pdf-controls {
-        display: flex;
-        gap: 10px;
-        align-items: center;
+      .btn-tertiary:hover {
+        background: linear-gradient(135deg, #e37616 0%, #d1580e 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(240, 148, 27, 0.4);
       }
 
-      .pdf-controls button {
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
-        border: none;
-        padding: 8px 15px;
-        border-radius: 6px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        transition: background 0.3s ease;
-      }
+      /* ===== REAL BOOK PDF VIEWER STYLES ===== */
+      /* ===== ENHANCED FULL SCREEN PDF VIEWER STYLES ===== */
+.pdf-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(15px);
+  z-index: 10000;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
 
-      .pdf-controls button:hover {
-        background: rgba(255, 255, 255, 0.2);
-      }
+.pdf-modal.active {
+  display: block;
+  opacity: 1;
+}
 
-      .pdf-controls button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
+.pdf-header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 18px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 10;
+}
 
-      .pdf-viewer-container {
-        flex: 1;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-        position: relative;
-        overflow: hidden;
-      }
+.pdf-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #4f46e5, #f0941b, #10b981);
+}
 
-      .book-pages {
-        position: relative;
-        width: 80%;
-        max-width: 800px;
-        height: 80vh;
-        perspective: 2000px;
-      }
+.pdf-title {
+  color: white;
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  font-family: "Chakra Petch", sans-serif;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
 
-      .page {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        background: white;
-        box-shadow: 
-          0 2px 10px rgba(0,0,0,0.1),
-          inset 1px 0 0 rgba(255,255,255,0.5),
-          inset -1px 0 0 rgba(0,0,0,0.1);
-        border-radius: 5px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 24px;
-        color: #333;
-        transition: transform 0.8s ease, box-shadow 0.8s ease;
-        transform-style: preserve-3d;
-        backface-visibility: hidden;
-      }
+.pdf-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
 
-      .page.flipped {
-        transform: rotateY(-180deg);
-        box-shadow: 
-          -5px 0 15px rgba(0,0,0,0.2),
-          inset -1px 0 0 rgba(255,255,255,0.5),
-          inset 1px 0 0 rgba(0,0,0,0.1);
-      }
+.pdf-controls button {
+  background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  font-family: "Chakra Petch", sans-serif;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
 
-      .page-content {
-        padding: 40px;
-        width: 100%;
-        height: 100%;
-        overflow-y: auto;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-      }
+.pdf-controls button:hover {
+  background: linear-gradient(135deg, #3730a3 0%, #312e81 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+}
 
-      .page-content h2 {
-        color: #1a1a2e;
-        margin-bottom: 10px;
-        font-size: 28px;
-      }
+.pdf-controls button:disabled {
+  background: #6b7280;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
 
-      .page-content h3 {
-        color: #1a1a2e;
-        margin-bottom: 15px;
-        font-size: 22px;
-        border-bottom: 2px solid #f0941b;
-        padding-bottom: 5px;
-      }
+.pdf-viewer-container {
+  position: relative;
+  height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  overflow: hidden;
+}
 
-      .page-content .author {
-        color: #666;
-        font-style: italic;
-        margin-bottom: 20px;
-      }
+.real-book-container {
+  position: relative;
+  width: 95%;
+  height: 95%;
+  perspective: 2000px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-      .page-content p {
-        line-height: 1.6;
-        margin-bottom: 15px;
-        text-align: left;
-      }
+.book-cover {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, #654321 0%, #8b4513 50%, #a0522d 100%);
+  border-radius: 12px 25px 25px 12px;
+  transform-origin: left center;
+  transition: transform 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 20;
+  box-shadow: 
+    8px 8px 30px rgba(0, 0, 0, 0.6),
+    inset -5px 0 15px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
 
-      .page-number {
-        position: absolute;
-        bottom: 10px;
-        right: 15px;
-        font-size: 14px;
-        color: #666;
-      }
+.book-open .book-cover {
+  transform: rotateY(-135deg);
+}
 
-      .page-nav {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        background: rgba(0, 0, 0, 0.5);
-        color: white;
-        border: none;
-        width: 50px;
-        height: 80px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        cursor: pointer;
-        transition: background 0.3s ease;
-        z-index: 10;
-      }
+.book-cover-inner {
+  position: absolute;
+  inset: 15px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #2d3748 100%);
+  border-radius: 8px 20px 20px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 25px;
+  color: white;
+  text-align: center;
+  box-shadow: inset 2px 0 10px rgba(0, 0, 0, 0.3);
+}
 
-      .page-nav:hover {
-        background: rgba(0, 0, 0, 0.7);
-      }
+.book-cover-inner img {
+  max-width: 180px;
+  max-height: 240px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
 
-      .prev-page {
-        left: 20px;
-        border-radius: 0 8px 8px 0;
-      }
+.book-cover-title h3 {
+  font-size: 22px;
+  margin-bottom: 8px;
+  color: #f0941b;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
 
-      .next-page {
-        right: 20px;
-        border-radius: 8px 0 0 8px;
-      }
+.book-cover-title p {
+  font-size: 16px;
+  color: #e2e8f0;
+  margin: 0;
+}
 
-      /* Enhanced PDF Content Styles */
-      .loading-page {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: #f8f9fa;
-      }
+.book-spine {
+  position: absolute;
+  left: -20px;
+  top: 4%;
+  height: 92%;
+  width: 20px;
+  background: linear-gradient(to right, #5d4037, #8b4513, #5d4037);
+  border-radius: 8px 0 0 8px;
+  z-index: 15;
+  box-shadow: 
+    -3px 0 10px rgba(0, 0, 0, 0.4),
+    inset -2px 0 8px rgba(255, 255, 255, 0.1);
+}
 
-      .loading-spinner {
-        font-size: 48px;
-        color: #4f46e5;
-        margin-bottom: 20px;
-      }
+.book-pages-real {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 
+    0 0 40px rgba(0, 0, 0, 0.4),
+    inset 0 0 50px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
 
-      .loading-page p {
-        font-size: 18px;
-        color: #666;
-      }
+.page-content-real {
+  padding: 40px;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: white;
+}
 
-      .book-meta-pdf {
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 8px;
-        margin: 20px 0;
-        border-left: 4px solid #4f46e5;
-      }
+.page-header {
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 20px;
+  margin-bottom: 25px;
+}
 
-      .book-meta-pdf p {
-        margin: 5px 0;
-        color: #555;
-        text-align: left;
-      }
+.page-header h2 {
+  color: #1a1a2e;
+  margin-bottom: 8px;
+  font-size: 28px;
+  font-weight: 700;
+}
 
-      .book-intro {
-        margin-top: 30px;
-        line-height: 1.6;
-      }
+.author {
+  color: #6b7280;
+  font-size: 18px;
+  margin-bottom: 0;
+}
 
-      .chapter-highlight {
-        background: #e8f4ff;
-        padding: 15px;
-        border-radius: 8px;
-        margin: 20px 0;
-        border-left: 4px solid #4f46e5;
-      }
+.pdf-content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
 
-      .chapter-highlight ul {
-        text-align: left;
-        margin: 10px 0;
-      }
+.pdf-embed-full {
+  width: 100%;
+  height: 100%;
+  min-height: 600px;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
 
-      .chapter-highlight li {
-        margin-bottom: 5px;
-      }
+.pdf-fallback-message {
+  margin-top: 20px;
+  text-align: center;
+  color: #6b7280;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
 
-      blockquote {
-        background: #f8f9fa;
-        border-left: 4px solid #f0941b;
-        padding: 15px 20px;
-        margin: 20px 0;
-        font-style: italic;
-        text-align: left;
-      }
+.pdf-link {
+  color: #4f46e5;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background: rgba(79, 70, 229, 0.1);
+  transition: all 0.3s ease;
+}
 
-      blockquote footer {
-        margin-top: 10px;
-        font-size: 14px;
-        color: #666;
-        text-align: right;
-      }
+.pdf-link:hover {
+  background: rgba(79, 70, 229, 0.2);
+  text-decoration: none;
+  transform: translateY(-2px);
+}
 
-      .reading-tip {
-        background: #fff3cd;
-        border: 1px solid #ffeaa7;
-        padding: 12px;
-        border-radius: 6px;
-        margin: 15px 0;
-        text-align: left;
-      }
+.page-footer {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
 
-      .reading-stats {
-        background: #e8f5e8;
-        padding: 15px;
-        border-radius: 8px;
-        margin-top: 30px;
-        border-left: 4px solid #10b981;
-      }
+/* Loading states */
+.pdf-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6b7280;
+  text-align: center;
+}
 
-      .reading-stats p {
-        margin: 8px 0;
-        text-align: left;
-      }
+.loading-spinner {
+  font-size: 48px;
+  margin-bottom: 20px;
+  color: #4f46e5;
+}
 
-      .completion-message {
-        background: #d1ecf1;
-        padding: 15px;
-        border-radius: 8px;
-        margin-top: 20px;
-        border-left: 4px solid #17a2b8;
-      }
+.page-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+  color: white;
+  border: none;
+  width: 60px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 28px;
+  border-radius: 10px;
+  z-index: 100;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.page-nav:hover {
+  background: linear-gradient(135deg, #3730a3 0%, #312e81 100%);
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.prev-page {
+  left: 30px;
+}
+
+.next-page {
+  right: 30px;
+}
+
+/* ===== RESPONSIVE DESIGN FOR PDF VIEWER ===== */
+
+/* Large Tablets */
+@media (max-width: 1024px) {
+  .real-book-container {
+    width: 98%;
+    height: 98%;
+  }
+  
+  .pdf-header {
+    padding: 15px 25px;
+  }
+  
+  .pdf-title {
+    font-size: 20px;
+  }
+  
+  .page-nav {
+    width: 50px;
+    height: 80px;
+    font-size: 24px;
+  }
+  
+  .prev-page {
+    left: 20px;
+  }
+  
+  .next-page {
+    right: 20px;
+  }
+}
+
+/* Tablets and Small Laptops */
+@media (max-width: 768px) {
+  .pdf-header {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 20px;
+  }
+  
+  .pdf-controls {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .pdf-controls button {
+    padding: 8px 14px;
+    font-size: 14px;
+  }
+  
+  .book-cover-inner {
+    padding: 20px;
+  }
+  
+  .book-cover-inner img {
+    max-width: 120px;
+    max-height: 160px;
+  }
+  
+  .book-cover-title h3 {
+    font-size: 18px;
+  }
+  
+  .page-content-real {
+    padding: 25px;
+  }
+  
+  .page-header h2 {
+    font-size: 22px;
+  }
+  
+  .page-nav {
+    width: 45px;
+    height: 70px;
+    font-size: 22px;
+  }
+  
+  .prev-page {
+    left: 15px;
+  }
+  
+  .next-page {
+    right: 15px;
+  }
+}
+
+/* Mobile Phones */
+@media (max-width: 480px) {
+  .pdf-header {
+    padding: 10px 15px;
+  }
+  
+  .pdf-title {
+    font-size: 18px;
+    text-align: center;
+  }
+  
+  .pdf-controls {
+    gap: 8px;
+  }
+  
+  .pdf-controls button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  
+  .book-cover-inner {
+    padding: 15px;
+  }
+  
+  .book-cover-inner img {
+    max-width: 80px;
+    max-height: 120px;
+    margin-bottom: 15px;
+  }
+  
+  .book-cover-title h3 {
+    font-size: 16px;
+  }
+  
+  .book-cover-title p {
+    font-size: 14px;
+  }
+  
+  .page-content-real {
+    padding: 15px;
+  }
+  
+  .page-header h2 {
+    font-size: 20px;
+  }
+  
+  .author {
+    font-size: 16px;
+  }
+  
+  .page-nav {
+    width: 40px;
+    height: 60px;
+    font-size: 20px;
+  }
+  
+  .prev-page {
+    left: 10px;
+  }
+  
+  .next-page {
+    right: 10px;
+  }
+  
+  .pdf-embed-full {
+    min-height: 400px;
+  }
+}
+
+/* Very Small Mobile Phones */
+@media (max-width: 360px) {
+  .pdf-controls {
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .pdf-controls button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .book-cover-inner img {
+    max-width: 60px;
+    max-height: 90px;
+  }
+  
+  .book-cover-title h3 {
+    font-size: 14px;
+  }
+  
+  .page-nav {
+    width: 35px;
+    height: 50px;
+    font-size: 18px;
+  }
+}
+
+/* Landscape Orientation for Mobile */
+@media (max-height: 600px) and (orientation: landscape) {
+  .pdf-viewer-container {
+    height: calc(100vh - 70px);
+  }
+  
+  .real-book-container {
+    height: 90%;
+  }
+  
+  .book-cover-inner img {
+    max-width: 80px;
+    max-height: 100px;
+  }
+  
+  .book-cover-title h3 {
+    font-size: 16px;
+  }
+}
+
+/* High Resolution Screens */
+@media (min-width: 1440px) {
+  .real-book-container {
+    width: 90%;
+    height: 90%;
+  }
+  
+  .book-cover-inner img {
+    max-width: 220px;
+    max-height: 280px;
+  }
+  
+  .book-cover-title h3 {
+    font-size: 26px;
+  }
+  
+  .page-content-real {
+    padding: 50px;
+  }
+  
+  .page-header h2 {
+    font-size: 32px;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .page-nav:hover {
+    transform: translateY(-50%);
+  }
+  
+  .pdf-controls button:hover {
+    transform: none;
+  }
+  
+  .pdf-link:hover {
+    transform: none;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .book-cover {
+    transition: none;
+  }
+  
+  .page-nav,
+  .pdf-controls button,
+  .pdf-link {
+    transition: none;
+  }
+}
 
       /* ===== PAGINATION STYLES ===== */
       .pagination {
@@ -822,6 +1074,8 @@
         z-index: 10001;
         transform: translateX(150%);
         transition: transform 0.3s ease;
+        max-width: 400px;
+        word-wrap: break-word;
       }
 
       .notification.show {
@@ -838,29 +1092,200 @@
         color: white;
         cursor: pointer;
         font-size: 18px;
+        flex-shrink: 0;
+      }
+
+      /* ===== LOGOUT CONFIRMATION MODAL STYLES ===== */
+      #logoutConfirmationModal .modal-content {
+        max-width: 420px !important;
+        width: 90% !important;
+      }
+
+      #logoutConfirmationModal .modal-header {
+        padding: 20px 25px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        background: linear-gradient(90deg, rgba(79, 70, 229, 0.1) 0%, rgba(240, 148, 27, 0.1) 100%);
+      }
+
+      #logoutConfirmationModal .modal-header h2 {
+        font-size: 22px !important;
+        margin: 0;
+      }
+
+      #logoutConfirmationModal .modal-info {
+        padding: 25px !important;
+        text-align: center;
+      }
+
+      #logoutConfirmationModal .confirmation-icon {
+        font-size: 50px !important;
+        margin-bottom: 15px !important;
+        color: #f0941b;
+      }
+
+      #logoutConfirmationModal .modal-info h3 {
+        color: white;
+        margin-bottom: 12px !important;
+        font-size: 18px;
+        line-height: 1.3;
+      }
+
+      #logoutConfirmationModal .modal-info p {
+        color: #e2e8f0;
+        line-height: 1.5;
+        margin-bottom: 20px !important;
+        font-size: 14px;
+      }
+
+      #logoutConfirmationModal .modal-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        border-top: none !important;
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+      }
+
+      #logoutConfirmationModal .modal-actions button {
+        padding: 12px 20px !important;
+        min-width: 120px !important;
+        font-size: 14px !important;
       }
 
       /* ===== RESPONSIVE DESIGN ===== */
-      @media (max-width: 768px) {
-        .modal-body-content {
-          flex-direction: column;
-        }
 
+      /* Large Tablets */
+      @media (max-width: 1024px) {
+        .modal-content {
+          max-width: 95%;
+          margin: 10px;
+        }
+        
         .modal-cover-container {
-          flex: 0 0 auto;
+          flex: 0 0 250px;
           padding: 20px;
         }
-
+        
         .modal-cover {
           max-width: 200px;
         }
-
+        
+        .modal-info {
+          padding: 20px;
+        }
+        
         .book-meta {
-          grid-template-columns: 1fr;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: 12px;
+          padding: 15px;
         }
 
+        .pdf-controls {
+          gap: 8px;
+        }
+
+        .pdf-controls button {
+          padding: 6px 12px;
+          font-size: 13px;
+        }
+      }
+
+      /* Tablets and Small Laptops */
+      @media (max-width: 768px) {
+        .modal {
+          padding: 10px;
+        }
+        
+        .modal-content {
+          max-height: 90vh;
+          border-radius: 15px;
+        }
+        
+        .modal-body-content {
+          flex-direction: column;
+          overflow-y: auto;
+        }
+        
+        .modal-cover-container {
+          flex: 0 0 auto;
+          padding: 20px;
+          border-right: none;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-cover {
+          max-width: 180px;
+        }
+        
+        .modal-header {
+          padding: 15px 20px;
+          flex-direction: column;
+          gap: 10px;
+        }
+        
+        .modal-header-content {
+          width: 100%;
+        }
+        
+        .close-btn {
+          position: absolute;
+          top: 15px;
+          right: 15px;
+          width: 35px;
+          height: 35px;
+          font-size: 20px;
+        }
+        
+        .modal-info {
+          padding: 20px;
+          gap: 15px;
+        }
+        
+        .book-meta {
+          grid-template-columns: 1fr;
+          gap: 10px;
+          padding: 15px;
+        }
+        
+        .meta-item {
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+          padding: 8px 0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .meta-item:last-child {
+          border-bottom: none;
+        }
+        
+        .book-description-full p {
+          padding: 15px;
+          max-height: 150px;
+          font-size: 14px;
+        }
+        
         .modal-actions {
           flex-direction: column;
+          gap: 10px;
+        }
+        
+        .btn-primary,
+        .btn-success,
+        .btn-tertiary {
+          min-width: 100%;
+          padding: 14px 20px;
+          font-size: 15px;
+        }
+
+        .pdf-header {
+          flex-direction: column;
+          gap: 10px;
+          padding: 12px 15px;
+        }
+
+        .pdf-controls {
+          justify-content: center;
         }
 
         .book-pages {
@@ -868,11 +1293,10 @@
           height: 70vh;
         }
 
-        .btn-primary,
-        .btn-secondary,
-        .btn-tertiary,
-        .btn-success {
-          min-width: 100%;
+        .page-nav {
+          width: 40px;
+          height: 60px;
+          font-size: 20px;
         }
 
         .pagination {
@@ -910,107 +1334,318 @@
           right: -10px;
         }
 
-        .pdf-controls {
-          flex-wrap: wrap;
-          justify-content: center;
+        .notification {
+          right: 10px;
+          left: 10px;
+          max-width: none;
+        }
+      }
+
+      /* Mobile Phones */
+      @media (max-width: 480px) {
+        .modal {
+          padding: 5px;
+        }
+        
+        .modal-content {
+          width: 100%;
+          max-height: 95vh;
+          border-radius: 12px;
+          margin: 5px;
+        }
+        
+        .modal-header {
+          padding: 12px 15px;
+        }
+        
+        .modal-header h2 {
+          font-size: 18px;
+          padding-right: 40px;
+        }
+        
+        .modal-subtitle {
+          font-size: 13px;
+        }
+        
+        .close-btn {
+          top: 12px;
+          right: 12px;
+          width: 30px;
+          height: 30px;
+          font-size: 18px;
+        }
+        
+        .modal-cover-container {
+          padding: 15px;
+        }
+        
+        .modal-cover {
+          max-width: 150px;
+        }
+        
+        .modal-info {
+          padding: 15px;
+          gap: 12px;
+        }
+        
+        .book-meta {
+          padding: 12px;
+          gap: 8px;
+        }
+        
+        .meta-item {
+          padding: 6px 0;
+          font-size: 13px;
+        }
+        
+        .meta-item strong {
+          font-size: 13px;
+        }
+        
+        .meta-item span {
+          font-size: 13px;
+        }
+        
+        .book-description-full h4 {
+          font-size: 16px;
+          margin-bottom: 8px;
+        }
+        
+        .book-description-full p {
+          padding: 12px;
+          max-height: 120px;
+          font-size: 13px;
+          line-height: 1.6;
+        }
+        
+        .modal-actions {
+          gap: 8px;
+          padding-top: 15px;
+        }
+        
+        .btn-primary,
+        .btn-success,
+        .btn-tertiary {
+          padding: 12px 16px;
+          font-size: 14px;
+          min-width: 100%;
+        }
+
+        .pdf-header {
+          padding: 10px 12px;
         }
 
         .pdf-title {
           font-size: 16px;
         }
-      }
 
-      /* ===== LOGOUT CONFIRMATION MODAL STYLES ===== */
-      #logoutConfirmationModal .modal-content {
-          max-width: 420px !important;
-          width: 90% !important;
-      }
+        .pdf-controls {
+          gap: 5px;
+        }
 
-      #logoutConfirmationModal .modal-header {
-          padding: 20px 25px !important;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-          background: linear-gradient(90deg, rgba(79, 70, 229, 0.1) 0%, rgba(240, 148, 27, 0.1) 100%);
-      }
+        .pdf-controls button {
+          padding: 5px 8px;
+          font-size: 12px;
+        }
 
-      #logoutConfirmationModal .modal-header h2 {
-          font-size: 22px !important;
-          margin: 0;
-      }
+        .book-pages {
+          width: 98%;
+          height: 65vh;
+        }
 
-      #logoutConfirmationModal .modal-info {
-          padding: 25px !important;
-          text-align: center;
-      }
+        .page-content {
+          padding: 20px;
+        }
 
-      #logoutConfirmationModal .confirmation-icon {
-          font-size: 50px !important;
-          margin-bottom: 15px !important;
-          color: #f0941b;
-      }
-
-      #logoutConfirmationModal .modal-info h3 {
-          color: white;
-          margin-bottom: 12px !important;
+        .page-nav {
+          width: 35px;
+          height: 50px;
           font-size: 18px;
-          line-height: 1.3;
-      }
+        }
 
-      #logoutConfirmationModal .modal-info p {
-          color: #e2e8f0;
-          line-height: 1.5;
-          margin-bottom: 20px !important;
+        .notification {
+          padding: 12px 15px;
           font-size: 14px;
+        }
       }
 
-      #logoutConfirmationModal .modal-actions {
-          display: flex;
-          gap: 12px;
+      /* Very Small Mobile Phones */
+      @media (max-width: 360px) {
+        .modal-header h2 {
+          font-size: 16px;
+        }
+        
+        .modal-subtitle {
+          font-size: 12px;
+        }
+        
+        .modal-cover {
+          max-width: 120px;
+        }
+        
+        .book-meta {
+          padding: 10px;
+        }
+        
+        .meta-item {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 2px;
+        }
+        
+        .book-description-full p {
+          font-size: 12px;
+          max-height: 100px;
+        }
+        
+        .btn-primary,
+        .btn-success,
+        .btn-tertiary {
+          padding: 10px 14px;
+          font-size: 13px;
+        }
+
+        .pdf-controls {
+          flex-direction: column;
+          gap: 5px;
+        }
+
+        .pdf-controls button {
+          width: 100%;
           justify-content: center;
-          border-top: none !important;
-          padding-top: 0 !important;
-          margin-top: 0 !important;
+        }
+
+        .user-profile {
+          padding: 4px 8px;
+        }
+
+        .user-avatar {
+          width: 35px;
+          height: 35px;
+          font-size: 14px;
+        }
+
+        .user-name {
+          font-size: 12px;
+        }
+
+        .user-dropdown {
+          width: 180px;
+        }
       }
 
-      #logoutConfirmationModal .modal-actions button {
-          padding: 12px 20px !important;
-          min-width: 120px !important;
-          font-size: 14px !important;
+      /* Landscape Orientation for Mobile */
+      @media (max-height: 600px) and (orientation: landscape) {
+        .modal-content {
+          max-height: 85vh;
+        }
+        
+        .modal-body-content {
+          flex-direction: row;
+          max-height: 60vh;
+        }
+        
+        .modal-cover-container {
+          flex: 0 0 150px;
+          padding: 15px;
+        }
+        
+        .modal-cover {
+          max-width: 120px;
+        }
+        
+        .modal-info {
+          padding: 15px;
+          overflow-y: auto;
+        }
+        
+        .book-description-full p {
+          max-height: 80px;
+          font-size: 13px;
+        }
+
+        .book-pages {
+          height: 70vh;
+        }
       }
 
-      /* Mobile responsiveness */
-      @media (max-width: 768px) {
-          #logoutConfirmationModal .modal-content {
-              max-width: 90% !important;
-              margin: 20px;
-          }
-          
-          #logoutConfirmationModal .modal-info {
-              padding: 20px !important;
-          }
-          
-          #logoutConfirmationModal .confirmation-icon {
-              font-size: 45px !important;
-              margin-bottom: 12px !important;
-          }
-          
-          #logoutConfirmationModal .modal-info h3 {
-              font-size: 16px;
-          }
-          
-          #logoutConfirmationModal .modal-info p {
-              font-size: 13px;
-              margin-bottom: 15px !important;
-          }
-          
-          #logoutConfirmationModal .modal-actions {
-              flex-direction: column;
-              gap: 10px;
-          }
-          
-          #logoutConfirmationModal .modal-actions button {
-              min-width: 100% !important;
-              padding: 10px 16px !important;
-          }
+      /* High Resolution Screens */
+      @media (min-width: 1440px) {
+        .modal-content {
+          max-width: 1400px;
+        }
+        
+        .modal-cover-container {
+          flex: 0 0 400px;
+          padding: 30px;
+        }
+        
+        .modal-cover {
+          max-width: 320px;
+        }
+        
+        .modal-info {
+          padding: 30px;
+          gap: 25px;
+        }
+        
+        .book-meta {
+          gap: 20px;
+          padding: 25px;
+        }
+        
+        .modal-actions {
+          gap: 15px;
+        }
+        
+        .btn-primary,
+        .btn-success,
+        .btn-tertiary {
+          padding: 15px 25px;
+          font-size: 16px;
+        }
+      }
+
+      /* Touch Device Optimizations */
+      @media (hover: none) and (pointer: coarse) {
+        .close-btn:hover,
+        .btn-primary:hover,
+        .btn-success:hover,
+        .btn-tertiary:hover {
+          transform: none;
+        }
+        
+        .modal-cover:hover {
+          transform: none;
+        }
+        
+        .btn-primary:active,
+        .btn-success:active,
+        .btn-tertiary:active {
+          transform: scale(0.98);
+        }
+      }
+
+      /* Reduced Motion Support */
+      @media (prefers-reduced-motion: reduce) {
+        .modal-content {
+          animation: none;
+        }
+        
+        .close-btn,
+        .btn-primary,
+        .btn-success,
+        .btn-tertiary,
+        .modal-cover {
+          transition: none;
+        }
+      }
+
+      /* Dark Mode Support */
+      @media (prefers-color-scheme: dark) {
+        .modal-content {
+          background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+        }
       }
     </style>
   </head>
@@ -1067,118 +1702,140 @@
     <!-- ===== PAGINATION ===== -->
     <div class="pagination" id="pagination"></div>
 
-    <!-- ===== BOOK DETAILS MODAL ===== -->
-    <div class="modal" id="bookModal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <div>
-            <h2 id="modalBookTitle">Book Title</h2>
-            <p class="modal-subtitle" id="modalBookAuthor">by Author Name</p>
-          </div>
-          <button class="close-btn">&times;</button>
+   <!-- ===== BOOK DETAILS MODAL ===== -->
+<div class="modal" id="bookModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-header-content">
+        <h2 id="modalBookTitle">Book Title</h2>
+        <p class="modal-subtitle" id="modalBookAuthor">by Author Name</p>
+      </div>
+      <button class="close-btn">&times;</button>
+    </div>
+    <div class="modal-body-content">
+      <div class="modal-cover-section">
+        <div class="modal-cover-container">
+          <img
+            id="modalBookCover"
+            src=""
+            alt="Book Cover"
+            class="modal-cover"
+          />
         </div>
-        <div class="modal-body-content">
-          <div class="modal-cover-container">
-            <img
-              id="modalBookCover"
-              src=""
-              alt="Book Cover"
-              class="modal-cover"
-            />
-          </div>
-          <div class="modal-info">
-            <div class="book-meta">
-              <p>
-                <strong>Publication Year:</strong>
-                <span id="modalBookYear">N/A</span>
-              </p>
-              <p>
-                <strong>Genre:</strong> <span id="modalBookGenre">N/A</span>
-              </p>
-              <p><strong>ISBN:</strong> <span id="modalBookISBN">N/A</span></p>
-              <p>
-                <strong>Pages:</strong> <span id="modalBookPages">N/A</span>
-              </p>
-              <p>
-                <strong>Language:</strong>
-                <span id="modalBookLanguage">English</span>
-              </p>
+      </div>
+      <div class="modal-info-section">
+        <div class="modal-info">
+          <div class="book-meta">
+            <div class="meta-item">
+              <strong>Publication Year:</strong>
+              <span id="modalBookYear">N/A</span>
             </div>
-            <div class="book-description-full">
-              <h4>Description</h4>
+            <div class="meta-item">
+              <strong>Genre:</strong> 
+              <span id="modalBookGenre">General</span>
+            </div>
+            <div class="meta-item">
+              <strong>ISBN:</strong> 
+              <span id="modalBookISBN">N/A</span>
+            </div>
+            <div class="meta-item">
+              <strong>Language:</strong>
+              <span id="modalBookLanguage">English</span>
+            </div>
+          </div>
+          <div class="book-description-full">
+            <h4>Description</h4>
+            <div class="description-content">
               <p id="modalBookDescription">
                 No description available for this book.
               </p>
             </div>
-            <div class="modal-actions">
-              <button class="btn-primary" id="readNowBtn">
-                <i class="bx bx-play-circle"></i> Read Now
-              </button>
-              <button class="btn-success" id="addToReadListBtn">
-                <i class="bx bx-list-plus"></i> Add to Read List
-              </button>
-              <button class="btn-tertiary" id="downloadBookBtn">
-                <i class="bx bx-download"></i> Download
-              </button>
-            </div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== ENHANCED PDF VIEWER MODAL ===== -->
-    <div class="pdf-modal" id="pdfViewer">
-      <div class="pdf-header">
-        <h3 class="pdf-title" id="pdfBookTitle">Book Title</h3>
-        <div class="pdf-controls">
-          <button id="prevPageBtn">
-            <i class="bx bx-chevron-left"></i> Previous
-          </button>
-          <span style="color: white; padding: 0 15px" id="pageIndicator">Page 1 of 5</span>
-          <button id="nextPageBtn">
-            Next <i class="bx bx-chevron-right"></i>
-          </button>
-          <button id="closePdfBtn"><i class="bx bx-x"></i> Close</button>
-        </div>
-      </div>
-      <div class="pdf-viewer-container">
-        <button class="page-nav prev-page" id="prevPageNav">
-          <i class="bx bx-chevron-left"></i>
-        </button>
-        <div class="book-pages" id="bookPagesContainer">
-          <!-- Pages will be dynamically inserted here -->
-        </div>
-        <button class="page-nav next-page" id="nextPageNav">
-          <i class="bx bx-chevron-right"></i>
-        </button>
-      </div>
-    </div>
-
-    <!-- ===== LOGOUT CONFIRMATION MODAL ===== -->
-    <div class="modal" id="logoutConfirmationModal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>Confirm Logout</h2>
-          <button class="close-btn" id="closeLogoutModal">&times;</button>
-        </div>
-        <div class="modal-info">
-          <div class="confirmation-icon">
-            <i class='bx bx-log-out-circle'></i>
-          </div>
-          <h3>Are you sure you want to logout?</h3>
-          <p>You will be redirected to the login page and will need to sign in again to access your account.</p>
           <div class="modal-actions">
-            <button class="btn-secondary" id="cancelLogoutBtn">
-              <i class="bx bx-x"></i> Cancel
+            <button class="btn-primary" id="readNowBtn">
+              <i class="bx bx-play-circle"></i> Read Now
             </button>
-            <button class="btn-tertiary" id="confirmLogoutBtn">
-              <i class="bx bx-log-out"></i> Yes, Logout
+            <button class="btn-success" id="addToReadListBtn">
+              <i class="bx bx-list-plus"></i> Add to Read List
+            </button>
+            <button class="btn-tertiary" id="downloadBookBtn">
+              <i class="bx bx-download"></i> Download
             </button>
           </div>
         </div>
       </div>
     </div>
+  </div>
+</div>
 
+   <!-- ===== ENHANCED PDF VIEWER MODAL ===== -->
+<div class="pdf-modal" id="pdfViewer">
+  <div class="pdf-header">
+    <h3 class="pdf-title" id="pdfBookTitle">Book Title</h3>
+    <div class="pdf-controls">
+      <button id="prevPageBtn">
+        <i class="bx bx-chevron-left"></i> Previous
+      </button>
+      <span style="color: white; padding: 0 15px" id="pageIndicator">Page 1 of 1</span>
+      <button id="nextPageBtn">
+        Next <i class="bx bx-chevron-right"></i>
+      </button>
+      <button id="closePdfBtn"><i class="bx bx-x"></i> Close</button>
+    </div>
+  </div>
+  
+  <div class="pdf-viewer-container">
+    <button class="page-nav prev-page" id="prevPageNav">
+      <i class="bx bx-chevron-left"></i>
+    </button>
+    
+    <div class="real-book-container">
+      <div class="book-spine"></div>
+      <div class="book-cover">
+        <div class="book-cover-inner">
+          <img id="pdfBookCover" src="" alt="Book Cover">
+          <div class="book-cover-title">
+            <h3 id="pdfCoverTitle">Book Title</h3>
+            <p id="pdfCoverAuthor">Author</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="book-pages-real" id="realBookPages">
+        <!-- PDF content will be loaded here -->
+      </div>
+    </div>
+    
+    <button class="page-nav next-page" id="nextPageNav">
+      <i class="bx bx-chevron-right"></i>
+    </button>
+  </div>
+</div>
+
+   <!-- ===== LOGOUT CONFIRMATION MODAL ===== -->
+<div class="modal" id="logoutConfirmationModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Confirm Logout</h2>
+      <button class="close-btn" id="closeLogoutModal">&times;</button>
+    </div>
+    <div class="modal-info">
+      <div class="confirmation-icon">
+        <i class='bx bx-log-out-circle'></i>
+      </div>
+      <h3>Are you sure you want to logout?</h3>
+      <p>You will be redirected to the login page and will need to sign in again to access your account.</p>
+      <div class="modal-actions">
+        <button class="btn-tertiary" id="cancelLogoutBtn">
+          <i class="bx bx-x"></i> Cancel
+        </button>
+        <button class="btn-primary" id="confirmLogoutBtn">
+          <i class="bx bx-log-out"></i> Yes, Logout
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
     <!-- ===== NOTIFICATION CONTAINER ===== -->
     <div id="notificationContainer"></div>
 
@@ -1446,73 +2103,6 @@ setTimeout(() => {
     }
 }, 3000);
 
-// ===== ENHANCED PDF VIEWER FUNCTIONALITY =====
-let modalCurrentPage = 1;
-const modalTotalPages = 5;
-
-function updatePdfView() {
-    // Update page indicator
-    document.getElementById("pageIndicator").textContent = `Page ${modalCurrentPage} of ${modalTotalPages}`;
-
-    // Show/hide navigation buttons
-    document.getElementById("prevPageBtn").disabled = modalCurrentPage === 1;
-    document.getElementById("prevPageNav").style.display = modalCurrentPage === 1 ? "none" : "flex";
-    document.getElementById("nextPageBtn").disabled = modalCurrentPage === modalTotalPages;
-    document.getElementById("nextPageNav").style.display = modalCurrentPage === modalTotalPages ? "none" : "flex";
-
-    // Show current page, hide others
-    for (let i = 1; i <= modalTotalPages; i++) {
-        const pageEl = document.getElementById(`page${i}`);
-        if (pageEl) {
-            if (i === modalCurrentPage) {
-                pageEl.style.zIndex = "10";
-                pageEl.style.display = "flex";
-            } else {
-                pageEl.style.zIndex = "1";
-                pageEl.style.display = "none";
-            }
-        }
-    }
-}
-
-function modalPrevPage() {
-    if (modalCurrentPage > 1) {
-        // Flip page animation
-        const currentPageEl = document.getElementById(`page${modalCurrentPage}`);
-        if (currentPageEl) {
-            currentPageEl.classList.add("flipped");
-        }
-
-        modalCurrentPage--;
-
-        setTimeout(() => {
-            updatePdfView();
-            if (currentPageEl) {
-                currentPageEl.classList.remove("flipped");
-            }
-        }, 400);
-    }
-}
-
-function modalNextPage() {
-    if (modalCurrentPage < modalTotalPages) {
-        // Flip page animation
-        const currentPageEl = document.getElementById(`page${modalCurrentPage}`);
-        if (currentPageEl) {
-            currentPageEl.classList.add("flipped");
-        }
-
-        modalCurrentPage++;
-
-        setTimeout(() => {
-            updatePdfView();
-            if (currentPageEl) {
-                currentPageEl.classList.remove("flipped");
-            }
-        }, 400);
-    }
-}
-
 // ===== SEARCH FUNCTIONALITY =====
 const searchForm = document.querySelector(".search-form");
 const searchButton = document.querySelector(".search-form button");
@@ -1606,14 +2196,87 @@ function initializeLogoutModal() {
     });
 }
 
+// ===== MODAL BUTTONS EVENT LISTENERS =====
+function initializeModalButtons() {
+    const readNowBtn = document.getElementById('readNowBtn');
+    const addToReadListBtn = document.getElementById('addToReadListBtn');
+    const downloadBookBtn = document.getElementById('downloadBookBtn');
+
+    if (readNowBtn) {
+        readNowBtn.addEventListener('click', function() {
+            if (window.currentModalBook && window.currentModalBook.filePath) {
+                console.log('📖 Opening PDF for:', window.currentModalBook.title);
+                
+                // Track reading start
+                if (typeof trackReadingActivity === 'function') {
+                    trackReadingActivity(window.currentModalBook.id || window.currentModalBook._id, 'start_reading');
+                }
+                
+                // Open enhanced PDF viewer
+                if (typeof openActualPdfViewer === 'function') {
+                    openActualPdfViewer(window.currentModalBook);
+                } else {
+                    // Fallback: open in new tab
+                    window.open(window.currentModalBook.filePath, '_blank');
+                }
+            } else {
+                showNotification('This book is not available for reading yet.', false);
+            }
+        });
+    }
+
+    if (addToReadListBtn) {
+        addToReadListBtn.addEventListener('click', function() {
+            if (window.currentModalBook && typeof addToUserDashboard === 'function') {
+                addToUserDashboard(window.currentModalBook, 'reading_list');
+                showNotification(`"${window.currentModalBook.title}" added to your reading list!`);
+            } else {
+                showNotification('Please login to add books to reading list', false);
+            }
+        });
+    }
+
+    if (downloadBookBtn) {
+        downloadBookBtn.addEventListener('click', function() {
+            if (window.currentModalBook && window.currentModalBook.filePath) {
+                console.log('📥 Downloading book:', window.currentModalBook.title);
+                
+                // Add to downloads and trigger download
+                if (typeof addToUserDashboard === 'function') {
+                    addToUserDashboard(window.currentModalBook, 'downloads');
+                }
+                if (typeof trackDownloadActivity === 'function') {
+                    trackDownloadActivity(window.currentModalBook);
+                }
+                
+                showNotification(`"${window.currentModalBook.title}" added to your downloads!`);
+                
+                // Trigger actual download
+                const link = document.createElement('a');
+                link.href = window.currentModalBook.filePath;
+                link.download = `${window.currentModalBook.title}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                showNotification('Download not available for this book', false);
+            }
+        });
+    }
+}
+
 // ===== MODAL FUNCTIONALITY =====
 const bookModal = document.getElementById("bookModal");
 const pdfViewer = document.getElementById("pdfViewer");
+let modalCurrentBook = null;
+let modalCurrentPage = 1;
+const modalTotalPages = 5;
 
 // Initialize modals
 function initializeModals() {
     // Book details modal
     const closeModalBtn = bookModal.querySelector(".close-btn");
+
     closeModalBtn.addEventListener("click", closeBookModal);
 
     bookModal.addEventListener("click", (e) => {
@@ -1633,6 +2296,9 @@ function initializeModals() {
     document.getElementById("nextPageBtn").addEventListener("click", modalNextPage);
     document.getElementById("prevPageNav").addEventListener("click", modalPrevPage);
     document.getElementById("nextPageNav").addEventListener("click", modalNextPage);
+
+    // Initialize modal buttons
+    initializeModalButtons();
 
     // Initialize logout confirmation modal
     initializeLogoutModal();
@@ -1657,10 +2323,85 @@ function closeBookModal() {
     document.body.style.overflow = "auto";
 }
 
+// Open PDF viewer
+function openPdfViewer() {
+    if (!modalCurrentBook) return;
+
+    // Set PDF viewer title
+    document.getElementById("pdfBookTitle").textContent = modalCurrentBook.title;
+    document.getElementById("pdfTitle").textContent = modalCurrentBook.title;
+    document.getElementById("pdfAuthor").textContent = `by ${modalCurrentBook.author || "Unknown Author"}`;
+
+    // Reset to first page
+    modalCurrentPage = 1;
+    updatePdfView();
+
+    // Close book modal and open PDF viewer
+    closeBookModal();
+    pdfViewer.classList.add("active");
+    document.body.style.overflow = "hidden";
+}
+
 // Close PDF viewer
 function closePdfViewer() {
     pdfViewer.classList.remove("active");
     document.body.style.overflow = "auto";
+}
+
+// Previous page in PDF viewer
+function modalPrevPage() {
+    if (modalCurrentPage > 1) {
+        // Flip page animation
+        const currentPageEl = document.getElementById(`page${modalCurrentPage}`);
+        currentPageEl.classList.add("flipped");
+
+        modalCurrentPage--;
+        updatePdfView();
+
+        // Reset animation after delay
+        setTimeout(() => {
+            currentPageEl.classList.remove("flipped");
+        }, 1000);
+    }
+}
+
+// Next page in PDF viewer
+function modalNextPage() {
+    if (modalCurrentPage < modalTotalPages) {
+        // Flip page animation
+        const currentPageEl = document.getElementById(`page${modalCurrentPage}`);
+        currentPageEl.classList.add("flipped");
+
+        modalCurrentPage++;
+        updatePdfView();
+
+        // Reset animation after delay
+        setTimeout(() => {
+            currentPageEl.classList.remove("flipped");
+        }, 1000);
+    }
+}
+
+// Update PDF viewer display
+function updatePdfView() {
+    // Update page indicator
+    document.getElementById("pageIndicator").textContent = `Page ${modalCurrentPage} of ${modalTotalPages}`;
+
+    // Show/hide navigation buttons
+    document.getElementById("prevPageBtn").disabled = modalCurrentPage === 1;
+    document.getElementById("prevPageNav").style.display = modalCurrentPage === 1 ? "none" : "flex";
+    document.getElementById("nextPageBtn").disabled = modalCurrentPage === modalTotalPages;
+    document.getElementById("nextPageNav").style.display = modalCurrentPage === modalTotalPages ? "none" : "flex";
+
+    // Show current page, hide others
+    for (let i = 1; i <= modalTotalPages; i++) {
+        const pageEl = document.getElementById(`page${i}`);
+        if (i === modalCurrentPage) {
+            pageEl.style.zIndex = 10;
+        } else {
+            pageEl.style.zIndex = 1;
+        }
+    }
 }
 
 // ===== LOGOUT CONFIRMATION MODAL FUNCTIONS - FIXED =====
@@ -1724,7 +2465,196 @@ function removeNotification(notification) {
 document.addEventListener("DOMContentLoaded", function () {
     initializeModals();
     userManager.init();
+    
+    // Final initialization check
+    setTimeout(() => {
+        console.log('🔧 Final initialization check...');
+        console.log('openActualPdfViewer available:', typeof openActualPdfViewer === 'function');
+        console.log('showBookDetailsInHTMLModal available:', typeof showBookDetailsInHTMLModal === 'function');
+        console.log('initializeModalButtons available:', typeof initializeModalButtons === 'function');
+    }, 2000);
 });
+
+// Global functions - YE IMPORTANT HAI
+window.readBook = function(pdfUrl) {
+    if (!pdfUrl) {
+        showNotification("This book is not available for reading yet.", false);
+        return;
+    }
+    window.open(pdfUrl, '_blank');
+};
+
+window.showBookDetailsInHTMLModal = function(book) {
+    const modal = document.getElementById('bookModal');
+    if (!modal) {
+        console.error('❌ bookModal not found');
+        return;
+    }
+    
+    console.log('📖 Showing book details for:', book.title);
+    
+    // Store current book globally for button access
+    window.currentModalBook = book;
+    window.modalCurrentBook = book; // For backward compatibility
+    
+    // Populate modal with book data
+    document.getElementById('modalBookTitle').textContent = book.title;
+    document.getElementById('modalBookAuthor').textContent = `by ${book.author || 'Unknown Author'}`;
+    document.getElementById('modalBookCover').src = book.imagePath || '/images/default-book.jpg';
+    document.getElementById('modalBookYear').textContent = book.publicationYear || 'N/A';
+    document.getElementById('modalBookGenre').textContent = book.genre || 'General';
+    document.getElementById('modalBookISBN').textContent = book.isbn || 'N/A';
+    document.getElementById('modalBookLanguage').textContent = book.language || 'English';
+    document.getElementById('modalBookDescription').textContent = book.description || 'No description available for this book.';
+
+    // Show/hide buttons based on PDF availability
+    const readNowBtn = document.getElementById('readNowBtn');
+    const downloadBookBtn = document.getElementById('downloadBookBtn');
+
+    if (book.filePath) {
+        readNowBtn.style.display = 'flex';
+        downloadBookBtn.style.display = 'flex';
+    } else {
+        readNowBtn.style.display = 'none';
+        downloadBookBtn.style.display = 'none';
+    }
+
+    // Show modal
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+};
+
+window.showNotification = showNotification;
+window.openActualPdfViewer = function(book) {
+    if (!book.filePath) {
+        showNotification('PDF not available for this book', false);
+        return;
+    }
+    
+    const pdfViewer = document.getElementById('pdfViewer');
+    const pdfBookTitle = document.getElementById('pdfBookTitle');
+    const pdfCoverTitle = document.getElementById('pdfCoverTitle');
+    const pdfCoverAuthor = document.getElementById('pdfCoverAuthor');
+    const pdfBookCover = document.getElementById('pdfBookCover');
+    const realBookPages = document.getElementById('realBookPages');
+    const realBookContainer = document.querySelector('.real-book-container');
+    
+    if (!pdfViewer) {
+        console.error('PDF viewer not found');
+        return;
+    }
+    
+    // Set book information
+    pdfBookTitle.textContent = book.title;
+    pdfCoverTitle.textContent = book.title;
+    pdfCoverAuthor.textContent = `by ${book.author || 'Unknown Author'}`;
+    pdfBookCover.src = book.imagePath || '/images/default-book.jpg';
+    pdfBookCover.alt = book.title;
+    
+    // Show loading state
+    realBookPages.innerHTML = `
+        <div class="pdf-loading">
+            <div class="loading-spinner">
+                <i class='bx bx-loader-alt bx-spin'></i>
+            </div>
+            <h3>Opening "${book.title}"</h3>
+            <p>Loading your reading experience...</p>
+        </div>
+    `;
+    
+    // Open PDF viewer
+    pdfViewer.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Start book opening animation
+    setTimeout(() => {
+        realBookContainer.classList.add('book-open');
+        
+        // Load actual PDF after animation
+        setTimeout(() => {
+            loadRealPdfContent(book, realBookPages);
+        }, 1500);
+    }, 500);
+    
+    // Track reading activity
+    if (typeof trackReadingActivity === 'function') {
+        trackReadingActivity(book.id || book._id, 'start_reading');
+    }
+};
+
+function loadRealPdfContent(book, container) {
+    // Create embedded PDF viewer with real book styling
+    container.innerHTML = `
+        <div class="book-page active">
+            <div class="page-content-real">
+                <div class="page-header">
+                    <h2>${book.title}</h2>
+                    <p class="author">by ${book.author || 'Unknown Author'}</p>
+                </div>
+                
+                <div class="pdf-content-area">
+                    <embed 
+                        src="${book.filePath}" 
+                        type="application/pdf" 
+                        width="100%" 
+                        height="600px"
+                        class="pdf-embed-full"
+                    >
+                    <div class="pdf-fallback-message">
+                        <p><i class='bx bx-info-circle'></i> If PDF doesn't load properly:</p>
+                        <p><a href="${book.filePath}" target="_blank" class="pdf-link">
+                            <i class='bx bx-link-external'></i> Open PDF in new tab
+                        </a></p>
+                    </div>
+                </div>
+                
+                <div class="page-footer">
+                    <p>Thank you for reading with Intelli-Read</p>
+                    <p>Page 1</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Add to reading history
+    if (typeof addToUserDashboard === 'function') {
+        addToUserDashboard(book, 'reading_history');
+    }
+    
+    // Set up page navigation
+    setupRealBookNavigation();
+}
+
+function setupRealBookNavigation() {
+    // Update page indicator
+    document.getElementById('pageIndicator').textContent = 'Page 1 of 1';
+    
+    // Disable prev/next for single page PDF
+    document.getElementById('prevPageBtn').disabled = true;
+    document.getElementById('nextPageBtn').disabled = true;
+    document.getElementById('prevPageNav').style.display = 'none';
+    document.getElementById('nextPageNav').style.display = 'none';
+}
+
+window.addToUserDashboard = async function(book, listType) {
+    try {
+        // Simulate API call - replace with actual API endpoint
+        console.log(`Adding book to ${listType}:`, book.title);
+        
+        // Show success notification
+        showNotification(`"${book.title}" added to your ${listType.replace('_', ' ')}!`);
+        return true;
+    } catch (error) {
+        console.error(`Error adding book to ${listType}:`, error);
+        showNotification(`Failed to add book to ${listType.replace('_', ' ')}`, false);
+        return false;
+    }
+};
+
+// PDF Viewer functions ko globally available karo
+window.closePdfViewer = closePdfViewer;
+window.modalPrevPage = modalPrevPage;
+window.modalNextPage = modalNextPage;
 
 // Console warnings ko minimize karne ke liye
 const originalError = console.error;
