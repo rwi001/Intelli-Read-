@@ -8,7 +8,7 @@ let recommendedBooks = [];
 const genres = [
     { "id": "all", "name": "All" },
     { "id": "fiction", "name": "Fiction" },
-    { "id": "non_fiction", "name": "Non-Fiction" },
+    { "id": "Non-Fiction", "name": "Non-Fiction" },
     { "id": "science", "name": "Science" },
     { "id": "technology", "name": "Technology" },
     { "id": "self_help", "name": "Self-Help" },
@@ -328,14 +328,18 @@ function updateClearButton(query) {
 
 // ===== ENHANCED GENRE SELECTION SYSTEM =====
 
+// ===== ENHANCED GENRE SELECTION SYSTEM =====
+
 function initializeGenres() {
     const tagsEl = document.getElementById('tags');
     if (!tagsEl) return;
     
-    // Clear existing content
+    console.log('🔄 Initializing genres...');
+    
+    // Pehle existing tags clear karo
     tagsEl.innerHTML = '';
     
-    // Create genre tags (ONLY REMOVED THE "ALL GENRES" BUTTON, KEPT ALL OTHER GENRES)
+    // Naye tags banayo with FRESH event listeners
     genres.forEach(genre => {
         const tag = document.createElement('div');
         tag.classList.add('tag');
@@ -343,93 +347,106 @@ function initializeGenres() {
         tag.setAttribute('data-genre-id', genre.id);
         tag.innerHTML = `
             <span class="tag-text">${genre.name}</span>
-            <span class="tag-count" style="display: none">0</span>
         `;
         
-        tag.addEventListener('click', () => {
-            selectGenre(genre.id);
+        // DIRECT event listener - koi duplication nahi
+        tag.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🎯 Genre clicked:', genre.id);
+            selectGenreNow(genre.id);
         });
         
         tagsEl.appendChild(tag);
     });
     
-    // Select "All" by default
-    selectedGenre = ['all'];
-    highlightSelectedGenres();
-    
-    console.log('✅ Enhanced genre system initialized');
+    // "All" genre select karo by default
+    selectGenreNow('all');
+    console.log('✅ Genres initialized');
 }
 
-// Single genre selection
-function selectGenre(genreId) {
-    // Clear search when genre changes
-    clearSearch();
+// Genre select function - bilkul simple
+function selectGenreNow(genreId) {
+    console.log('🚀 Selecting genre:', genreId);
     
-    // Single selection - only one genre at a time
-    if (genreId === 'all') {
-        selectedGenre = ['all'];
-    } else {
-        selectedGenre = [genreId]; // Only the selected genre
-    }
+    // Search clear karo
+    const searchInput = document.getElementById('search');
+    if (searchInput) searchInput.value = '';
+    currentQuery = '';
     
+    // Genre set karo
+    selectedGenre = [genreId];
+    
+    // UI update karo
     highlightSelectedGenres();
-    currentPage = 1;
     
-    // Load books with selected genre
+    // Books load karo
+    currentPage = 1;
     loadDatabaseBooks('');
     
-    // Show notification
-    if (genreId === 'all') {
-        showNotification('Showing all genres');
-    } else {
-        const genreName = genres.find(g => g.id === genreId)?.name || genreId;
-        showNotification(`Showing ${genreName} books`);
-    }
+    // Notification show karo
+    const genreName = genres.find(g => g.id === genreId)?.name || genreId;
+    showNotification(`Showing ${genreName} books`);
 }
 
-// Enhanced genre highlighting with your existing color scheme
+// Genre highlighting
 function highlightSelectedGenres() {
     const tags = document.querySelectorAll('.tag');
     
     tags.forEach(tag => {
         const genreId = tag.getAttribute('data-genre-id');
+        
+        // Sabhi tags se highlight hatao
         tag.classList.remove('highlight');
         tag.style.backgroundColor = '';
         tag.style.color = '';
         tag.style.borderColor = '';
-        tag.style.transform = '';
         
-        // Remove any existing animation classes
-        tag.classList.remove('genre-pulse');
-    });
-    
-    selectedGenre.forEach(id => {
-        const tagElement = document.getElementById(`genre-${id}`);
-        if (tagElement) {
-            tagElement.classList.add('highlight');
-            
-            // Apply your existing color scheme
-            if (id === 'all') {
-                tagElement.style.backgroundColor = '#4f46e5'; // Your purple color
-                tagElement.style.color = 'white';
-                tagElement.style.borderColor = '#f0941b';
-            } else {
-                tagElement.style.backgroundColor = '#4f46e5'; // Your orange color
-                tagElement.style.color = 'white';
-                tagElement.style.borderColor = '#f0941b';
-            }
-            
-            // Add subtle animation
-            tagElement.style.transform = 'scale(1.05)';
-            tagElement.classList.add('genre-pulse');
-            
-            // Reset transform after animation
-            setTimeout(() => {
-                tagElement.style.transform = 'scale(1)';
-            }, 300);
+        // Selected genre ko highlight karo
+        if (selectedGenre.includes(genreId)) {
+            tag.classList.add('highlight');
+            tag.style.backgroundColor = '#4f46e5';
+            tag.style.color = 'white';
+            tag.style.borderColor = '#f0941b';
         }
     });
 }
+
+// ===== INITIALIZATION =====
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📚 Page loaded - initializing...');
+    
+    // Genres initialize karo
+    initializeGenres();
+    
+    // Baaki functions
+    setupSearchHandler();
+    initializeCommonFeatures();
+    
+    if (isBookScreen) {
+        initializeBookScreen();
+    } else {
+        initializeBooksPage();
+    }
+    
+    console.log('✅ All systems ready');
+});
+
+// ===== SEARCH CLEAR FUNCTION =====
+function clearSearch() {
+    const searchInput = document.getElementById('search');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    currentQuery = '';
+    currentPage = 1;
+    loadDatabaseBooks('', 1);
+    showNotification('Search cleared');
+}
+
+// Global functions
+window.showAllGenres = () => selectGenreNow('all');
+window.clearSearch = clearSearch;
 
 // Show all genres function
 function showAllGenres() {
@@ -1380,6 +1397,308 @@ function addEnhancedSearchStyles() {
     document.head.appendChild(style);
 }
 
+// ===== RECOMMENDATIONS SYSTEM =====
+let userPreferences = {
+    favoriteGenres: [],
+    readingHistory: [],
+    recentlyViewed: []
+};
+
+// Initialize recommendations system
+function initializeRecommendations() {
+    console.log('🎯 Initializing recommendations system...');
+    loadUserPreferences();
+    loadRecommendedBooks();
+    setupRecommendationsRefresh();
+}
+
+// Load user preferences from localStorage or API
+function loadUserPreferences() {
+    try {
+        // Try to get from localStorage first
+        const storedPrefs = localStorage.getItem('userPreferences');
+        if (storedPrefs) {
+            userPreferences = JSON.parse(storedPrefs);
+            console.log('✅ Loaded user preferences:', userPreferences);
+            return;
+        }
+        
+        // If no stored preferences, analyze from user data
+        analyzeUserPreferences();
+    } catch (error) {
+        console.error('❌ Error loading user preferences:', error);
+        analyzeUserPreferences();
+    }
+}
+
+// Analyze user preferences based on available data
+function analyzeUserPreferences() {
+    console.log('🔍 Analyzing user preferences...');
+    
+    // Get current user
+    const currentUser = window.userManager?.getCurrentUser();
+    
+    if (currentUser && currentUser.name !== "Login Required") {
+        // Simulate preference analysis based on user data
+        userPreferences = {
+            favoriteGenres: getRandomGenres(3), // Simulate top 3 genres
+            readingHistory: [],
+            recentlyViewed: []
+        };
+        
+        // Save to localStorage
+        localStorage.setItem('userPreferences', JSON.stringify(userPreferences));
+        console.log('✅ Generated user preferences:', userPreferences);
+    } else {
+        // Default preferences for non-logged in users
+        userPreferences = {
+            favoriteGenres: ['fiction', 'technology', 'self_help'],
+            readingHistory: [],
+            recentlyViewed: []
+        };
+        console.log('ℹ️ Using default preferences for guest user');
+    }
+}
+
+// Get random genres for simulation
+function getRandomGenres(count) {
+    const availableGenres = genres.filter(g => g.id !== 'all').map(g => g.id);
+    const shuffled = [...availableGenres].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+}
+
+// Load and display recommended books
+async function loadRecommendedBooks() {
+    const container = document.getElementById('recommendationsContainer');
+    if (!container) return;
+    
+    try {
+        // Show loading state
+        container.innerHTML = `
+            <div class="loading-recommendations">
+                <div class="loading-spinner">
+                    <i class='bx bx-loader-alt bx-spin'></i>
+                </div>
+                <p>Finding books you'll love...</p>
+            </div>
+        `;
+        
+        // Get recommendations based on user preferences
+        const recommendedBooks = await getPersonalizedRecommendations();
+        
+        if (recommendedBooks.length > 0) {
+            renderRecommendedBooks(recommendedBooks);
+        } else {
+            showNoRecommendations();
+        }
+        
+    } catch (error) {
+        console.error('❌ Error loading recommendations:', error);
+        showNoRecommendations();
+    }
+}
+
+// Get personalized book recommendations
+async function getPersonalizedRecommendations() {
+    console.log('🎯 Generating personalized recommendations...');
+    
+    try {
+        // Fetch books from API
+        const response = await fetch(`${API_URL}?limit=50&status=approved`);
+        
+        if (response.ok) {
+            const data = await response.json();
+            
+            if (data.success && data.books) {
+                // Filter and sort books based on user preferences
+                const personalizedBooks = personalizeBookRecommendations(data.books);
+                return personalizedBooks.slice(0, 7); // Return top 7 recommendations
+            }
+        }
+        
+        // Fallback: Return empty array
+        return [];
+        
+    } catch (error) {
+        console.error('❌ Error fetching books for recommendations:', error);
+        return [];
+    }
+}
+
+// Personalize book recommendations based on user preferences
+function personalizeBookRecommendations(books) {
+    if (!userPreferences.favoriteGenres.length) {
+        return books.sort(() => 0.5 - Math.random()).slice(0, 6);
+    }
+    
+    // Score books based on user preferences
+    const scoredBooks = books.map(book => {
+        let score = 0;
+        
+        // Genre matching (highest weight)
+        if (book.genre && userPreferences.favoriteGenres.includes(book.genre.toLowerCase())) {
+            score += 10;
+        }
+        
+        // Recent publications get bonus
+        if (book.publicationYear && book.publicationYear >= new Date().getFullYear() - 2) {
+            score += 3;
+        }
+        
+        // Popular books get bonus (simulated)
+        if (Math.random() > 0.7) {
+            score += 2;
+        }
+        
+        // Random factor for variety
+        score += Math.random() * 2;
+        
+        return { ...book, recommendationScore: score };
+    });
+    
+    // Sort by recommendation score
+    return scoredBooks.sort((a, b) => b.recommendationScore - a.recommendationScore);
+}
+
+// Render recommended books in the container
+function renderRecommendedBooks(books) {
+    const container = document.getElementById('recommendationsContainer');
+    if (!container) return;
+    
+    console.log(`🎨 Rendering ${books.length} recommended books`);
+    
+    container.innerHTML = books.map(book => `
+        <div class="recommendation-card" onclick="showBookDetailsInHTMLModal(${JSON.stringify(book).replace(/"/g, '&quot;')})">
+            <div class="recommendation-badge">
+                <i class='bx bx-star'></i> Recommended
+            </div>
+            <img 
+                src="${book.imagePath || '/images/default-book.jpg'}" 
+                alt="${book.title}"
+                class="recommendation-image"
+                onerror="this.src='/images/default-book.jpg'"
+            >
+            <div class="recommendation-content">
+                <h3 class="recommendation-title">${book.title}</h3>
+                <p class="recommendation-author">by ${book.author || 'Unknown Author'}</p>
+                <span class="recommendation-genre">${book.genre || 'General'}</span>
+                <p class="recommendation-description">
+                    ${book.description ? 
+                        (book.description.length > 120 ? 
+                         book.description.substring(0, 120) + '...' : 
+                         book.description) : 
+                        'No description available'}
+                </p>
+                <div class="recommendation-meta">
+                    <span class="recommendation-year">${book.publicationYear || 'N/A'}</span>
+                    <div class="recommendation-rating">
+                        <i class='bx bxs-star'></i>
+                        <span>${(Math.random() * 2 + 3).toFixed(1)}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Show no recommendations message
+function showNoRecommendations() {
+    const container = document.getElementById('recommendationsContainer');
+    if (!container) return;
+    
+    container.innerHTML = `
+        <div class="no-recommendations">
+            <div class="no-recommendations-icon">
+                <i class='bx bx-book-open'></i>
+            </div>
+            <h3>No Recommendations Yet</h3>
+            <p>Start reading books to get personalized recommendations!</p>
+            <p>Browse our collection to discover new favorites.</p>
+        </div>
+    `;
+}
+
+// Setup refresh recommendations button
+function setupRecommendationsRefresh() {
+    const refreshBtn = document.getElementById('refreshRecommendations');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            refreshBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Refreshing...';
+            refreshBtn.disabled = true;
+            
+            // Simulate API call delay
+            setTimeout(() => {
+                loadRecommendedBooks();
+                refreshBtn.innerHTML = '<i class="bx bx-refresh"></i> Refresh Recommendations';
+                refreshBtn.disabled = false;
+                showNotification('Recommendations refreshed!');
+            }, 1500);
+        });
+    }
+}
+
+// Update user preferences when user interacts with books
+function updateUserPreferences(book, action) {
+    if (!book) return;
+    
+    // Add to reading history
+    if (action === 'read' || action === 'view') {
+        const historyItem = {
+            bookId: book.id || book._id,
+            title: book.title,
+            genre: book.genre,
+            timestamp: new Date().toISOString(),
+            action: action
+        };
+        
+        // Add to beginning of history
+        userPreferences.readingHistory.unshift(historyItem);
+        
+        // Keep only last 50 items
+        userPreferences.readingHistory = userPreferences.readingHistory.slice(0, 50);
+        
+        // Update favorite genres based on reading history
+        updateFavoriteGenres();
+        
+        // Save to localStorage
+        localStorage.setItem('userPreferences', JSON.stringify(userPreferences));
+        
+        console.log('✅ Updated user preferences:', userPreferences);
+    }
+}
+
+// Update favorite genres based on reading history
+function updateFavoriteGenres() {
+    const genreCounts = {};
+    
+    // Count genre occurrences in reading history
+    userPreferences.readingHistory.forEach(item => {
+        if (item.genre) {
+            genreCounts[item.genre] = (genreCounts[item.genre] || 0) + 1;
+        }
+    });
+    
+    // Get top 3 genres
+    const topGenres = Object.entries(genreCounts)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 3)
+        .map(([genre]) => genre);
+    
+    userPreferences.favoriteGenres = topGenres.length > 0 ? topGenres : userPreferences.favoriteGenres;
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Add this to your existing DOMContentLoaded function
+    if (isBookScreen) {
+        initializeRecommendations();
+    }
+});
+
+// Make functions available globally
+window.initializeRecommendations = initializeRecommendations;
+window.loadRecommendedBooks = loadRecommendedBooks;
+
 // ===== GLOBAL FUNCTIONS =====
 window.readBook = readBook;
 window.showBookDetailsInHTMLModal = showBookDetailsInHTMLModal;
@@ -1390,4 +1709,4 @@ window.clearSearch = clearSearch;
 window.showAllGenres = showAllGenres;
 window.performSearch = performSearch;
 
-console.log('✅ Enhanced BookScript.js with Search & Genre System loaded successfully!');
+console.log('✅ Enhanced BookScript.js with Search & Genre System loaded successfully!'); 
