@@ -1673,6 +1673,17 @@
     z-index: 1;
 }
 
+.recommendations-section::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #10b981, #f0941b, #4f46e5); /* Reverse gradient */
+    z-index: 1;
+}
+
 
 .section-header {
     text-align: center;
@@ -1713,15 +1724,17 @@
 .recommendations-container {
     display: flex;
     overflow-x: auto;
-    gap: 15px;
-    padding: 20px 20px; /* Padding bhi kam kar diya */
-    margin-bottom: 15px; /* Margin aur kam kar diya */
+    overflow-y: hidden; /* Vertical scroll hide kiya */
+    gap: 10px;
+    padding: 15px 25px;
+    margin-bottom: 10px;
     max-width: 100%;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
     scrollbar-color: #4f46e5 #1a1a2e;
-    max-height: 40s0px; /* Aur kam height */
+    height: 390px; /* Fixed height - max-height ki jagah */
+    align-items: flex-start;
 }
 
 /* Custom scrollbar for webkit browsers */
@@ -1842,17 +1855,7 @@
 }
 
 .recommendation-description {
-    color: #cbd5e1;
-    font-size: 0.95rem;
-    line-height: 1.6;
-    margin-bottom: 20px;
     display: none;
-    /* display: -webkit-box; */
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    line-clamp: 3;
-    display: -webkit-box;
 }
 
 .recommendation-meta {
